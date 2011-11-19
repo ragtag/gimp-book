@@ -1,0 +1,66 @@
+COMIC BOOK
+
+- New google ad.
+
+NEXT
+- Implement add, delete, move and shift page functions.
+- Layout of thumbs in spreads (see NOTES)
+
+NOTES
+- Pages Layout
+-- Single pages.
+-- Two pages together.
+--- Single page at start, or two.
+--- Left to right or right to left reading.
+- Edit Template
+-- Loads the template, which is the base for any new pages you add.
+- Add Page
+-- Asks for a name.
+-- Creates a new .xcf file from the template.
+-- Add it to the page list, moving the page you clicked back.
+- Delete Page
+-- Ask for verification!
+-- Trash the entry from the page list.
+-- Put the .xcf file in the trash can if possible (don't delete directly).
+- Open Page
+-- Double click it or right click>Open
+- Sort Pages
+-- Right click>Move Page to... Dialog opens where you enter page number to move the page to.
+oo Drag and drop a single page
+oo Drag and drop multiple pages
+o Support tags/notes on individual pages, visible on mouse over.
+o Support color coding pages, making it easy to divide up the story into chapters or mark pages.
+
+Export
+- Crop and scale.
+- Include metadata where available.
+- Formats
+-- Tiff (none or lzw)
+-- JPG (meta data, compression ratio etc.)
+-- PNG
+
+Batch (destructive operations on the whole comice...maybe not safe to include)
+- Crop and scale.
+
+Config File
+- comic_name.comic
+- Use json
+- Additional info that can be added later.
+-- Title
+-- Chapters
+-- Which page belongs to which chapter
+-- Reading direction (needed for export)
+-- First page, or not.
+-- General notes
+-- Notes per page
+-- Copyright info
+-- Tag to add to all or each page on export
+-- Language(s)
+-- Previous export settings
+
+FUTURE FEATURES
+- Language support, codes in layer names define language (e.g. [en],[no],[is]), and these are then hidden or shown on export
+- Drag and drop of pages to re-order them.
+- Multi-select of pages, to move or delete.
+
+
