@@ -25,6 +25,7 @@ class Page():
         self.number = number # The page number of this page.
         self.pagepath = page # Path to the page.
         self.thumbpath = ""  # Path to the pages thumb.
+        self.name = os.path.basename(self.pagepath)
         # Find or generate the thumbnail for the page.
         if not self.find_thumb():
             img = pdb.gimp_xcf_load(0, self.pagepath, os.path.basename(self.pagepath))
@@ -304,6 +305,7 @@ class Book(gtk.Window):
         self.bookpath = ""  # The path to the folder containing the book.
         self.pagepath = ""  # Path to the "pages" subfolder.
         self.pages = []     # List for storing page objects.
+        self.selected = -1  # Index of the currently selected page, -1 if none.
         self.left2right = True  # Read from left to right.
         self.spreads = True     # Show two and two pages together, rather than individual ones.
         self.firstpage = True   # Have the first page stand alone, even if self.spreads is true.
@@ -365,8 +367,12 @@ class Book(gtk.Window):
         vbox.pack_start(mb, False, False, 0)
         vbox.pack_start(toolbar, False, False, 0)
 
-        self.hbox = gtk.HBox(False, 2)
-        vbox.pack_start(self.hbox, False, False, 0)
+        self.scroll = gtk.ScrolledWindow()
+        self.scroll.set_shadow_type(gtk.SHADOW_ETCHED_IN)
+        self.scroll.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        vbox.pack_start(self.scroll, True, True, 0)
+        # self.hbox = gtk.HBox(False, 2)
+        #vbox.pack_start(self.hbox, False, False, 0)
 
         self.add(vbox)
         self.connect("destroy", gtk.main_quit)
@@ -410,12 +416,50 @@ class Book(gtk.Window):
                 # Create a page object, and add to a list.
                 self.pagecount += 1
                 self.pages.append(Page(os.path.join(self.pagepath, p),self, self.pagecount))
+
+            # Load the pages into an IconView.
+            self.pagestore = gtk.ListStore(str, gtk.gdk.Pixbuf, bool)
             for p in self.pages:
-                self.hbox.pack_start(p.page, False, False, 0)
+                self.pagestore.append((p.name, p.thumbfile, True))
+            self.pagestore.connect("rows-reordered", self.drag_callback)
+            self.pagestore.connect("row-inserted", self.drag_callback)
+            thumbs = gtk.IconView(self.pagestore)
+            thumbs.set_text_column(0)
+            thumbs.set_pixbuf_column(1)
+            thumbs.set_reorderable(True)
+            thumbs.set_columns(2)
+            thumbs.connect("selection-changed", self.selection)
+            thumbs.connect("item-activated", self.open_page)
+            self.scroll.add(thumbs)
+            #for p in self.pages:
+            #    self.hbox.pack_start(p.page, False, False, 0)
             self.set_title("Book - %s" % (self.bookname))
             self.show_all()
         else:
             show_error_msg("Unable to find book "+book)
+
+    def open_page(self, iconview, number):
+        # Open the page the user clicked in GIMP.
+        number = number[0]
+        pprint(book.pages[number].pagepath)
+        img = pdb.gimp_file_load(book.pages[number].pagepath, book.pages[number].pagepath)
+        gimp.Display(img)
+
+    def selection(self, thumbs):
+        # A page has been selected.
+        pagenumber = thumbs.get_selected_items()
+        if pagenumber:
+            self.selected = pagenumber[0]
+        else:
+            self.selected = -1
+        print("Page %s selected." % (self.selected))
+
+    def drag_callback(self, pagestore, destination_index, tree_iterator):
+        # Pages have been dragged around.
+        destination = destination_index[0]
+        if destination > self.selected[0]:
+            destination = (destination - 1)
+        print("Page %s moved to %s" % (self.selected[0], destination))
 
     def add_page(self, widget):
         # Add a new page to the current book.

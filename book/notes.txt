@@ -1,10 +1,11 @@
-COMIC BOOK
-
-- New google ad.
+BOOK
 
 NEXT
+- Layout of thumbs in spreads using gtk.IconView.
 - Implement add, delete, move and shift page functions.
-- Layout of thumbs in spreads (see NOTES)
+-- These were on right click menus, but with the IconView I can change that.
+--- Add a toolbar with add and delete buttons.
+--- Use drag and drop to re-order the pages (figure out how to catch the callback).
 
 NOTES
 - Pages Layout
