@@ -95,7 +95,6 @@ class Page():
         # Move this page to pagenumber
         show_error_msg("Move page %s to %s" % (self.number, pagenumber)) 
         # self.number = pagenumber
-        # Move the actual .xcf file
 
     def find_thumb(self):
         # Find the pages thumbnail.
@@ -457,9 +456,36 @@ class Book(gtk.Window):
     def drag_callback(self, pagestore, destination_index, tree_iterator):
         # Pages have been dragged around.
         destination = destination_index[0]
-        if destination > self.selected[0]:
+        selected = self.selected[0]
+        if destination > selected:
             destination = (destination - 1)
-        print("Page %s moved to %s" % (self.selected[0], destination))
+        print("Page %s moved to %s" % (selected, destination))
+        # Shifting pages around.
+        last = len(self.pages)-1
+        # Remove the page.
+        tmpage = self.pages[selected]
+        if last > selected:
+            index = selected + 1
+            for p in self.pages[selected+1:last]:
+                self.pages[index-1] = self.pages[index]
+            del self.pages[last]
+        # Add the page back in.
+        if destination == last:
+            self.pages[last] = tmpage
+        else:
+            pass
+
+    def shift_pages(start, forward):
+        # Shifting the pages.
+        direction = 1
+        if not forward:
+            direction = -1
+        last = len(self.pages)-1
+        if last > start:
+            index = start + 1
+            for p in self.pages[start+1:]:
+                self.pages[index+direction] = self.pages[index]
+
 
     def add_page(self, widget):
         # Add a new page to the current book.
@@ -475,19 +501,6 @@ class Book(gtk.Window):
                 sys.exit(1)
         else:
             show_error_msg("You need to create a book, before adding pages to it.")
-    
-    def shift_pages(self, start, end, forward):
-        # Shift a bunch of pages forward or backwards.
-        show_error_msg("Moving pages %s through %s" % (start, end))
-        if forward:
-            # When shifting forward we need to start at the back.
-            for i in range(end, start-1, -1):
-                self.pages[i-1].shift(i+1)
-        else:
-            show_error_msg("moving back")
-            for i in range(start, end+1):
-                self.pages[i-1].shift(i-1)
-
 
     def delete_page(self, widget):
         # Delete the selected page.
