@@ -5,9 +5,6 @@ File
 o Book Properties
 - Export Book...
 - Close Book
-Edit
-- Edit Template
-o Edit MetaData
 Help
 o Help
 - About GIMP Book
@@ -15,15 +12,13 @@ Toolbar
 - Add Page
 - Delete Page
 - Rename Page
-- Refresh Thumbnail (not sure if this is needed...or should be done automatically in the background)
+- Refresh Thumbnail (not sure if this is needed...should probably be done automatically in the background).
 
 NOTES
-- Pages Layout
+x Pages Layout
 o- Single pages....maybe.
 o- Flowing layouts....maybe.
 x- Two pages together.
-- Edit Template
--- Loads the template, which is the base for any new pages you add.
 - Add Page button in toolbar.
 -- Asks for a name.
 -- Creates a new .xcf file from the template.
@@ -32,6 +27,7 @@ x- Two pages together.
 -- Ask for verificatinon!
 -- Trash the entry from the page list.
 -- Put the .xcf file in the trash can if possible (don't delete directly).
+- Rename
 x Open Page by double clicking it.
 -- Figure out why the image shows up as modified in GIMP on loading.
 x Drag and drop pages to reorder them.
@@ -46,8 +42,8 @@ o Left to right or right to left reading.
 --- Tiff (none or lzw)
 --- JPG (meta data, compression ratio etc.)
 --- PNG
-- Batch (destructive operations on the whole book...maybe not safe to include)
--- Crop and scale.
+o Batch (destructive operations on the whole book...maybe not safe to include)
+o- Crop and scale.
 
 
 CONFIG FILE

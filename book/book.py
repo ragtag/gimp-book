@@ -20,9 +20,7 @@ from pprint import pprint
 
 class Page():
     # Stores instances and information on a single page.
-    def __init__ (self, page, parent, number):
-        self.parent = parent # Links to the parent Book object.
-        self.number = number # The page number of this page.
+    def __init__ (self, page):
         self.pagepath = page # Path to the page.
         self.thumbpath = ""  # Path to the pages thumb.
         self.name = os.path.basename(self.pagepath)
@@ -33,68 +31,7 @@ class Page():
             pdb.gimp_image_delete(img)
             self.find_thumb()
         self.thumbfile = gtk.gdk.pixbuf_new_from_file(self.thumbpath)
-        self.thumb = gtk.Image()
-        self.thumb.set_from_pixbuf(self.thumbfile)
-        self.page = gtk.EventBox()
-        self.page.add(self.thumb)
-        self.page.set_events(gtk.gdk.BUTTON_PRESS_MASK)
-        self.page.connect("button_press_event", self.pageclicked) # No pun intended!
 
-    def pageclicked(self, widget, event):
-        # Dummy function to test page clicking. Currently just loads the image you clicked.
-        if (event.button == 1):
-            img = pdb.gimp_file_load(self.pagepath, self.pagepath)
-            gimp.Display(img)
-        elif (event.button == 3):
-            self.popupmenu(event)
-
-    def popupmenu(self, event):
-        # Popup Menu for the thumbnail.
-        # Move page, delete page, 
-        m = gtk.Menu()
-        o = gtk.MenuItem("Open Page")
-        o.show()
-        o.connect("activate", self.open)
-        m.append(o)
-        add = gtk.MenuItem("Add Page")
-        add.show()
-        add.connect("activate", self.add)
-        m.append(add)
-        move = gtk.MenuItem("Move Page to...")
-        move.show()
-        m.append(move)
-        delete = gtk.MenuItem("Delete Page")
-        delete.show()
-        delete.connect("activate", self.delete)
-        m.append(delete)
-        m.popup(None, None, None, event.button, event.time, None)
-        
-    def open(self, widget):
-        # Open the current page im GIMP.
-        img = pdb.gimp_file_load(self.pagepath, self.pagepath)
-        gimp.Display(img)
-
-    def add(self, widget):
-        # Add a page.
-        current_page = self.number
-        self.parent.shift_pages(self.number, self.parent.pagecount, True)
-        # self.parent.add_page(current_page)
-
-    def move(self, widget):
-        # Move the current page to somewhere else in the order.
-        # Open window to ask where to.
-        pass
-
-    def delete(self, widget):
-        # Delete this page.
-        #self.parent.delete_page(self)
-        nextpage = self.number + 1
-        self.parent.shift_pages(nextpage, self.parent.pagecount, False)
-
-    def shift(self, pagenumber):
-        # Move this page to pagenumber
-        show_error_msg("Move page %s to %s" % (self.number, pagenumber)) 
-        # self.number = pagenumber
 
     def find_thumb(self):
         # Find the pages thumbnail.
@@ -260,10 +197,13 @@ class NewBook(gtk.Window):
                 if not os.path.isdir(fullpath):
                     os.makedirs(fullpath)
                 # Make file dest/name/name.book
-                metadata = json.dumps({ 'pages':[ ] }, indent=4)
+                metadata = json.dumps({ 'pages':[ 'Template.xcf' ] }, indent=4)
                 bookfile = open(os.path.join(fullpath,name+".book"), "w")
                 bookfile.write(metadata)
                 bookfile.close()
+                # Make folder dest/name/Pages
+                if not os.path.isdir(os.path.join(fullpath,"pages")):
+                    os.makedirs(os.path.join(fullpath,"pages"))
                 # Make file dest/name/Template.xcf
                 img = pdb.gimp_image_new(width, height, color)
                 if color == 0:
@@ -279,10 +219,7 @@ class NewBook(gtk.Window):
                 elif fill == 3:
                     bglayer.fill(TRANSPARENT_FILL)
                 img.add_layer(bglayer, 0)
-                pdb.gimp_xcf_save(0, img, None, os.path.join(fullpath, "Template.xcf") , "Template.xcf")
-                # Make folder dest/name/Pages
-                if not os.path.isdir(os.path.join(fullpath,"pages")):
-                    os.makedirs(os.path.join(fullpath,"pages"))
+                pdb.gimp_xcf_save(0, img, None, os.path.join(fullpath, "pages", "Template.xcf") , "Template.xcf")
                 # Load the newly created book.
                 self.book.load_book(os.path.join(fullpath, name+".book"))
                 # Kill the window. TODO! Check if everything was created correctly.
@@ -310,7 +247,7 @@ class Book(gtk.Window):
         self.firstpage = True   # Have the first page stand alone, even if self.spreads is true.
 
         window = super(Book, self).__init__()
-        self.w, self.h = 300, 600
+        self.w, self.h = 600, 600
         self.set_title("Book")
         self.set_size_request(self.w, self.h)
         self.set_position(gtk.WIN_POS_CENTER)
@@ -359,8 +296,11 @@ class Book(gtk.Window):
         new_page.connect("clicked", self.add_page)
         delete_page = gtk.ToolButton(gtk.STOCK_DELETE)
         delete_page.connect("clicked", self.delete_page)
+        rename_page = gtk.ToolButton(gtk.STOCK_PROPERTIES)
+        rename_page.connect("clicked", self.rename_page)
         toolbar.insert(new_page, 0)
         toolbar.insert(delete_page, 1)
+        toolbar.insert(rename_page, 2)
 
         vbox = gtk.VBox(False, 2)
         vbox.pack_start(mb, False, False, 0)
@@ -370,8 +310,6 @@ class Book(gtk.Window):
         self.scroll.set_shadow_type(gtk.SHADOW_ETCHED_IN)
         self.scroll.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         vbox.pack_start(self.scroll, True, True, 0)
-        # self.hbox = gtk.HBox(False, 2)
-        #vbox.pack_start(self.hbox, False, False, 0)
 
         self.add(vbox)
         self.connect("destroy", gtk.main_quit)
@@ -394,10 +332,10 @@ class Book(gtk.Window):
         if response == gtk.RESPONSE_OK:
             self.load_book(o.get_filename())
         o.destroy()
-        
 
     def load_book(self, book):
         # Loads a selected book.
+        # TODO! Fix bug when loading a second book.
         if os.path.exists(book):
             self.loaded = True
             self.bookfile = book
@@ -414,25 +352,21 @@ class Book(gtk.Window):
             for p in pagelist:
                 # Create a page object, and add to a list.
                 self.pagecount += 1
-                self.pages.append(Page(os.path.join(self.pagepath, p),self, self.pagecount))
-
+                self.pages.append(Page(os.path.join(self.pagepath, p)))
             # Load the pages into an IconView.
             self.pagestore = gtk.ListStore(str, gtk.gdk.Pixbuf, bool)
             for p in self.pages:
                 self.pagestore.append((p.name, p.thumbfile, True))
-            self.pagestore.connect("rows-reordered", self.drag_callback)
-            self.pagestore.connect("row-inserted", self.drag_callback)
-            thumbs = gtk.IconView(self.pagestore)
-            thumbs.set_text_column(0)
-            thumbs.set_pixbuf_column(1)
-            thumbs.set_reorderable(True)
-            thumbs.set_columns(2)
-            thumbs.connect("selection-changed", self.selection)
-            thumbs.connect("item-activated", self.open_page)
-            self.scroll.add(thumbs)
-            #for p in self.pages:
-            #    self.hbox.pack_start(p.page, False, False, 0)
-            self.set_title("Book - %s" % (self.bookname))
+            self.pagestore.connect("row-inserted", self.move_page)
+            self.thumbs = gtk.IconView(self.pagestore)
+            self.thumbs.set_text_column(0)
+            self.thumbs.set_pixbuf_column(1)
+            self.thumbs.set_reorderable(True)
+            self.thumbs.set_columns(2)
+            self.thumbs.connect("selection-changed", self.select_page)
+            self.thumbs.connect("item-activated", self.open_page)
+            self.scroll.add(self.thumbs)
+            self.set_title("GIMP Book - %s" % (self.bookname))
             self.show_all()
         else:
             show_error_msg("Unable to find book "+book)
@@ -440,94 +374,49 @@ class Book(gtk.Window):
     def open_page(self, iconview, number):
         # Open the page the user clicked in GIMP.
         number = number[0]
-        pprint(book.pages[number].pagepath)
-        img = pdb.gimp_file_load(book.pages[number].pagepath, book.pages[number].pagepath)
+        pprint(self.pages[number].pagepath)
+        img = pdb.gimp_file_load(self.pages[number].pagepath, self.pages[number].pagepath)
         gimp.Display(img)
 
-    def selection(self, thumbs):
+    def select_page(self, thumbs):
         # A page has been selected.
-        pagenumber = thumbs.get_selected_items()
-        if pagenumber:
-            self.selected = pagenumber[0]
+        if self.thumbs.get_selected_items():
+            self.selected = self.thumbs.get_selected_items()[0][0]
         else:
             self.selected = -1
         print("Page %s selected." % (self.selected))
 
-    def drag_callback(self, pagestore, destination_index, tree_iterator):
-        # Pages have been dragged around.
+    def move_page(self, pagestore, destination_index, tree_iterator):
+        # Move a page around in the book.
+        # TODO! Write the new page order to the *.book file.
         destination = destination_index[0]
-        selected = self.selected[0]
-        if destination > selected:
-            destination = (destination - 1)
-        print("Page %s moved to %s" % (selected, destination))
-        # Shifting pages around.
-        last = len(self.pages)-1
-        # Remove the page.
-        tmpage = self.pages[selected]
-        if last > selected:
-            index = selected + 1
-            for p in self.pages[selected+1:last]:
-                self.pages[index-1] = self.pages[index]
-            del self.pages[last]
-        # Add the page back in.
-        if destination == last:
-            self.pages[last] = tmpage
-        else:
-            pass
-
-    def shift_pages(start, forward):
-        # Shifting the pages.
-        direction = 1
-        if not forward:
-            direction = -1
-        last = len(self.pages)-1
-        if last > start:
-            index = start + 1
-            for p in self.pages[start+1:]:
-                self.pages[index+direction] = self.pages[index]
-
+        if not destination == self.selected:
+            movingpage = self.pages.pop(self.selected)
+            if destination < self.selected:
+                self.pages.insert(destination, movingpage)
+            else:
+                self.pages.insert(destination-1, movingpage)
+            for p in self.pages:
+                pprint(p.pagepath)
 
     def add_page(self, widget):
         # Add a new page to the current book.
-        # TODO! Define page number where to add the page.
+        # TODO! Implement copying the template and writing new page order to file.
         if self.path:
-            try:
-                img = pdb.gimp_image_new(800, 800, 0)
-                pdb.gimp_xcf_save(0, img, None, self.path+"/aaa.xcf", "aaa.xcf")
-                show_error_msg("Adding a page")
-                # TODO! Add a page object.
-            except Exception, e:
-                show_error_msg(e.message)
-                sys.exit(1)
+            # Make a copy of the template.
+            print("Adding a page")
         else:
             show_error_msg("You need to create a book, before adding pages to it.")
 
     def delete_page(self, widget):
         # Delete the selected page.
-        show_error_msg("Deleting a page")
+        # TODO! Delete a page and file, and write new page order to file.
+        print("Deleting a page")
 
+    def rename_page(self, widget):
+        # Rename the selected page.
+        print("Renaming a page.")
 
-    def open_book_old(self, widget):
-        # Opens up a new book project
-        #self.pagecount = 10
-
-        #for i in xragne(self.pagecount):
-        #    pass
-
-        # Images
-        try:
-            self.boyd = gtk.gdk.pixbuf_new_from_file("/home/ragnar/Projects/sketches/ref/boyd.jpg")
-        except Exception, e:
-            show_error_msg(e.message)
-            sys.exit(1)
-
-        image1 = gtk.Image()
-        image1.set_from_pixbuf(self.boyd)
-        image2 = gtk.Image()
-        image2.set_from_pixbuf(self.boyd)
-        self.hbox.pack_start(image1, False, False, 0)
-        self.hbox.pack_start(image2, False, False, 0)
-        self.show_all()
 
 
 
