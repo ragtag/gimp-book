@@ -1,67 +1,68 @@
-BOOK
-
-NEXT
-- Layout of thumbs in spreads using gtk.IconView.
-- Implement add, delete, move and shift page functions.
--- These were on right click menus, but with the IconView I can change that.
---- Add a toolbar with add and delete buttons.
---- Use drag and drop to re-order the pages (figure out how to catch the callback).
+MENUS
+File
+- New Book
+- Open Book
+o Book Properties
+- Export Book...
+- Close Book
+Edit
+- Edit Template
+o Edit MetaData
+Help
+o Help
+- About GIMP Book
+Toolbar
+- Add Page
+- Delete Page
+- Rename Page
+- Refresh Thumbnail (not sure if this is needed...or should be done automatically in the background)
 
 NOTES
 - Pages Layout
--- Single pages.
--- Two pages together.
---- Single page at start, or two.
---- Left to right or right to left reading.
+o- Single pages....maybe.
+o- Flowing layouts....maybe.
+x- Two pages together.
 - Edit Template
 -- Loads the template, which is the base for any new pages you add.
-- Add Page
+- Add Page button in toolbar.
 -- Asks for a name.
 -- Creates a new .xcf file from the template.
--- Add it to the page list, moving the page you clicked back.
-- Delete Page
--- Ask for verification!
+-- Add it to the page list, after the currently selected page.
+- Delete Page button in toolbar.
+-- Ask for verificatinon!
 -- Trash the entry from the page list.
 -- Put the .xcf file in the trash can if possible (don't delete directly).
-- Open Page
--- Double click it or right click>Open
-- Sort Pages
--- Right click>Move Page to... Dialog opens where you enter page number to move the page to.
-oo Drag and drop a single page
-oo Drag and drop multiple pages
-o Support tags/notes on individual pages, visible on mouse over.
+x Open Page by double clicking it.
+-- Figure out why the image shows up as modified in GIMP on loading.
+x Drag and drop pages to reorder them.
+-- Implement back end that modifies the data in the JSON file.
+o Language support, codes in layer names define language (e.g. [en],[no],[is]), and these are then hidden or shown on export
 o Support color coding pages, making it easy to divide up the story into chapters or mark pages.
+o Left to right or right to left reading.
+- Export
+-- Crop and scale.
+-- Include metadata where available.
+-- Formats
+--- Tiff (none or lzw)
+--- JPG (meta data, compression ratio etc.)
+--- PNG
+- Batch (destructive operations on the whole book...maybe not safe to include)
+-- Crop and scale.
 
-Export
-- Crop and scale.
-- Include metadata where available.
-- Formats
--- Tiff (none or lzw)
--- JPG (meta data, compression ratio etc.)
--- PNG
 
-Batch (destructive operations on the whole comice...maybe not safe to include)
-- Crop and scale.
-
-Config File
+CONFIG FILE
 - comic_name.comic
 - Use json
 - Additional info that can be added later.
 -- Title
 -- Chapters
--- Which page belongs to which chapter
+--- Which page belongs to which chapter
 -- Reading direction (needed for export)
--- First page, or not.
+-- Include cover (page 0).
 -- General notes
 -- Notes per page
 -- Copyright info
--- Tag to add to all or each page on export
+-- Tag to add to allp or each page on export
 -- Language(s)
 -- Previous export settings
-
-FUTURE FEATURES
-- Language support, codes in layer names define language (e.g. [en],[no],[is]), and these are then hidden or shown on export
-- Drag and drop of pages to re-order them.
-- Multi-select of pages, to move or delete.
-
 
