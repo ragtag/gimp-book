@@ -1,7 +1,6 @@
 NEXT
-- Rename
-- Export
 - Cleanup
+- Export
 
 MENUS
 File
@@ -32,14 +31,14 @@ x- Delete Page button in toolbar.
 x-- Ask for verificatinon!
 x-- Trash the entry from the page list.
 x-- Put the .xcf file in the trash can if possible (don't delete directly). 
-- Rename
--- Dialog for entering a new name.
--- Move the file.
--- Update the .book file
+x- Rename
+x-- Dialog for entering a new name.
+x-- Move the file.
+x-- Update the .book file
 x Open Page by double clicking it.
--- Figure out why the image shows up as modified in GIMP on loading.
+x-- Figure out why the image shows up as modified in GIMP on loading.
 x Drag and drop pages to reorder them.
--- Implement back end that modifies the data in the JSON file.
+x-- Implement back end that modifies the data in the JSON file.
 o Language support, codes in layer names define language (e.g. [en],[no],[is]), and these are then hidden or shown on export
 o Support color coding pages, making it easy to divide up the story into chapters or mark pages.
 o Left to right or right to left reading.

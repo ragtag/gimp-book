@@ -283,8 +283,18 @@ class Book(gtk.Window):
         file_open.connect("activate", self.open_book)
         filemenu.append(file_open)
 
-        sep = gtk.SeparatorMenuItem()
-        filemenu.append(sep)
+        sep1 = gtk.SeparatorMenuItem()
+        filemenu.append(sep1)
+
+        file_export = gtk.ImageMenuItem(gtk.STOCK_OPEN, agr)
+        file_export.set_label("Export Book...")
+        key, mod = gtk.accelerator_parse("<Control>E")
+        file_export.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
+        file_export.connect("activate", self.export_book_gui)
+        filemenu.append(file_export)
+
+        sep2 = gtk.SeparatorMenuItem()
+        filemenu.append(sep2)
 
         file_close = gtk.ImageMenuItem(gtk.STOCK_CLOSE, agr)
         file_close.set_label("Close Book...")
@@ -377,6 +387,10 @@ class Book(gtk.Window):
         else:
             show_error_msg("Unable to find book "+book)
 
+    def export_book_gui(self, widget):
+        # Settings for exporting the book.
+        print("Open export GUI")
+
     def open_page(self, iconview, number):
         # Open the page the user clicked in GIMP.
         number = number[0]
@@ -404,10 +418,6 @@ class Book(gtk.Window):
                     self.pages.insert(destination-1, movingpage)
                 self.write_pages()
 
-    def read_pages(self):
-        # Read the list of pages from the *.book file.
-        pass
-
     def write_pages(self):
         # Writes self.pages to the *.book file.
         metadata = []
@@ -417,7 +427,6 @@ class Book(gtk.Window):
         bookfile = open(os.path.join(self.bookpath,self.bookname+".book"), "w")
         bookfile.write(savetofile)
         bookfile.close()
-        
             
     def add_page(self, widget):
         # Add a new page to the current book.
@@ -426,25 +435,8 @@ class Book(gtk.Window):
         if self.selected < 1:
             dest = len(self.pages)
         if self.loaded:
-            dialog = gtk.Dialog("Add a Page",
-                                None,
-                                gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                                (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT,
-                                 gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
-            dialog.set_default_response(gtk.RESPONSE_ACCEPT)
-            hbox = gtk.HBox(False, 4)
-            hbox.show()
-            dialog.vbox.pack_start(hbox)
-            label = gtk.Label("Enter Page Description: ")
-            label.show()
-            hbox.pack_start(label)
-            entry = gtk.Entry()
-            entry.set_activates_default(True)
-            entry.show()
-            hbox.pack_start(entry)
-            response = dialog.run()
+            response, text = self.name_dialog("Add a Page", "Enter Page Description: ")
             if response == gtk.RESPONSE_ACCEPT:
-                text = entry.get_text()
                 if text:
                     textext = text+".xcf"
                     unique = True
@@ -466,11 +458,9 @@ class Book(gtk.Window):
                         show_error_msg("The page name must be unique. Page '%s' already exists." % (textext))
                 else:
                     show_error_msg("No page name entered.")
-            dialog.destroy()
         else:
             show_error_msg("You need to create or load a book, before adding pages to it.")
             # TODO! Disable toolbutton, if no book is loaded.
-
 
     def delete_page(self, widget):
         # Delete the selected page.
@@ -485,11 +475,53 @@ class Book(gtk.Window):
             except Exception, err:
                 show_error_msg(err)
         areyousure.destroy()
-        
 
     def rename_page(self, widget):
         # Rename the selected page.
-        print("Renaming a page.")
+        # TODO! Show message on illegal characters and duplicate file creation.
+        if self.selected > -1:
+            response, text = self.name_dialog("Rename Page", "Ente Page Description: ")
+            if response == gtk.RESPONSE_ACCEPT:
+                if text:
+                    textext = text+".xcf"
+                    unique = True
+                    for p in self.pages:
+                        if textext == p.name:
+                            unique = False
+                            break
+                    if unique:
+                        try:
+                            shutil.move(self.pages[self.selected].pagepath, os.path.join(self.pagepath, textext))
+                            p = Page(os.path.join(self.pagepath, textext))
+                            self.pages[self.selected] = p
+                            self.write_pages()
+                            del self.pagestore[self.selected]
+                            self.pagestore.insert(self.selected, (p.name, p.thumbfile, True))
+                        except Exception, err:
+                            show_error_msg(err)
+
+    def name_dialog(self, title, label):
+        # Dialog for entering page names.
+        dialog = gtk.Dialog(title,
+                            None,
+                            gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                            (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT,
+                             gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
+        dialog.set_default_response(gtk.RESPONSE_ACCEPT)
+        hbox = gtk.HBox(False, 4)
+        hbox.show()
+        dialog.vbox.pack_start(hbox)
+        label = gtk.Label(label)
+        label.show()
+        hbox.pack_start(label)
+        entry = gtk.Entry()
+        entry.set_activates_default(True)
+        entry.show()
+        hbox.pack_start(entry)
+        response = dialog.run()
+        text = entry.get_text()
+        dialog.destroy()
+        return response, text
 
 
 def show_book():
