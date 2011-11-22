@@ -1,3 +1,8 @@
+NEXT
+- Rename
+- Export
+- Cleanup
+
 MENUS
 File
 - New Book
@@ -19,15 +24,18 @@ x Pages Layout
 o- Single pages....maybe.
 o- Flowing layouts....maybe.
 x- Two pages together.
-- Add Page button in toolbar.
--- Asks for a name.
--- Creates a new .xcf file from the template.
--- Add it to the page list, after the currently selected page.
-- Delete Page button in toolbar.
--- Ask for verificatinon!
--- Trash the entry from the page list.
--- Put the .xcf file in the trash can if possible (don't delete directly).
+x- Add Page button in toolbar.
+x-- Asks for a name.
+x-- Creates a new .xcf file from the template.
+x-- Add it to the page list, after the currently selected page.
+x- Delete Page button in toolbar.
+x-- Ask for verificatinon!
+x-- Trash the entry from the page list.
+x-- Put the .xcf file in the trash can if possible (don't delete directly). 
 - Rename
+-- Dialog for entering a new name.
+-- Move the file.
+-- Update the .book file
 x Open Page by double clicking it.
 -- Figure out why the image shows up as modified in GIMP on loading.
 x Drag and drop pages to reorder them.
@@ -47,9 +55,10 @@ o- Crop and scale.
 
 
 CONFIG FILE
-- comic_name.comic
-- Use json
+- comic_name.book
+x Use json
 - Additional info that can be added later.
+x- pages
 -- Title
 -- Chapters
 --- Which page belongs to which chapter
