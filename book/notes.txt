@@ -2,6 +2,30 @@ NEXT
 - Cleanup
 - Export
 
+CLEAN
+What responsibilites are there in the code?
+- Book
+-- Store the pages.
+- IO
+-- Copy, delete and create files.
+- GUI
+-- All GUI.
+- Config
+-- Config file.
+- Page
+-- Convenient way to store them.
+- Thumbs
+-- Find, create and draw.
+
+
+- Page
+-- The pages, finding thumbs....not  drawing.
+- Book
+-- Main interface, writing and more.
+- NewBook
+-- GUI for new book.
+-- New book creation.
+
 MENUS
 File
 - New Book

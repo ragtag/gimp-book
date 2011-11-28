@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Script for managing multiple pages in GIMP, intended for working with comic books,  illustrated childrens books,
+# Script for managing multiple pages in GIMP, intended for working with comic books, illustrated childrens books,
 # sketchbooks or similar.
 #
 # Copyright 2011 - Ragnar Brynjúlfsson
@@ -12,7 +12,6 @@ import hashlib
 import json
 import gtk
 import shutil
-import gtk.glade
 import gobject
 import urllib
 from gimpfu import *
@@ -338,7 +337,7 @@ class Book(gtk.Window):
 
     def open_book(self, widget):
         # Interface for opening an existing book.
-        o = gtk.FileChooserDialog("Create a New Book", None, gtk.FILE_CHOOSER_ACTION_OPEN, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        o = gtk.FileChooserDialog("Open Book", None, gtk.FILE_CHOOSER_ACTION_OPEN, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         o.set_default_response(gtk.RESPONSE_OK)
         f = gtk.FileFilter()
         f.set_name("GIMP Book")
