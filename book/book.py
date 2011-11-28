@@ -23,33 +23,40 @@ class Page():
     # Stores instances and information on a single page.
     def __init__ (self, page):
         self.pagepath = page # Path to the page.
-        self.thumbpath = ""  # Path to the pages thumb.
         self.name = os.path.basename(self.pagepath)
-        # Find or generate the thumbnail for the page.
-        if not self.find_thumb():
-            img = pdb.gimp_xcf_load(0, self.pagepath, self.pagepath)
-            pdb.gimp_file_save_thumbnail(img, self.pagepath)
-            pdb.gimp_image_delete(img)
-            self.find_thumb()
-        self.thumbfile = gtk.gdk.pixbuf_new_from_file(self.thumbpath)
+        self.thumb = Thumb(self.pagepath)
 
+class Thumb():
+    # Managing thumbnails, and creating new ones when needed.
+    def __init__(self, imagepath):
+        self.imagepath = imagepath
+        if not self.find_thumb():
+            self.build_thumb()
+            if not self.find_thumb():
+                show_error_msg('Failed to find or build thumb for %s.' % self.imagepath)
+
+    def build_thumb(self):
+        # Build or rebuild a thumb for the image.
+        img = pdb.gimp_xcf_load(0, self.imagepath, self.imagepath)
+        pdb.gimp_file_save_thumbnail(img, self.imagepath)
+        pdb.gimp_image_delete(img)
+        
     def find_thumb(self):
         # Find the pages thumbnail.
         # TODO! Fails with some obscure characters like !?* ...needs testing.
-        pagepathuri = urllib.quote(self.pagepath.encode("utf-8"))
-        file_hash = hashlib.md5('file://'+pagepathuri).hexdigest()
+        imagepathuri = urllib.quote(self.imagepath.encode("utf-8"))
+        file_hash = hashlib.md5('file://'+imagepathuri).hexdigest()
         thumb = os.path.join(os.path.expanduser('~/.thumbnails/large'), file_hash) + '.png'
         if os.path.exists(thumb):
-            self.thumbpath = thumb
+            self.thumbpix = gtk.gdk.pixbuf_new_from_file(thumb)
             return True
         else:
             thumb = os.path.join(os.path.expanduser('~/.thumbnails/normal'), file_hash) + '.png'
             if os.path.exists(thumb):
-                self.thumbpath = thumb
+                self.thumbpix = gtk.gdk.pixbuf_new_from_file(thumb)
                 return True
             else:
                 return False
-
 
 class NewBook(gtk.Window):
     # Interface for creating new books.
@@ -183,15 +190,27 @@ class NewBook(gtk.Window):
         # Cancel book creation and close the window.
         self.destroy()
 
-        
-    def make_book(self, widget):
+    def make_book(self, widget, path, filename, w, h, color, fill):
+        # Make a page.
+        self.io = IO()
+        if self.io.make_book(path, filename, w, h, color, fill):
+            self.book.load_book()
+        else:
+            show_error_msg('Failed to load book %s' % filename)
+
+class IO():
+    # File creation and deletion.
+    def __init__(self):
+        pass
+    
+    def make_book(self, path, filename, w, h, color, fill):
         # Build the files and folders needed for the book.
-        dest = self.destbutton.get_filename()
-        name = self.nameentry.get_text()
-        width = int(self.widthentry.get_text())
-        height = int(self.heightentry.get_text())
-        color = self.colormenu.get_active()
-        fill = self.fillmenu.get_active()
+        dest = path
+        name = filename
+        width = int(w)
+        height = int(h)
+        color = color
+        fill = fill
         if os.path.isdir(dest):
             if name:
                 # Make folder dest/name
@@ -371,7 +390,7 @@ class Book(gtk.Window):
             # Load the pages into an IconView.
             self.pagestore = gtk.ListStore(str, gtk.gdk.Pixbuf, bool)
             for p in self.pages:
-                self.pagestore.append((p.name, p.thumbfile, True))
+                self.pagestore.append((p.name, p.thumb.thumbpix, True))
             self.pagestore.connect("row-inserted", self.move_page)
             self.thumbs = gtk.IconView(self.pagestore)
             self.thumbs.set_text_column(0)
@@ -449,7 +468,7 @@ class Book(gtk.Window):
                             p = Page(os.path.join(self.pagepath, textext))
                             self.pages.insert(dest, p)
                             self.write_pages()
-                            self.pagestore.insert(dest, (p.name, p.thumbfile, True))
+                            self.pagestore.insert(dest, (p.name, p.thumb.thumbpix, True))
                         except Exception, err:
                             print("ERROR HERE")
                             show_error_msg(err)
@@ -495,7 +514,7 @@ class Book(gtk.Window):
                             self.pages[self.selected] = p
                             self.write_pages()
                             del self.pagestore[self.selected]
-                            self.pagestore.insert(self.selected, (p.name, p.thumbfile, True))
+                            self.pagestore.insert(self.selected, (p.name, p.thumb.thumbpix, True))
                         except Exception, err:
                             show_error_msg(err)
 

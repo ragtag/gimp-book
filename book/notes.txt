@@ -5,17 +5,20 @@ NEXT
 CLEAN
 What responsibilites are there in the code?
 - Book
+-- Main - own all others.
 -- Store the pages.
 - IO
 -- Copy, delete and create files.
 - GUI
 -- All GUI.
 - Config
--- Config file.
+-- load and save.
 - Page
 -- Convenient way to store them.
-- Thumbs
--- Find, create and draw.
+x Thumbs
+x- Find
+x- Create
+-- Draw
 
 
 - Page
