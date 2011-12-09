@@ -1,33 +1,9 @@
 NEXT
-- Cleanup
-- Export
-
-CLEAN
-What responsibilites are there in the code?
-- Book
--- Main - own all others.
--- Store the pages.
-- IO
--- Copy, delete and create files.
-- GUI
--- All GUI.
-- Config
--- load and save.
-- Page
--- Convenient way to store them.
-x Thumbs
-x- Find
-x- Create
--- Draw
-
-
-- Page
--- The pages, finding thumbs....not  drawing.
-- Book
--- Main interface, writing and more.
-- NewBook
--- GUI for new book.
--- New book creation.
+- Fix bug after reloading, when add, delete and rename no longer display correctly.
+- Clean up the code a bit.
+- Export!!!
+- Add progress indicator when making thumbnails.
+- Disable menus and toobuttons that are not in use.
 
 MENUS
 File

@@ -7,21 +7,25 @@
 # TODO! Add license info
 #
 # http://queertales.com
-import os, re, glob, sys
+import os
+# import re
+# import glob
+import sys
 import hashlib
 import json
-import gtk
 import shutil
+import gtk
 import gobject
 import urllib
 from gimpfu import *
 from gimpenums import *
-from pprint import pprint
 from time import strftime
+# from pprint import pprint
 
 class Page():
     # Stores instances and information on a single page.
     def __init__ (self, page):
+        # Set page variables.
         self.pagepath = page # Path to the page.
         self.name = os.path.basename(self.pagepath)
         self.thumb = Thumb(self.pagepath)
@@ -58,17 +62,19 @@ class Thumb():
             else:
                 return False
 
-class NewBook(gtk.Window):
+class NewBookGUI(gtk.Window):
     # Interface for creating new books.
-    def __init__(self, book):
-        self.book = book
+    def __init__(self, bookgui):
+        self.book = bookgui.book
+        self.bookgui = bookgui
         # Create a new book.
-        win = super(NewBook, self).__init__()
+        win = super(NewBookGUI, self).__init__()
         self.set_title("Create a New Book...")
         self.set_size_request(300, 300)
         self.set_position(gtk.WIN_POS_CENTER)
         self.path = ""
 
+        # TODO! Fix the layout, so that everything aligns properly.
         # Box for divding the window in three parts, name, page and buttons.
         cont = gtk.VBox(False, 4)
         self.add(cont)
@@ -190,27 +196,31 @@ class NewBook(gtk.Window):
         # Cancel book creation and close the window.
         self.destroy()
 
-    def make_book(self, widget, path, filename, w, h, color, fill):
+    def make_book(self, widget):
         # Make a page.
-        self.io = IO()
-        if self.io.make_book(path, filename, w, h, color, fill):
-            self.book.load_book()
-        else:
-            show_error_msg('Failed to load book %s' % filename)
+        self.book.make_book(self.destbutton.get_filename(), self.nameentry.get_text(), self.widthentry.get_value(), self.heightentry.get_value(), self.colormenu.get_active(), self.fillmenu.get_active())
+        self.bookgui.load_book(os.path.join(self.destbutton.get_filename(), self.nameentry.get_text(), self.nameentry.get_text(), ".book"))
+        self.destroy()
 
-class IO():
-    # File creation and deletion.
+
+class Book():
+    # Stores and manages the data for the book.
     def __init__(self):
-        pass
-    
-    def make_book(self, path, filename, w, h, color, fill):
+        # Defines basic variables to store.
+        self.loaded = False  # If there is a book loaded in the interface.
+        self.pagecount = 0  # Number of pages in this book.
+        self.bookfile = ""  # The *.book for this book.
+        self.bookname = ""  # The name of the book.
+        self.bookpath = ""  # The path to the folder containing the book.
+        self.pagepath = ""  # Path to the "pages" subfolder.
+        self.trashpath = "" # Path to trash folder.
+        self.pages = []     # List for storing page objects.
+        self.selected = -1  # Index of the currently selected page, -1 if none.
+
+    def make_book(self, dest, name, w, h, color, fill):
         # Build the files and folders needed for the book.
-        dest = path
-        name = filename
         width = int(w)
         height = int(h)
-        color = color
-        fill = fill
         if os.path.isdir(dest):
             if name:
                 # Make folder dest/name
@@ -244,33 +254,106 @@ class IO():
                 img.add_layer(bglayer, 0)
                 pdb.gimp_xcf_save(0, img, None, os.path.join(fullpath, "pages", "Template.xcf") , "Template.xcf")
                 # Load the newly created book.
-                self.book.load_book(os.path.join(fullpath, name+".book"))
-                # Kill the window. TODO! Check if everything was created correctly.
-                self.destroy()
+                self.load_book(os.path.join(fullpath, name+".book"))
+                # TODO! Check if everything was created correctly.
+                return True
             else:
                 show_error_msg("Name was left empty")
         else:
             show_error_msg("Destination does not exist.")
 
+    def load_book(self, bookfile):
+        # Loads a selected book.
+        # TODO! Fix bug when loading a second book.
+        if os.path.exists(bookfile):
+            self.loaded = True
+            self.bookfile = bookfile
+            self.bookname = os.path.splitext(os.path.basename(self.bookfile))[0]
+            self.bookpath = os.path.dirname(self.bookfile)
+            self.pagepath = os.path.join(self.bookpath, "pages")
+            self.trashpath = os.path.join(self.bookpath, "trash")
+            # Load the pages.
+            f = open(self.bookfile, "r")
+            metatext = f.read()
+            metadata = json.loads(metatext)
+            f.close()
+            pagelist = metadata['pages']
+            for p in pagelist:
+                # Create a page object, and add to a list.
+                self.pagecount += 1
+                self.pages.append(Page(os.path.join(self.pagepath, p)))
+            return True
 
 
-class Book(gtk.Window):
+    def move_page(self, pagestore, destination_index, tree_iterator):
+        # Move a page around in the book.
+        if self.selected > -1:
+            destination = destination_index[0]
+            if not destination == self.selected:
+                movingpage = self.pages.pop(self.selected)
+                if destination < self.selected:
+                    self.pages.insert(destination, movingpage)
+                else:
+                    self.pages.insert(destination-1, movingpage)
+                self.write_pages()
+
+    def open_page(self, iconview, number):
+        # Open the page the user clicked in GIMP.
+        number = number[0]
+        img = pdb.gimp_file_load(self.pages[number].pagepath, self.pages[number].pagepath)
+        img.clean_all()
+        gimp.Display(img)
+
+    def write_pages(self):
+        # Writes self.pages to the *.book file.
+        metadata = []
+        for p in self.pages:
+            metadata.append(p.name)
+        savetofile = json.dumps({ 'pages': metadata }, indent=4)
+        bookfile = open(os.path.join(self.bookpath,self.bookname+".book"), "w")
+        bookfile.write(savetofile)
+        bookfile.close()
+
+    def add_page(self, pagetitle, dest):
+        # Copy the template to a new page.
+        try:
+            shutil.copy(self.pages[0].pagepath, os.path.join(self.pagepath, pagetitle))
+            p = Page(os.path.join(self.pagepath, pagetitle))
+            self.pages.insert(dest, p)
+            self.write_pages()
+            return True
+        except Exception, err:
+            show_error_msg(err)
+
+    def delete_page(self):
+        # Delete the selected page.
+        try:
+            shutil.move(self.pages[self.selected].pagepath, os.path.join(self.trashpath,strftime("%Y%m%d_%H%M%S_")+self.pages[self.selected].name))
+            self.pages.pop(self.selected)
+            self.write_pages()
+            return True
+        except Exception, err:
+            show_error_msg(err)
+
+    def rename_page(self, pagetitle):
+        # Rename a page.
+        try:
+            shutil.move(self.pages[self.selected].pagepath, os.path.join(self.pagepath, pagetitle))
+            p = Page(os.path.join(self.pagepath, pagetitle))
+            self.pages[self.selected] = p
+            self.write_pages()
+            return True
+        except Exception, err:
+            show_error_msg(err)
+            
+
+class BookGUI(gtk.Window):
     # Builds a GTK windows for managing the pages of a book.
     def __init__ (self):
-        self.loaded = False # If there is a book loaded in the interface.
-        self.pagecount = 0  # Number of pages in this book.
-        self.bookfile = ""  # The *.book for this book.
-        self.bookname = ""  # The name of the book.
-        self.bookpath = ""  # The path to the folder containing the book.
-        self.pagepath = ""  # Path to the "pages" subfolder.
-        self.trashpath = "" # Path to trash folder.
-        self.pages = []     # List for storing page objects.
-        self.selected = -1  # Index of the currently selected page, -1 if none.
-        self.left2right = True  # Read from left to right.
-        self.spreads = True     # Show two and two pages together, rather than individual ones.
-        self.firstpage = True   # Have the first page stand alone, even if self.spreads is true.
+        self.book = Book()
+        self.pagestore = gtk.ListStore(str, gtk.gdk.Pixbuf, bool)
 
-        window = super(Book, self).__init__()
+        window = super(BookGUI, self).__init__()
         self.w, self.h = 600, 600
         self.set_title("Book")
         self.set_size_request(self.w, self.h)
@@ -352,7 +435,9 @@ class Book(gtk.Window):
 
     def new_book(self, widget):
         # Helper for opening up the New Book window.
-        nb = NewBook(self)
+        self.close_book()
+        nb = NewBookGUI(self)
+        del nb
 
     def open_book(self, widget):
         # Interface for opening an existing book.
@@ -364,116 +449,59 @@ class Book(gtk.Window):
         o.add_filter(f)
         response = o.run()
         if response == gtk.RESPONSE_OK:
-            self.load_book(o.get_filename())
+            self.close_book()
+            if self.book.load_book(o.get_filename()):
+                self.load_book(o.get_filename())
         o.destroy()
 
-    def load_book(self, book):
-        # Loads a selected book.
-        # TODO! Fix bug when loading a second book.
-        if os.path.exists(book):
-            self.loaded = True
-            self.bookfile = book
-            self.bookname = os.path.splitext(os.path.basename(book))[0]
-            self.bookpath = os.path.dirname(book)
-            self.pagepath = os.path.join(self.bookpath, "pages")
-            self.trashpath = os.path.join(self.bookpath, "trash")
-            # Load the pages.
-            bookfile = open(self.bookfile, "r")
-            metatext = bookfile.read()
-            metadata = json.loads(metatext)
-            bookfile.close()
-            pagelist = metadata['pages']
-            for p in pagelist:
-                # Create a page object, and add to a list.
-                self.pagecount += 1
-                self.pages.append(Page(os.path.join(self.pagepath, p)))
-            # Load the pages into an IconView.
-            self.pagestore = gtk.ListStore(str, gtk.gdk.Pixbuf, bool)
-            for p in self.pages:
-                self.pagestore.append((p.name, p.thumb.thumbpix, True))
-            self.pagestore.connect("row-inserted", self.move_page)
-            self.thumbs = gtk.IconView(self.pagestore)
-            self.thumbs.set_text_column(0)
-            self.thumbs.set_pixbuf_column(1)
-            self.thumbs.set_reorderable(True)
-            self.thumbs.set_columns(2)
-            self.thumbs.connect("selection-changed", self.select_page)
-            self.thumbs.connect("item-activated", self.open_page)
-            self.scroll.add(self.thumbs)
-            self.set_title("GIMP Book - %s" % (self.bookname))
-            self.show_all()
-        else:
-            show_error_msg("Unable to find book "+book)
-
+    def load_book(self, bookfile):
+        # Load the pages into an IconView.
+        for p in self.book.pages:
+            self.pagestore.append((p.name, p.thumb.thumbpix, True))
+        self.pagestore.connect("row-inserted", self.book.move_page)
+        self.thumbs = gtk.IconView(self.pagestore)
+        self.thumbs.set_text_column(0)
+        self.thumbs.set_pixbuf_column(1)
+        self.thumbs.set_reorderable(True)
+        self.thumbs.set_columns(2)
+        self.thumbs.connect("selection-changed", self.select_page)
+        self.thumbs.connect("item-activated", self.book.open_page)
+        self.scroll.add(self.thumbs)
+        self.set_title("GIMP Book - %s" % (self.book.bookname))
+        self.show_all()
+        
     def export_book_gui(self, widget):
         # Settings for exporting the book.
         print("Open export GUI")
 
-    def open_page(self, iconview, number):
-        # Open the page the user clicked in GIMP.
-        number = number[0]
-        img = pdb.gimp_file_load(self.pages[number].pagepath, self.pages[number].pagepath)
-        img.clean_all()
-        gimp.Display(img)
-
     def select_page(self, thumbs):
         # A page has been selected.
         if self.thumbs.get_selected_items():
-            self.selected = self.thumbs.get_selected_items()[0][0]
+            self.book.selected = self.thumbs.get_selected_items()[0][0]
         else:
-            self.selected = -1
-        print("Page %s selected." % (self.selected))
+            self.book.selected = -1
 
-    def move_page(self, pagestore, destination_index, tree_iterator):
-        # Move a page around in the book.
-        if self.selected > -1:
-            destination = destination_index[0]
-            if not destination == self.selected:
-                movingpage = self.pages.pop(self.selected)
-                if destination < self.selected:
-                    self.pages.insert(destination, movingpage)
-                else:
-                    self.pages.insert(destination-1, movingpage)
-                self.write_pages()
-
-    def write_pages(self):
-        # Writes self.pages to the *.book file.
-        metadata = []
-        for p in self.pages:
-            metadata.append(p.name)
-        savetofile = json.dumps({ 'pages': metadata }, indent=4)
-        bookfile = open(os.path.join(self.bookpath,self.bookname+".book"), "w")
-        bookfile.write(savetofile)
-        bookfile.close()
-            
     def add_page(self, widget):
         # Add a new page to the current book.
         # TODO! Show message on illegal characters and duplicate file creation.
-        dest = self.selected
-        if self.selected < 1:
-            dest = len(self.pages)
-        if self.loaded:
+        dest = self.book.selected
+        if self.book.selected < 1:
+            dest = len(self.book.pages)
+        if self.book.loaded:
             response, text = self.name_dialog("Add a Page", "Enter Page Description: ")
             if response == gtk.RESPONSE_ACCEPT:
                 if text:
-                    textext = text+".xcf"
+                    pagetitle = text+".xcf"
                     unique = True
-                    for p in self.pages:
-                        if textext == p.name:
+                    for p in self.book.pages:
+                        if pagetitle == p.name:
                             unique = False
                             break
                     if unique:
-                        try:
-                            shutil.copy(self.pages[0].pagepath, os.path.join(self.pagepath, textext))
-                            p = Page(os.path.join(self.pagepath, textext))
-                            self.pages.insert(dest, p)
-                            self.write_pages()
-                            self.pagestore.insert(dest, (p.name, p.thumb.thumbpix, True))
-                        except Exception, err:
-                            print("ERROR HERE")
-                            show_error_msg(err)
+                        if self.book.add_page(pagetitle, dest):
+                            self.pagestore.insert(dest, (self.book.pages[dest].name, self.book.pages[dest].thumb.thumbpix, True))
                     else:
-                        show_error_msg("The page name must be unique. Page '%s' already exists." % (textext))
+                        show_error_msg("The page name must be unique. Page '%s' already exists." % (pagetitle))
                 else:
                     show_error_msg("No page name entered.")
         else:
@@ -482,41 +510,33 @@ class Book(gtk.Window):
 
     def delete_page(self, widget):
         # Delete the selected page.
-        areyousure = gtk.MessageDialog(None, 0, gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, 'Delete page "%s"?' % (self.pages[self.selected].name))
+        areyousure = gtk.MessageDialog(None, 0, gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, 'Delete page "%s"?' % (self.book.pages[self.book.selected].name))
         response = areyousure.run()
         if response == gtk.RESPONSE_YES:
-            try:
-                shutil.move(self.pages[self.selected].pagepath, os.path.join(self.trashpath,strftime("%Y%m%d_%H%M%S_")+self.pages[self.selected].name))
-                self.pages.pop(self.selected)
-                self.write_pages()
-                del self.pagestore[self.selected]
-            except Exception, err:
-                show_error_msg(err)
+            if self.book.delete_page():
+                del self.pagestore[self.book.selected]
         areyousure.destroy()
 
     def rename_page(self, widget):
         # Rename the selected page.
         # TODO! Show message on illegal characters and duplicate file creation.
-        if self.selected > -1:
+        if self.book.selected > -1:
             response, text = self.name_dialog("Rename Page", "Ente Page Description: ")
             if response == gtk.RESPONSE_ACCEPT:
                 if text:
-                    textext = text+".xcf"
+                    pagetitle = text+".xcf"
                     unique = True
-                    for p in self.pages:
-                        if textext == p.name:
+                    for p in self.book.pages:
+                        if pagetitle == p.name:
                             unique = False
                             break
                     if unique:
-                        try:
-                            shutil.move(self.pages[self.selected].pagepath, os.path.join(self.pagepath, textext))
-                            p = Page(os.path.join(self.pagepath, textext))
-                            self.pages[self.selected] = p
-                            self.write_pages()
-                            del self.pagestore[self.selected]
-                            self.pagestore.insert(self.selected, (p.name, p.thumb.thumbpix, True))
-                        except Exception, err:
-                            show_error_msg(err)
+                        if self.book.rename_page(pagetitle):
+                            del self.pagestore[self.book.selected]
+                            self.pagestore.insert(self.book.selected, (self.book.pages[self.book.selected].name, self.book.pages[self.book.selected].thumb.thumbpix, True))
+                    else:
+                        show_error_msg("The page title must be unique.")
+                        
 
     def name_dialog(self, title, label):
         # Dialog for entering page names.
@@ -541,10 +561,15 @@ class Book(gtk.Window):
         dialog.destroy()
         return response, text
 
+    def close_book(self):
+        # Closes the currently open book.
+        self.pagestore = gtk.ListStore(str, gtk.gdk.Pixbuf, bool)
+        self.book = Book()
+
 
 def show_book():
     # Display the book window.
-    r = Book()
+    r = BookGUI()
     gtk.main()
 
 def show_error_msg( msg ):
