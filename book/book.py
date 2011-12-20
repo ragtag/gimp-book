@@ -58,7 +58,7 @@ class NewBookWin(gtk.Window):
         # Create a new book.
         win = super(NewBookWin, self).__init__()
         self.set_title("Create a New Book...")
-        self.set_size_request(300, 300)
+        self.set_size_request(400, 400)
         self.set_position(gtk.WIN_POS_CENTER)
 
         # TODO! Fix the layout, so that everything aligns properly.
@@ -202,94 +202,176 @@ class ExportWin(gtk.Window):
         # Box for divding the window in three parts, name, page and buttons.
         cont = gtk.VBox(False, 4)
         self.add(cont)
-        # Output destination and name
-        outframe = gtk.Frame()
-        outframe.set_shadow_type(gtk.SHADOW_NONE)
-        outframelabel = gtk.Label("<b>Export Name and Destination</b>")
-        outframelabel.set_use_markup(True)
-        outframe.set_label_widget(outframelabel)
-        cont.add(outframe)
-        # Name to use
-        nametable = gtk.Table(3, 2, True)
-        cont.pack_start(nametable)
-        entry1 = gtk.Label("ONE")
-        entry2 = gtk.Label("TWO")
-        nametable.attach(entry1, 0, 2, 0, 2)
-        nametable.attach(entry2, 1, 3, 1, 3)
-        # WORKING HERE!
-        namelabel = gtk.Label("Filename:")
-        namelist = gtk.ListStore(gobject.TYPE_STRING)
-        nameoptions = [ "Use Book Name", "Use Page Names", "Enter Name" ]
-        for nameoption in nameoptions:
-            namelist.append([nameoption])
-        self.namemenu = gtk.ComboBox(namelist)
-        namecell = gtk.CellRendererText()
-        self.namemenu.pack_start(namecell, True)
-        self.namemenu.add_attribute(namecell, 'text', 0)
-        self.namemenu.set_active(0)
-        # Name entry field
-        nameentrybox = gtk.HBox(True, 2)
-        cont.pack_start(nameentrybox)
-        nameentrylabel = gtk.Label("Name:")
-        self.nameentry = gtk.Entry()
-        nameentrybox.pack_start(nameentrylabel)
-        nameentrybox.pack_start(self.nameentry)
-        # Frame for the crop
-        cropframe = gtk.Frame()
-        cropframe.set_shadow_type(gtk.SHADOW_NONE)
-        cropframelabel = gtk.Label("<b>Crop and Resize</b>")
-        cropframelabel.set_use_markup(True)
-        cropframe.set_label_widget(cropframelabel)
-        cont.add(cropframe)
-        # Split the book frame in 4.
-        cropbox = gtk.VBox(True, 4)
-        cropframe.add(cropbox)
-        # Crop entry fields.
-        # x
-        xcropbox = gtk.HBox(True, 2)
-        cropbox.pack_start(xcropbox)
-        xcroplabel = gtk.Label("x:")
-        self.xcropentry = gtk.Entry()
-        xcropbox.pack_start(xcroplabel)
-        xcropbox.pack_start(self.xcropentry)
-        # y
-        ycropbox = gtk.HBox(True, 2)
-        cropbox.pack_start(ycropbox)
-        ycroplabel = gtk.Label("y:")
-        self.ycropentry = gtk.Entry()
-        ycropbox.pack_start(ycroplabel)
-        ycropbox.pack_start(self.ycropentry)
-        # width
-        wcropbox = gtk.HBox(True, 2)
-        cropbox.pack_start(wcropbox)
-        wcroplabel = gtk.Label("Width:")
-        self.wcropentry = gtk.Entry()
-        wcropbox.pack_start(wcroplabel)
-        wcropbox.pack_start(self.wcropentry)
-        # height
-        hcropbox = gtk.HBox(False, 2)
-        cropbox.pack_start(hcropbox)
-        hcroplabel = gtk.Label("Height:")
-        self.hcropentry = gtk.Entry()
-        hcropbox.pack_start(hcroplabel)
-        hcropbox.pack_start(self.hcropentry)
+        # Destination table
+        destt = gtk.Table(4, 2, True)
+        destl = gtk.Label("Destination Folder:")
+        destd = gtk.FileChooserDialog("Export to", None, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        destd.set_default_response(gtk.RESPONSE_OK)
+        self.destb = gtk.FileChooserButton(destd)
 
-        print "Opening the export window."
-        #- Export
-        #-- File naming
-        #;--- Enter a name.
-        #--- Use page names.
-        #--- Use book name.
-        #-- Crop and scale.
-        #--- Crop: x,y,width,height
-        #--- Scale: x, y, type (percent/pixels)
-        #-- Include metadata where available.
-        #-- Formats
-        #--- xcf
-        #--- Tiff (none or lzw)
-        #--- jpg (meta data, compression ratio etc.)
-        #--- png (include alpha)
+        namel = gtk.Label("Name Pages Using:")
+        namels = gtk.ListStore(gobject.TYPE_STRING)
+        nameoptions = [ "Book Name", "Page Names", "Page Number", "Custom Name" ]
+        for nameoption in nameoptions:
+            namels.append([nameoption])
+        self.namem = gtk.ComboBox(namels)
+        namec = gtk.CellRendererText()
+        self.namem.pack_start(namec, True)
+        self.namem.add_attribute(namec, 'text', 0)
+        self.namem.set_active(0)
+        entl = gtk.Label("Custom Name:")
+        self.namee = gtk.Entry(128)
+        self.namee.set_sensitive(False)
+        self.namem.connect("changed", self.name_option_changed)
+
+        # Enable scaling and cropping
+        self.enablescaletb = gtk.ToggleButton("Enable Resizing")
+        self.enablescaletb.set_active(False)
+        self.enablescaletb.connect("clicked", self.toggle_resize)
+        self.enablecroptb = gtk.ToggleButton("Enable Crop")
+        self.enablecroptb.set_active(False)
+        self.enablecroptb.connect("clicked", self.toggle_crop)
+
+        # Attach stuff to the table
+        destt.attach(destl, 0,1,0,1)
+        destt.attach(self.destb, 1,2,0,1)
+        destt.attach(namel, 0,1,1,2)
+        destt.attach(self.namem, 1,2,1,2)
+        destt.attach(entl, 0,1,2,3)
+        destt.attach(self.namee, 1,2,2,3)
+        destt.attach(self.enablescaletb, 0,1,3,4)
+        destt.attach(self.enablecroptb, 1,2,3,4)
+        cont.add(destt)
+
+        # Size frame
+        self.sizef = gtk.Frame()
+        self.sizef.set_sensitive(False)
+        self.sizef.set_shadow_type(gtk.SHADOW_NONE)
+        sizefl = gtk.Label("<b>Image Size</b>")
+        sizefl.set_use_markup(True)
+        self.sizef.set_label_widget(sizefl)
+        cont.add(self.sizef)
+        # Size table
+        sizet = gtk.Table(1,2)
+        sizel = gtk.Label("Size %:")
+        sizea = gtk.Adjustment(100, 1, 65536, 1, 10)
+        self.sizesb = gtk.SpinButton(sizea, 1, 1)
+        self.sizesb.set_text("100")
+        self.sizesb.set_numeric(True)
+        self.sizesb.set_text("100")
+        sizet.attach(sizel, 0,1,0,1)
+        sizet.attach(self.sizesb, 1,2,0,1)
+        self.sizef.add(sizet)
+
+        # Crop frame
+        self.cropf = gtk.Frame()
+        self.cropf.set_sensitive(False)
+        self.cropf.set_shadow_type(gtk.SHADOW_NONE)
+        cropfl = gtk.Label("<b>Image Crop</b>")
+        cropfl.set_use_markup(True)
+        self.cropf.set_label_widget(cropfl)
+        cont.add(self.cropf)
+        # Crop table
+        cropt = gtk.Table(4,2)
+        cropwha = gtk.Adjustment(1024, 1, 65536, 1, 10)
+        cropwl = gtk.Label("Width:")
+        self.cropwsb = gtk.SpinButton(cropwha, 1, 0)
+        self.cropwsb.set_numeric(True)
+        self.cropwsb.set_text("100")
+        crophl = gtk.Label("Height:")
+        self.crophsb = gtk.SpinButton(cropwha, 1, 0)
+        self.crophsb.set_numeric(True)
+        self.crophsb.set_text("100")
+        
+        cropxya = gtk.Adjustment(0, 0, 65536, 1, 10)
+        cropxl = gtk.Label("Offset X:")
+        self.cropxsb = gtk.SpinButton(cropxya, 1, 0)
+        self.cropxsb.set_text("0")
+        self.cropxsb.set_numeric(True)
+        cropyl = gtk.Label("Offset Y:")
+        self.cropysb = gtk.SpinButton(cropxya, 1, 0)
+        self.cropysb.set_text("0")
+        self.cropysb.set_numeric(True)
+
+        cropt.attach(cropwl, 0,1,0,1)
+        cropt.attach(self.cropwsb, 1,2,0,1)
+        cropt.attach(crophl, 0,1,1,2)
+        cropt.attach(self.crophsb, 1,2,1,2)
+        cropt.attach(cropxl, 0,1,2,3)
+        cropt.attach(self.cropxsb, 1,2,2,3)
+        cropt.attach(cropyl, 0,1,3,4)
+        cropt.attach(self.cropysb, 1,2,3,4)
+        self.cropf.add(cropt)
+
+        # File format frame
+        formatf = gtk.Frame()
+        formatf.set_shadow_type(gtk.SHADOW_NONE)
+        formatfl = gtk.Label("<b>File Formats</b>")
+        formatfl.set_use_markup(True)
+        formatf.set_label_widget(formatfl)
+        cont.add(formatf)
+        # Format table
+        formatt = gtk.Table(4,2)
+        formatl = gtk.Label("File Format:")
+        formatls = gtk.ListStore(gobject.TYPE_STRING)
+        formatoptions = [ "GIMP XCF image (*.xcf)", "GIF image (*.gif)", "JPEG image (*.jpg)", "PNG image (*.png)", "TIFF image (*.tif)" ]
+        for formatoption in formatoptions:
+            formatls.append([formatoption])
+        self.formatm = gtk.ComboBox(formatls)
+        formatc = gtk.CellRendererText()
+        self.formatm.pack_start(formatc, True)
+        self.formatm.add_attribute(formatc, 'text', 0)
+        self.formatm.set_active(1)
+        self.formatm.connect("changed", self.format_changed)
+        
+        formatt.attach(formatl, 0,1,0,1)
+        formatt.attach(self.formatm, 1,2,0,1)
+        formatf.add(formatt)
+
+        # Done buttons
+        doneb = gtk.HBox(True, 4)
+        cancelb = gtk.Button("Cancel")
+        cancelb.connect("clicked", self.close)
+        exportb = gtk.Button("Export Pages")
+        exportb.connect("clicked", self.export)
+        doneb.pack_start(cancelb)
+        doneb.pack_start(exportb)
+        cont.add(doneb)
+        # TODO! Implement save options for each format.
         self.show_all()
+
+    def toggle_resize(self, sizetb):
+        # Enable/disable the image resize frame
+        if sizetb.get_active():
+            self.sizef.set_sensitive(True)
+        else:
+            self.sizef.set_sensitive(False)
+
+    def toggle_crop(self, croptb):
+        # Enable/disable the image resize frame
+        if croptb.get_active():
+            self.cropf.set_sensitive(True)
+        else:
+            self.cropf.set_sensitive(False)
+
+    def name_option_changed(self, namem):
+        # Enable entry field if name option is set to custom.
+        if namem.get_active() == 3:
+            self.namee.set_sensitive(True)
+        else:
+            self.namee.set_sensitive(False)
+
+    def format_changed(self, formatm):
+        # Enable/disable relevant file format options.
+        pass
+
+    def export(self, button):
+        # Export all pages of the comic book.
+        pass
+
+    def close(self, button):
+        # Close this window
+        self.destroy()
 
 
 class Book():
