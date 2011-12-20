@@ -197,7 +197,7 @@ class ExportWin(gtk.Window):
         self.main = main
         win = super(ExportWin, self).__init__()
         self.set_title("Export Book...")
-        self.set_size_request(300, 300)
+        self.set_size_request(350, 500)
         self.set_position(gtk.WIN_POS_CENTER)
         # Box for divding the window in three parts, name, page and buttons.
         cont = gtk.VBox(False, 4)
@@ -314,14 +314,14 @@ class ExportWin(gtk.Window):
         formatt = gtk.Table(4,2)
         formatl = gtk.Label("File Format:")
         formatls = gtk.ListStore(gobject.TYPE_STRING)
-        formatoptions = [ "GIMP XCF image (*.xcf)", "GIF image (*.gif)", "JPEG image (*.jpg)", "PNG image (*.png)", "TIFF image (*.tif)" ]
+        formatoptions = [  "GIF image (*.gif)", "GIMP XCF image (*.xcf)", "JPEG image (*.jpg)", "PNG image (*.png)", "TIFF image (*.tif)" ]
         for formatoption in formatoptions:
             formatls.append([formatoption])
         self.formatm = gtk.ComboBox(formatls)
         formatc = gtk.CellRendererText()
         self.formatm.pack_start(formatc, True)
         self.formatm.add_attribute(formatc, 'text', 0)
-        self.formatm.set_active(1)
+        self.formatm.set_active(2) 
         self.formatm.connect("changed", self.format_changed)
         
         formatt.attach(formatl, 0,1,0,1)
@@ -366,8 +366,9 @@ class ExportWin(gtk.Window):
         pass
 
     def export(self, button):
-        # Export all pages of the comic book.
-        pass
+        # Pass self to Book, and tell it to export.
+        self.main.book.export_book(self)
+        self.close()
 
     def close(self, button):
         # Close this window
@@ -527,8 +528,9 @@ class Book():
         except Exception, err:
             show_error_msg(err)
 
-    def export_book(self, destination, format, settings):
+    def export_book(self, expwin):
         # Export the entire book.
+        print "Exporting book"
         pass
 
 

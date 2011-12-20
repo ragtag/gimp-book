@@ -1,6 +1,8 @@
 NEXT
-- Export!!! (see notes below)
-- Clean up the code a bit.
+- Export
+-- Implement exporting.
+-- Figure out how to piggyback on existing options...maybe.
+- Clenaup - New Book more like export with tables.
 - Get callback from GIMP when an image is saved, so the thumbnail can be updated.
 - Add progress indicator when making thumbnails on loading new projects.
 - Make all text translateable.
@@ -46,21 +48,6 @@ x-- Implement back end that modifies the data in the JSON file.
 o Language support, codes in layer names define language (e.g. [en],[no],[is]), and these are then hidden or shown on export
 o Support color coding pages, making it easy to divide up the story into chapters or mark pages.
 o Left to right or right to left reading.
-- Export
--- File naming
---- Enter a name.
---- Use page names.
---- Use book name.
--- Reading direction?
--- Crop and scale.
---- Crop: x,y,width,height
---- Scale: x, y, type (percent/pixels)
--- Include metadata where available.
--- Formats
---- xcf
---- Tiff (none or lzw)
---- jpg (meta data, compression ratio etc.)
---- png (include alpha)
 o Batch (destructive operations on the whole book...maybe not safe to include)
 o- Crop and scale.
 
