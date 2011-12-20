@@ -1,9 +1,10 @@
 NEXT
-- Fix bug after reloading, when add, delete and rename no longer display correctly.
+- Export!!! (see notes below)
 - Clean up the code a bit.
-- Export!!!
-- Add progress indicator when making thumbnails.
-- Disable menus and toobuttons that are not in use.
+- Get callback from GIMP when an image is saved, so the thumbnail can be updated.
+- Add progress indicator when making thumbnails on loading new projects.
+- Make all text translateable.
+***- Make pagestore a variable of Book, not GUI. (GUI=View, Book=Controller, ListStore=Model...more or less).
 
 MENUS
 File
@@ -46,12 +47,20 @@ o Language support, codes in layer names define language (e.g. [en],[no],[is]), 
 o Support color coding pages, making it easy to divide up the story into chapters or mark pages.
 o Left to right or right to left reading.
 - Export
+-- File naming
+--- Enter a name.
+--- Use page names.
+--- Use book name.
+-- Reading direction?
 -- Crop and scale.
+--- Crop: x,y,width,height
+--- Scale: x, y, type (percent/pixels)
 -- Include metadata where available.
 -- Formats
+--- xcf
 --- Tiff (none or lzw)
---- JPG (meta data, compression ratio etc.)
---- PNG
+--- jpg (meta data, compression ratio etc.)
+--- png (include alpha)
 o Batch (destructive operations on the whole book...maybe not safe to include)
 o- Crop and scale.
 
