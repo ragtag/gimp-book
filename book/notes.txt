@@ -1,9 +1,10 @@
 NEXT
 - Export
--- Implement exporting.-
--- Figure out how to piggyback on existing options...maybe.
-- Clenaup - New Book more like export with tables.
-- Add progress indicator when making thumbnails on loading new projects.
+-- TIF, PNG, GIF
+-- Add settings for making images indexed for GIF.
+-- Check that the different options are actually working.
+- Add progress indicator when making thumbnails on loading new projects, and maybe in general.
+- Clenaup - New Book more like export with tables...maybe.
 - Make all text translateable.
 ***- Make pagestore a variable of Book, not GUI. (GUI=View, Book=Controller, ListStore=Model...more or less).
 

@@ -70,7 +70,6 @@ class NewBookWin(gtk.Window):
         self.set_size_request(400, 400)
         self.set_position(gtk.WIN_POS_CENTER)
 
-        # TODO! Fix the layout, so that everything aligns properly.
         # Box for divding the window in three parts, name, page and buttons.
         cont = gtk.VBox(False, 4)
         self.add(cont)
@@ -206,7 +205,7 @@ class ExportWin(gtk.Window):
         self.main = main
         win = super(ExportWin, self).__init__()
         self.set_title("Export Book...")
-        self.set_size_request(350, 500)
+        self.set_size_request(350, 650)
         self.set_position(gtk.WIN_POS_CENTER)
         # Box for divding the window in three parts, name, page and buttons.
         cont = gtk.VBox(False, 4)
@@ -220,7 +219,7 @@ class ExportWin(gtk.Window):
 
         namel = gtk.Label("Name Pages Using:")
         namels = gtk.ListStore(gobject.TYPE_STRING)
-        nameoptions = [ "Book Name", "Page Names", "Page Number", "Custom Name" ]
+        nameoptions = [ "Book Name", "Page Names", "Page Numbers", "Custom Name" ]
         for nameoption in nameoptions:
             namels.append([nameoption])
         self.namem = gtk.ComboBox(namels)
@@ -320,7 +319,7 @@ class ExportWin(gtk.Window):
         formatf.set_label_widget(formatfl)
         cont.add(formatf)
         # Format table
-        formatt = gtk.Table(4,2)
+        formatt = gtk.Table(3,2)
         formatl = gtk.Label("File Format:")
         formatls = gtk.ListStore(gobject.TYPE_STRING)
         formatoptions = [  "GIF image (*.gif)", "GIMP XCF image (*.xcf)", "JPEG image (*.jpg)", "PNG image (*.png)", "TIFF image (*.tif)" ]
@@ -332,9 +331,23 @@ class ExportWin(gtk.Window):
         self.formatm.add_attribute(formatc, 'text', 0)
         self.formatm.set_active(2) 
         self.formatm.connect("changed", self.format_changed)
-        
+        commentl = gtk.Label("Comment:")
+        self.comment = gtk.Entry(256)
+
+        self.gift = self.gif()
+        #self.xcf()
+        self.jpgt = self.jpg()
+        self.pngt = self.png()
+        self.tift = self.tif()
+
         formatt.attach(formatl, 0,1,0,1)
         formatt.attach(self.formatm, 1,2,0,1)
+        formatt.attach(commentl, 0,1,1,2)
+        formatt.attach(self.comment, 1,2,1,2)
+        formatt.attach(self.gift, 0,2,2,3)
+        formatt.attach(self.jpgt, 0,2,2,3)
+        formatt.attach(self.pngt, 0,2,2,3)
+        formatt.attach(self.tift, 0,2,2,3)
         formatf.add(formatt)
 
         # Done buttons
@@ -346,8 +359,136 @@ class ExportWin(gtk.Window):
         doneb.pack_start(cancelb)
         doneb.pack_start(exportb)
         cont.add(doneb)
-        # TODO! Implement save options for each format.
+
         self.show_all()
+        self.format_changed(2)
+
+    def gif(self):
+        # GIF save options GUI.
+        gift = gtk.Table(2,2)
+        self.gifgrayscale = gtk.CheckButton("Convert to Grayscale")
+        self.gifinterlace = gtk.CheckButton("Interlace")
+        gifcommentl = gtk.Label("Comment:")
+        self.gifcomment = gtk.Entry(256)
+        gift.attach(self.gifgrayscale, 0,2,0,1)
+        gift.attach(self.gifinterlace, 0,2,1,2)
+        return gift
+
+    def jpg(self):
+        # JPEG save options GUI.
+        jpgt = gtk.Table(8,2)
+        jpgqualityl = gtk.Label("Quality:")
+        jpgqualitya = gtk.Adjustment(85, 0, 100, 1, 10, 10)
+        self.jpgquality = gtk.HScale(jpgqualitya)
+        self.jpgquality.set_digits(0)
+        jpgsmoothingl = gtk.Label("Smoothing:")
+        jpgsmoothinga = gtk.Adjustment(0.00, 0.00, 1.00, 0.01, 0.1, 0.1)
+        self.jpgsmoothing = gtk.HScale(jpgsmoothinga)
+        self.jpgsmoothing.set_digits(2)
+        self.jpgoptimize = gtk.CheckButton("Optimize")
+        self.jpgoptimize.set_active(True)
+        self.jpgprogressive = gtk.CheckButton("Progressive")
+        self.jpgrestart = gtk.CheckButton("Restart Markers")
+        self.jpgrestart.connect("clicked", self.jpgrestartchecked)
+        jpgfreql = gtk.Label("Marker Frequency:")
+        jpgfreqa = gtk.Adjustment(1, 1, 64, 1)
+        self.jpgfreq = gtk.SpinButton(jpgfreqa)
+        self.jpgfreq.set_sensitive(False)
+        jpgsubl = gtk.Label("Subsampling:")
+        jpgsubls = gtk.ListStore(gobject.TYPE_STRING)
+        jpgsubos = [ "1x1,1x1,1x1 (best quality)", "2x1,1x1,1x1 (4:2:2)", "1x2,1x1,1x1", "2x2,1x1,1x1 (smallest file)" ]
+        for jpgsubo in jpgsubos:
+            jpgsubls.append([jpgsubo])
+        jpgsubc = gtk.CellRendererText()
+        self.jpgsub = gtk.ComboBox(jpgsubls)
+        self.jpgsub.pack_start(jpgsubc, True)
+        self.jpgsub.add_attribute(jpgsubc, 'text', 0)
+        self.jpgsub.set_active(3)
+        jpgdctl = gtk.Label("DCT Method:")
+        jpgdctls = gtk.ListStore(gobject.TYPE_STRING)
+        jpgdctos = [ "Float Integer", "Integer", "Floating-Point" ]
+        for jpgdcto in jpgdctos:
+            jpgdctls.append([jpgdcto])
+        jpgdctc = gtk.CellRendererText()
+        self.jpgdct = gtk.ComboBox(jpgdctls)
+        self.jpgdct.pack_start(jpgdctc, True)
+        self.jpgdct.add_attribute(jpgdctc, 'text', 0)
+        self.jpgdct.set_active(1)
+        jpgt.attach(jpgqualityl, 0,1,0,1)
+        jpgt.attach(self.jpgquality, 1,2,0,1)
+        jpgt.attach(jpgsmoothingl, 0,1,1,2)
+        jpgt.attach(self.jpgsmoothing, 1,2,1,2)
+        jpgt.attach(self.jpgoptimize, 0,2,2,3)
+        jpgt.attach(self.jpgprogressive, 0,2,3,4)
+        jpgt.attach(self.jpgrestart, 0,2,4,5)
+        jpgt.attach(jpgfreql, 0,1,5,6)
+        jpgt.attach(self.jpgfreq, 1,2,5,6)
+        jpgt.attach(jpgsubl, 0,1,6,7)
+        jpgt.attach(self.jpgsub, 1,2,6,7)
+        jpgt.attach(jpgdctl, 0,1,7,8)
+        jpgt.attach(self.jpgdct, 1,2,7,8)
+        return jpgt
+
+    def jpgrestartchecked(self, restartcheckbox):
+        # JPG restart has been checked.
+        if restartcheckbox.get_active():
+            self.jpgfreq.set_sensitive(True)
+        else:
+            self.jpgfreq.set_sensitive(False)
+
+    def png(self):
+        # PNG save options GUI.
+        pngt = gtk.Table(8,2)
+        self.pnginterlacing = gtk.CheckButton("Interlacing (Adam7)")
+        self.pngbgcolor = gtk.CheckButton("Save background color")
+        self.pnggamma = gtk.CheckButton("Save gamma")
+        self.pnglayeroffset = gtk.CheckButton("Save layer offset")
+        self.pngresolution = gtk.CheckButton("Save resolution")
+        self.pngresolution.set_active(True)
+        self.pngcreationtime = gtk.CheckButton("Save creation time")
+        self.pngcreationtime.set_active(True)
+        self.pngcoloroftransp = gtk.CheckButton("Save color values from transparent pixels")
+        pngcompressl = gtk.Label("Compression level:")
+        pngcompressa = gtk.Adjustment(9, 0, 9, 1)
+        self.pngcompress = gtk.HScale(pngcompressa)
+        self.pngcompress.set_digits(0)
+        pngt.attach(self.pnginterlacing, 0,2,0,1)
+        pngt.attach(self.pngbgcolor, 0,2,1,2)
+        pngt.attach(self.pnggamma, 0,2,2,3)
+        pngt.attach(self.pnglayeroffset, 0,2,3,4)
+        pngt.attach(self.pngresolution, 0,2,4,5)
+        pngt.attach(self.pngcreationtime, 0,2,5,6)
+        pngt.attach(self.pngcoloroftransp, 0,2,6,7)
+        pngt.attach(pngcompressl, 0,1,7,8)
+        pngt.attach(self.pngcompress, 1,2,7,8)
+        return pngt
+
+    def tif(self):
+        # TIF save options GUI.
+        tift = gtk.Table(2,1)
+        # Save color
+        tifframe = gtk.Frame()
+        tifframe.set_shadow_type(gtk.SHADOW_NONE)
+        tifframel = gtk.Label("<b>Compression</b>")
+        tifframel.set_use_markup(True)
+        tifframe.set_label_widget(tifframel)
+        tifvbox = gtk.VBox(False, 5)
+        tifframe.add(tifvbox)
+        self.tifnone = gtk.RadioButton(None, "None")
+        tifvbox.pack_start(self.tifnone)
+        self.tiflzw = gtk.RadioButton(self.tifnone, "LZW")
+        tifvbox.pack_start(self.tiflzw)
+        self.tifpackbits = gtk.RadioButton(self.tifnone, "Pack Bits")
+        tifvbox.pack_start(self.tifpackbits)
+        self.tifdeflate = gtk.RadioButton(self.tifnone, "Deflate")
+        tifvbox.pack_start(self.tifdeflate)
+        self.tifjpeg = gtk.RadioButton(self.tifnone, "JPEG")
+        tifvbox.pack_start(self.tifjpeg)
+        self.tifcoloroftransp = gtk.CheckButton("Save color values from transparent pixels")
+        tift.attach(tifframe, 0,2,0,1)
+        tift.attach(self.tifcoloroftransp, 0,2,1,2)
+        return tift
+        
 
     def toggle_resize(self, sizetb):
         # Enable/disable the image resize frame
@@ -372,12 +513,33 @@ class ExportWin(gtk.Window):
 
     def format_changed(self, formatm):
         # Enable/disable relevant file format options.
-        pass
+        ext = self.main.book.format_index_to_extension(self.formatm.get_active())
+        self.gift.hide()
+        self.jpgt.hide()
+        self.pngt.hide()
+        self.tift.hide()
+        if ext == "gif":
+            self.gift.show()
+        elif ext == "jpg":
+            self.jpgt.show()
+        elif ext == "png":
+            self.pngt.show()
+        elif ext == "tif":
+            self.tift.show()
 
     def export(self, button):
         # Pass self to Book, and tell it to export.
-        self.main.book.export_book(self)
-        self.close()
+        outfolder = os.path.join(self.destb.get_filename(), self.main.book.bookname)
+        if os.path.isdir(outfolder):
+            overwrite = gtk.MessageDialog(None, 0, gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, '"%s" exists, do you want to overwrite it?' % (outfolder))
+            response = overwrite.run()
+            if response == gtk.RESPONSE_YES:
+                self.main.book.export_book(self)
+                self.close(button)
+            overwrite.destroy()
+        else:
+            self.main.book.export_book(self)
+            self.close(button)
 
     def close(self, button):
         # Close this window
@@ -539,10 +701,97 @@ class Book():
         except Exception, err:
             show_error_msg(err)
 
+    def format_index_to_extension(self, formati):
+        # Convert the format index to an extension.
+        if formati == 0: # GIF
+            return "gif"
+        elif formati == 1: # XCF
+            return "xcf"
+        elif formati == 2: # JPEG
+            return "jpg"
+        elif formati == 3: # PNG
+            return "png"
+        elif formati == 4: # TIFF
+            return "tif"
+        else:
+            show_error_msg("Format index out of range")
+
+
     def export_book(self, expwin):
         # Export the entire book.
-        print "Exporting book"
-        pass
+        outfolder = os.path.join(expwin.destb.get_filename(), self.bookname)
+        namei = expwin.namem.get_active() # Index of type of name to use, book, page, number or custom.
+        if not os.path.isdir(outfolder):
+            os.makedirs(outfolder)
+        # Page number padding needed.
+        pagecount = len(self.pagestore)
+        padding = 1
+        if pagecount > 999:  # Damn...you've made a 1000+ page long comic book....nice work.
+            padding = 4
+        elif pagecount > 99:
+            padding = 3
+        elif pagecount > 9:
+            padding = 2
+        # Find file extension.
+        ext = self.format_index_to_extension(expwin.formatm.get_active())
+        # Loop through pages
+        for i,p in enumerate(self.pagestore):
+            # Figure out the page name.
+            original = os.path.join(self.pagepath, p[0])
+            pagenr = str(i).zfill(padding)
+            name=""
+            if namei == 0: # Book Name
+                name = pagenr+"_"+self.bookname+"."+ext
+            elif namei == 1: # Page Names
+                name = pagenr+"_"+os.path.splitext(p[0])[0]+"."+ext
+            elif namei == 2: # Page Number
+                name = pagenr+"."+ext
+            elif namei == 3: # Custom Name
+                name = pagenr+"_"+expwin.namee.get_text()+"."+ext
+            fullname = os.path.join(outfolder, name)
+            # Process image.
+            img = pdb.gimp_file_load(original, original)
+            img.flatten()
+            if expwin.enablescaletb.get_active():
+                scale = expwin.sizesb.get_value() / 100
+                w = img.width
+                h = img.height
+                nw = int(scale * w)
+                nh = int(scale * h)
+                print "Scaling page %s" % (p)
+                # img.resize(nw, nh, 0, 0)
+            if expwin.enablecroptb.get_active():
+                # Run crop code.
+                print "Cropping page %s" % (p)
+            # Save the image.
+            drw = pdb.gimp_image_get_active_layer(img)
+            if ext == "gif":
+                # Convert to grayscale
+                if expwin.gifgrayscale.get_active():
+                    pdb.gimp_image_convert_grayscale(img)
+                # TODO! Images need to be converted to indexed color first, and more options are needed. :(
+                pdb.file_gif_save(img, drw, fullname, name,
+                                       expwin.gifinterlace.get_active(),
+                                       0,0,0)
+            elif ext == "xcf":
+                pdb.gimp_file_save(img, drw, fullname, name)
+            elif ext == "jpg":
+                quality = float(expwin.jpgquality.get_value() / 100)
+                restartfreq = 0
+                if expwin.jpgrestart.get_active():
+                    restartfreq = expwin.jpgfreq.get_value()
+                pdb.file_jpeg_save(img, drw, fullname, name, quality,
+                                   expwin.jpgsmoothing.get_value(),
+                                   expwin.jpgoptimize.get_active(),
+                                   expwin.jpgprogressive.get_active(),
+                                   expwin.comment.get_text(),
+                                   expwin.jpgsub.get_active(),
+                                   0,
+                                   restartfreq,
+                                   expwin.jpgdct.get_active())
+            elif ext == "tif":
+                pass
+            pdb.gimp_image_delete(img)
 
     def update_thumbs(self):
         # Update all thumbnails that have changed.
