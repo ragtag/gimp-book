@@ -1,9 +1,8 @@
 NEXT
 - Export
--- Implement exporting.
+-- Implement exporting.-
 -- Figure out how to piggyback on existing options...maybe.
 - Clenaup - New Book more like export with tables.
-- Get callback from GIMP when an image is saved, so the thumbnail can be updated.
 - Add progress indicator when making thumbnails on loading new projects.
 - Make all text translateable.
 ***- Make pagestore a variable of Book, not GUI. (GUI=View, Book=Controller, ListStore=Model...more or less).

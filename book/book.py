@@ -30,6 +30,7 @@ class Thumb():
 
     def build_thumb(self):
         # Build or rebuild a thumb for the image.
+        print self.imagepath
         img = pdb.gimp_xcf_load(0, self.imagepath, self.imagepath)
         pdb.gimp_file_save_thumbnail(img, self.imagepath)
         pdb.gimp_image_delete(img)
@@ -41,12 +42,20 @@ class Thumb():
         file_hash = hashlib.md5('file://'+imagepathuri).hexdigest()
         thumb = os.path.join(os.path.expanduser('~/.thumbnails/large'), file_hash) + '.png'
         if os.path.exists(thumb):
+            if float(os.stat(thumb).st_mtime) < float(os.stat(self.imagepath).st_mtime):
+                return False
             self.thumbpix = gtk.gdk.pixbuf_new_from_file(thumb)
+            self.path = thumb
+            self.mtime = os.stat(thumb).st_mtime
             return True
         else:
-            thumb = os.path.join(os.path.expanduser('~/.thumbnails/normal'), file_hash) + '.png'
+            self.thumb = os.path.join(os.path.expanduser('~/.thumbnails/normal'), file_hash) + '.png'
             if os.path.exists(thumb):
+                if float(os.stat(thumb).st_mtime) < float(os.stat(self.imagepath).st_mtime):
+                    return False
                 self.thumbpix = gtk.gdk.pixbuf_new_from_file(thumb)
+                self.path = thumb
+                self.mtime = os.stat(thumb).st_mtime
                 return True
             else:
                 return False
@@ -379,7 +388,8 @@ class Book():
     # Stores and manages the data for the book.
     def __init__(self):
         # Defines basic variables to store.
-        self.pagestore = gtk.ListStore(str, gtk.gdk.Pixbuf, bool)
+        # pagestore columns = pagenmae, thumb Pixbuf, thumb path, thumb mtime
+        self.pagestore = gtk.ListStore(str, gtk.gdk.Pixbuf, str, str)
         self.bookfile = ""  # The *.book for this book.
         self.bookname = ""  # The name of the book.
         self.pagepath = ""  # Path to the "pages" subfolder.
@@ -447,7 +457,7 @@ class Book():
             for p in metadata['pages']:
                 # Create a page object, and add to a list.
                 thumb = Thumb(os.path.join(self.pagepath, p))
-                self.pagestore.append((p, thumb.thumbpix, True))
+                self.pagestore.append((p, thumb.thumbpix, thumb.path, thumb.mtime))
             self.pagestore.connect("row-deleted", self.row_deleted)
             self.pagestore.connect("row-inserted", self.row_inserted)
             self.pagestore.connect("row-changed", self.row_changed)
@@ -493,7 +503,7 @@ class Book():
                 template = os.path.join(self.pagepath, self.pagestore[0][0])
                 shutil.copy(template, os.path.join(self.pagepath, p))
                 thumb = Thumb(os.path.join(self.pagepath, p))
-                self.pagestore.insert(dest, ( p, thumb.thumbpix, True))
+                self.pagestore.insert(dest, ( p, thumb.thumbpix, thumb.path, thumb.mtime))
                 return True
             else:
                 show_error_msg("Page names must be unique")
@@ -510,7 +520,8 @@ class Book():
             if unique:
                 try:
                     shutil.move(os.path.join(self.pagepath, self.pagestore[self.selected][0]), os.path.join(self.pagepath, p))
-                    self.pagestore[self.selected][0] = p
+                    thumb = Thumb(os.path.join(self.pagepath,p))
+                    self.pagestore[self.selected] = ((p, thumb.thumbpix, thumb.path, thumb.mtime))
                     return True
                 except Exception, err:
                     show_error_msg(err)
@@ -533,6 +544,13 @@ class Book():
         print "Exporting book"
         pass
 
+    def update_thumbs(self):
+        # Update all thumbnails that have changed.
+        for i,p in enumerate(self.pagestore):
+            if p[0]:
+                if not str(os.stat(p[2]).st_mtime) == p[3]:
+                    thumb = Thumb(os.path.join(self.pagepath,p[0]))
+                    self.pagestore[i] = ((p[0], thumb.thumbpix, thumb.path, thumb.mtime))
 
 
 class Main(gtk.Window):
@@ -543,7 +561,8 @@ class Main(gtk.Window):
         self.set_size_request(600, 600)
         self.set_position(gtk.WIN_POS_CENTER)
         self.loaded = False  # If there is a book loaded in the interface.
-        
+        self.connect('notify::is-active', self.update_thumbs)
+
         # Main menu
         mb = gtk.MenuBar()
 
@@ -629,6 +648,11 @@ class Main(gtk.Window):
         self.connect("destroy", gtk.main_quit)
         self.show_all()
         return window    
+
+    def update_thumbs(self, widget, arg):
+        # Tell Book to update the thumbnails on window receiving focus.
+        if self.is_active() and self.loaded:
+            self.book.update_thumbs()
 
     def new_book(self, widget):
         # Helper for opening up the New Book window.
