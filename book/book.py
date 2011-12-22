@@ -211,7 +211,7 @@ class ExportWin(gtk.Window):
         cont = gtk.VBox(False, 4)
         self.add(cont)
         # Destination table
-        destt = gtk.Table(4, 2, True)
+        destt = gtk.Table(5, 4, True)
         destl = gtk.Label("Destination Folder:")
         destd = gtk.FileChooserDialog("Export to", None, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         destd.set_default_response(gtk.RESPONSE_OK)
@@ -232,6 +232,16 @@ class ExportWin(gtk.Window):
         self.namee.set_sensitive(False)
         self.namem.connect("changed", self.name_option_changed)
 
+        # Page range
+        self.pagecount = len(self.main.book.pagestore)-1
+        rangel = gtk.Label("Pages from/to")
+        rangefroma = gtk.Adjustment(1, 0, self.pagecount, 1)
+        self.rangefrom = gtk.SpinButton(rangefroma, 1, 1)
+        self.rangefrom.connect("changed", self.rangefromchanged)
+        rangetoa = gtk.Adjustment(self.pagecount, 0, self.pagecount, 1)
+        self.rangeto = gtk.SpinButton(rangetoa, 1, 1,)
+        self.rangeto.connect("changed", self.rangetochanged)
+
         # Enable scaling and cropping
         self.enablescaletb = gtk.ToggleButton("Enable Resizing")
         self.enablescaletb.set_active(False)
@@ -241,14 +251,17 @@ class ExportWin(gtk.Window):
         self.enablecroptb.connect("clicked", self.toggle_crop)
 
         # Attach stuff to the table
-        destt.attach(destl, 0,1,0,1)
-        destt.attach(self.destb, 1,2,0,1)
-        destt.attach(namel, 0,1,1,2)
-        destt.attach(self.namem, 1,2,1,2)
-        destt.attach(entl, 0,1,2,3)
-        destt.attach(self.namee, 1,2,2,3)
-        destt.attach(self.enablecroptb, 0,1,3,4)
-        destt.attach(self.enablescaletb, 1,2,3,4)
+        destt.attach(destl, 0,2,0,1)
+        destt.attach(self.destb, 2,4,0,1)
+        destt.attach(namel, 0,2,1,2)
+        destt.attach(self.namem, 2,4,1,2)
+        destt.attach(entl, 0,2,2,3)
+        destt.attach(self.namee, 2,4,2,3)
+        destt.attach(rangel, 0,2,3,4)
+        destt.attach(self.rangefrom, 2,3,3,4)
+        destt.attach(self.rangeto, 3,4,3,4)
+        destt.attach(self.enablecroptb, 0,2,4,5)
+        destt.attach(self.enablescaletb, 2,4,4,5)
         cont.add(destt)
 
         # Crop frame
@@ -304,7 +317,7 @@ class ExportWin(gtk.Window):
         sizet = gtk.Table(2,2)
         sizel = gtk.Label("Size %:")
         sizea = gtk.Adjustment(100, 1, 65536, 1, 10)
-        # TODO! HERE Add pixel or absolute scale.
+        # TODO! Add pixel or absolute scale.
         self.sizesb = gtk.SpinButton(sizea, 1, 1)
         self.sizesb.set_text("100")
         self.sizesb.set_numeric(True)
@@ -374,6 +387,59 @@ class ExportWin(gtk.Window):
 
         self.show_all()
         self.format_changed(2)
+
+    def name_option_changed(self, namem):
+        # Enable entry field if name option is set to custom.
+        if namem.get_active() == 3:
+            self.namee.set_sensitive(True)
+        else:
+            self.namee.set_sensitive(False)
+
+    def rangefromchanged(self, sb):
+        # Page from changed.
+        if self.rangefrom.get_value() > self.rangeto.get_value():
+            self.rangeto.set_value(self.rangefrom.get_value())
+
+    def rangetochanged(self, sb):
+        # Page to changed.
+        if self.rangefrom.get_value() > self.rangeto.get_value():
+            self.rangefrom.set_value(self.rangeto.get_value())
+
+    def toggle_resize(self, sizetb):
+        # Enable/disable the image resize frame
+        if sizetb.get_active():
+            self.sizef.set_sensitive(True)
+        else:
+            self.sizef.set_sensitive(False)
+
+    def toggle_crop(self, croptb):
+        # Enable/disable the image resize frame
+        if croptb.get_active():
+            self.cropf.set_sensitive(True)
+        else:
+            self.cropf.set_sensitive(False)
+
+    def format_changed(self, formatm):
+        # Enable/disable relevant file format options.
+        ext = self.main.book.format_index_to_extension(self.formatm.get_active())
+        self.gift.hide()
+        self.xcft.hide()
+        self.jpgt.hide()
+        self.psdt.hide()
+        self.pngt.hide()
+        self.tift.hide()
+        if ext == "gif":
+            self.gift.show()
+        elif ext == "xcf":
+            self.xcft.show()
+        elif ext == "jpg":
+            self.jpgt.show()
+        elif ext == "psd":
+            self.psdt.show()
+        elif ext == "png":
+            self.pngt.show()
+        elif ext == "tif":
+            self.tift.show()
 
     def gif(self):
         # GIF save options GUI.
@@ -550,50 +616,6 @@ class ExportWin(gtk.Window):
         tift.attach(self.tifcoloroftransp, 0,2,1,2)
         return tift
         
-
-    def toggle_resize(self, sizetb):
-        # Enable/disable the image resize frame
-        if sizetb.get_active():
-            self.sizef.set_sensitive(True)
-        else:
-            self.sizef.set_sensitive(False)
-
-    def toggle_crop(self, croptb):
-        # Enable/disable the image resize frame
-        if croptb.get_active():
-            self.cropf.set_sensitive(True)
-        else:
-            self.cropf.set_sensitive(False)
-
-    def name_option_changed(self, namem):
-        # Enable entry field if name option is set to custom.
-        if namem.get_active() == 3:
-            self.namee.set_sensitive(True)
-        else:
-            self.namee.set_sensitive(False)
-
-    def format_changed(self, formatm):
-        # Enable/disable relevant file format options.
-        ext = self.main.book.format_index_to_extension(self.formatm.get_active())
-        self.gift.hide()
-        self.xcft.hide()
-        self.jpgt.hide()
-        self.psdt.hide()
-        self.pngt.hide()
-        self.tift.hide()
-        if ext == "gif":
-            self.gift.show()
-        elif ext == "xcf":
-            self.xcft.show()
-        elif ext == "jpg":
-            self.jpgt.show()
-        elif ext == "psd":
-            self.psdt.show()
-        elif ext == "png":
-            self.pngt.show()
-        elif ext == "tif":
-            self.tift.show()
-
     def export(self, button):
         # Pass self to Book, and tell it to export.
         outfolder = os.path.join(self.destb.get_filename(), self.main.book.bookname)
@@ -805,7 +827,7 @@ class Book():
         ext = self.format_index_to_extension(expwin.formatm.get_active())
         # Loop through pages
         for i,p in enumerate(self.pagestore):
-            if i > 0:
+            if i >= expwin.rangefrom.get_value() and i <= expwin.rangeto.get_value():
                 # Figure out the page name.
                 original = os.path.join(self.pagepath, p[0])
                 pagenr = str(i).zfill(padding)
