@@ -247,29 +247,9 @@ class ExportWin(gtk.Window):
         destt.attach(self.namem, 1,2,1,2)
         destt.attach(entl, 0,1,2,3)
         destt.attach(self.namee, 1,2,2,3)
-        destt.attach(self.enablescaletb, 0,1,3,4)
-        destt.attach(self.enablecroptb, 1,2,3,4)
+        destt.attach(self.enablecroptb, 0,1,3,4)
+        destt.attach(self.enablescaletb, 1,2,3,4)
         cont.add(destt)
-
-        # Size frame
-        self.sizef = gtk.Frame()
-        self.sizef.set_sensitive(False)
-        self.sizef.set_shadow_type(gtk.SHADOW_NONE)
-        sizefl = gtk.Label("<b>Image Size</b>")
-        sizefl.set_use_markup(True)
-        self.sizef.set_label_widget(sizefl)
-        cont.add(self.sizef)
-        # Size table
-        sizet = gtk.Table(1,2)
-        sizel = gtk.Label("Size %:")
-        sizea = gtk.Adjustment(100, 1, 65536, 1, 10)
-        self.sizesb = gtk.SpinButton(sizea, 1, 1)
-        self.sizesb.set_text("100")
-        self.sizesb.set_numeric(True)
-        self.sizesb.set_text("100")
-        sizet.attach(sizel, 0,1,0,1)
-        sizet.attach(self.sizesb, 1,2,0,1)
-        self.sizef.add(sizet)
 
         # Crop frame
         self.cropf = gtk.Frame()
@@ -279,6 +259,7 @@ class ExportWin(gtk.Window):
         cropfl.set_use_markup(True)
         self.cropf.set_label_widget(cropfl)
         cont.add(self.cropf)
+
         # Crop table
         cropt = gtk.Table(4,2)
         cropwha = gtk.Adjustment(1024, 1, 65536, 1, 10)
@@ -311,6 +292,38 @@ class ExportWin(gtk.Window):
         cropt.attach(self.cropysb, 1,2,3,4)
         self.cropf.add(cropt)
 
+        # Size frame
+        self.sizef = gtk.Frame()
+        self.sizef.set_sensitive(False)
+        self.sizef.set_shadow_type(gtk.SHADOW_NONE)
+        sizefl = gtk.Label("<b>Image Size</b>")
+        sizefl.set_use_markup(True)
+        self.sizef.set_label_widget(sizefl)
+        cont.add(self.sizef)
+        # Size table
+        sizet = gtk.Table(2,2)
+        sizel = gtk.Label("Size %:")
+        sizea = gtk.Adjustment(100, 1, 65536, 1, 10)
+        # TODO! HERE Add pixel or absolute scale.
+        self.sizesb = gtk.SpinButton(sizea, 1, 1)
+        self.sizesb.set_text("100")
+        self.sizesb.set_numeric(True)
+        self.sizesb.set_text("100")
+        interpl = gtk.Label("Interpolation:")
+        interpls = gtk.ListStore(gobject.TYPE_STRING)
+        for o in [ "None", "Linear", "Cubic", "Sinc (Lanczos3)" ]:
+            interpls.append([o])
+        self.interp = gtk.ComboBox(interpls)
+        interpc = gtk.CellRendererText()
+        self.interp.pack_start(interpc, True)
+        self.interp.add_attribute(interpc, 'text', 0)
+        self.interp.set_active(3)
+        sizet.attach(sizel, 0,1,0,1)
+        sizet.attach(self.sizesb, 1,2,0,1)
+        sizet.attach(interpl, 0,1,1,2)
+        sizet.attach(self.interp, 1,2,1,2)
+        self.sizef.add(sizet)
+
         # File format frame
         formatf = gtk.Frame()
         formatf.set_shadow_type(gtk.SHADOW_NONE)
@@ -319,7 +332,7 @@ class ExportWin(gtk.Window):
         formatf.set_label_widget(formatfl)
         cont.add(formatf)
         # Format table
-        formatt = gtk.Table(3,2)
+        formatt = gtk.Table(2,2)
         formatl = gtk.Label("File Format:")
         formatls = gtk.ListStore(gobject.TYPE_STRING)
         formatoptions = [  "GIF image (*.gif)", "GIMP XCF image (*.xcf)", "JPEG image (*.jpg)", "Photoshop image (*.psd)", "PNG image (*.png)", "TIFF image (*.tif)" ]
@@ -331,8 +344,6 @@ class ExportWin(gtk.Window):
         self.formatm.add_attribute(formatc, 'text', 0)
         self.formatm.set_active(2) 
         self.formatm.connect("changed", self.format_changed)
-        commentl = gtk.Label("Comment:")
-        self.comment = gtk.Entry(256)
 
         self.gift = self.gif()
         self.xcft = self.xcf()
@@ -343,14 +354,12 @@ class ExportWin(gtk.Window):
 
         formatt.attach(formatl, 0,1,0,1)
         formatt.attach(self.formatm, 1,2,0,1)
-        formatt.attach(commentl, 0,1,1,2)
-        formatt.attach(self.comment, 1,2,1,2)
-        formatt.attach(self.gift, 0,2,2,3)
-        formatt.attach(self.xcft, 0,2,2,3)
-        formatt.attach(self.jpgt, 0,2,2,3)
-        formatt.attach(self.psdt, 0,2,2,3)
-        formatt.attach(self.pngt, 0,2,2,3)
-        formatt.attach(self.tift, 0,2,2,3)
+        formatt.attach(self.gift, 0,2,1,2)
+        formatt.attach(self.xcft, 0,2,1,2)
+        formatt.attach(self.jpgt, 0,2,1,2)
+        formatt.attach(self.psdt, 0,2,1,2)
+        formatt.attach(self.pngt, 0,2,1,2)
+        formatt.attach(self.tift, 0,2,1,2)
         formatf.add(formatt)
 
         # Done buttons
@@ -401,7 +410,7 @@ class ExportWin(gtk.Window):
 
     def jpg(self):
         # JPEG save options GUI.
-        jpgt = gtk.Table(8,2)
+        jpgt = gtk.Table(9,2)
         jpgqualityl = gtk.Label("Quality:")
         jpgqualitya = gtk.Adjustment(85, 0, 100, 1, 10, 10)
         self.jpgquality = gtk.HScale(jpgqualitya)
@@ -439,6 +448,8 @@ class ExportWin(gtk.Window):
         self.jpgdct.pack_start(jpgdctc, True)
         self.jpgdct.add_attribute(jpgdctc, 'text', 0)
         self.jpgdct.set_active(1)
+        jpgcommentl = gtk.Label("Comment:")
+        self.jpgcomment = gtk.Entry(256)
         jpgt.attach(jpgqualityl, 0,1,0,1)
         jpgt.attach(self.jpgquality, 1,2,0,1)
         jpgt.attach(jpgsmoothingl, 0,1,1,2)
@@ -452,6 +463,8 @@ class ExportWin(gtk.Window):
         jpgt.attach(self.jpgsub, 1,2,6,7)
         jpgt.attach(jpgdctl, 0,1,7,8)
         jpgt.attach(self.jpgdct, 1,2,7,8)
+        jpgt.attach(jpgcommentl, 0,1,8,9)
+        jpgt.attach(self.jpgcomment, 1,2,8,9)
         return jpgt
 
     def jpgrestartchecked(self, restartcheckbox):
@@ -792,103 +805,113 @@ class Book():
         ext = self.format_index_to_extension(expwin.formatm.get_active())
         # Loop through pages
         for i,p in enumerate(self.pagestore):
-            # Figure out the page name.
-            original = os.path.join(self.pagepath, p[0])
-            pagenr = str(i).zfill(padding)
-            name=""
-            if namei == 0: # Book Name
-                name = pagenr+"_"+self.bookname+"."+ext
-            elif namei == 1: # Page Names
-                name = pagenr+"_"+os.path.splitext(p[0])[0]+"."+ext
-            elif namei == 2: # Page Number
-                name = pagenr+"."+ext
-            elif namei == 3: # Custom Name
-                name = pagenr+"_"+expwin.namee.get_text()+"."+ext
-            fullname = os.path.join(outfolder, name)
-            # Process image.
-            img = pdb.gimp_file_load(original, original)
-            if ext == "xcf" and not expwin.xcfflatten.get_active():
-                pass
-            elif ext == "psd" and not expwin.psdflatten.get_active():
-                pass
-            else:
-                img.flatten()
-            if expwin.enablescaletb.get_active():
-                scale = expwin.sizesb.get_value() / 100
+            if i > 0:
+                # Figure out the page name.
+                original = os.path.join(self.pagepath, p[0])
+                pagenr = str(i).zfill(padding)
+                name=""
+                if namei == 0: # Book Name
+                    name = pagenr+"_"+self.bookname+"."+ext
+                elif namei == 1: # Page Names
+                    name = pagenr+"_"+os.path.splitext(p[0])[0]+"."+ext
+                elif namei == 2: # Page Number
+                    name = pagenr+"."+ext
+                elif namei == 3: # Custom Name
+                    name = pagenr+"_"+expwin.namee.get_text()+"."+ext
+                fullname = os.path.join(outfolder, name)
+                # Process image.
+                img = pdb.gimp_file_load(original, original)
+                if ext == "xcf" and not expwin.xcfflatten.get_active():
+                    pass
+                elif ext == "psd" and not expwin.psdflatten.get_active():
+                    pass
+                else:
+                    img.flatten()
                 w = img.width
                 h = img.height
-                nw = int(scale * w)
-                nh = int(scale * h)
-                print "Scaling page %s" % (p)
-                # img.resize(nw, nh, 0, 0)
-            if expwin.enablecroptb.get_active():
-                # Run crop code.
-                print "Cropping page %s" % (p)
-            drw = pdb.gimp_image_get_active_layer(img)
-            # Save the image.
-            if ext == "gif":
-                # Convert to grayscale
-                if expwin.gifgrayscale.get_active():
-                    pdb.gimp_image_convert_grayscale(img)
-                else:
-                    # TODO! Maybe support custom palettes and other GIF options...but not for now.
-                    pdb.gimp_image_convert_indexed(img,
-                                                   expwin.gifdith.get_active(),
-                                                   0,
-                                                   expwin.gifcolors.get_value(),
-                                                   False,
-                                                   False,
-                                                   "")
-                pdb.file_gif_save(img, drw, fullname, name,
-                                       expwin.gifinterlace.get_active(),
-                                       0,0,0)
-            elif ext == "xcf":
-                pdb.gimp_file_save(img, drw, fullname, name)
-            elif ext == "jpg":
-                quality = float(expwin.jpgquality.get_value() / 100)
-                restartfreq = 0
-                if expwin.jpgrestart.get_active():
-                    restartfreq = expwin.jpgfreq.get_value()
-                pdb.file_jpeg_save(img, drw, fullname, name, quality,
-                                   expwin.jpgsmoothing.get_value(),
-                                   expwin.jpgoptimize.get_active(),
-                                   expwin.jpgprogressive.get_active(),
-                                   expwin.comment.get_text(),
-                                   expwin.jpgsub.get_active(),
-                                   0,
-                                   restartfreq,
-                                   expwin.jpgdct.get_active())
-            elif ext == "psd":
-                compress = 0
-                if expwin.psdlzw.get_active():
-                    compress = 1
-                elif expwin.psdpackbits.get_active():
-                    compress = 2
-                # TODO! Figure out what fill-order actually does.
-                pdb.file_psd_save(img, drw, fullname, name, compress, 0)
-            elif ext == "png":
-                pdb.file_png_save2(img, drw, fullname, name,
-                                   expwin.pnginterlacing.get_active(),
-                                   expwin.pngcompress.get_value(),
-                                   expwin.pngbgcolor.get_active(),
-                                   expwin.pnggamma.get_active(),
-                                   expwin.pnglayeroffset.get_active(),
-                                   expwin.pngresolution.get_active(),
-                                   expwin.pngcreationtime.get_active(),
-                                   1,
-                                   expwin.pngcoloroftransp.get_active())
-            elif ext == "tif":
-                compress = 0
-                if self.tiflzw.get_active():
-                    compress = 1
-                elif self.tifpackbits.get_active():
-                    compress = 2
-                elif self.tifdeflate.get_active():
-                    compress = 3
-                elif self.tifjpeg.get_active():
-                    compress = 4
-                pdb.file_tiff_save2(img, drw, fullname, name, compress, expwin.tifcoloroftransp.get_active())
-            pdb.gimp_image_delete(img)
+                if expwin.enablecroptb.get_active():
+                    if expwin.cropwsb.get_value() > (w+1) or expwin.crophsb.get_value() > (h+1):
+                        show_error_msg("Crop  bigger than %s, no cropping done." % (p[0]))
+                    else:
+                        print("Cropping the image to %s %s %s %s" % (expwin.cropwsb.get_value(), expwin.crophsb.get_value(),expwin.cropxsb.get_value(), expwin.cropysb.get_value()))
+                        pdb.gimp_image_crop(img,
+                                            expwin.cropwsb.get_value(),
+                                            expwin.crophsb.get_value(),
+                                            expwin.cropxsb.get_value(),
+                                            expwin.cropysb.get_value())
+                if expwin.enablescaletb.get_active():
+                    scale = expwin.sizesb.get_value() / 100
+                    nw = int(scale * w)
+                    nh = int(scale * h)
+                    if nw < 1 or nh < 1:
+                        show_error_msg("%s not scaled, as the result would be less than 1 pixel big." % (p[0]))
+                    else:
+                        pdb.gimp_image_scale_full(img, nw, nh, expwin.interp.get_active())
+                drw = pdb.gimp_image_get_active_layer(img)
+                # Save the image.
+                if ext == "gif":
+                    # Convert to grayscale
+                    if expwin.gifgrayscale.get_active():
+                        pdb.gimp_image_convert_grayscale(img)
+                    else:
+                        # TODO! Maybe support custom palettes and other GIF options...but not for now.
+                        pdb.gimp_image_convert_indexed(img,
+                                                       expwin.gifdith.get_active(),
+                                                       0,
+                                                       expwin.gifcolors.get_value(),
+                                                       False,
+                                                       False,
+                                                       "")
+                        pdb.file_gif_save(img, drw, fullname, name,
+                                          expwin.gifinterlace.get_active(),
+                                          0,0,0)
+                elif ext == "xcf":
+                    pdb.gimp_file_save(img, drw, fullname, name)
+                elif ext == "jpg":
+                    quality = float(expwin.jpgquality.get_value() / 100)
+                    restartfreq = 0
+                    if expwin.jpgrestart.get_active():
+                        restartfreq = expwin.jpgfreq.get_value()
+                    pdb.file_jpeg_save(img, drw, fullname, name, quality,
+                                       expwin.jpgsmoothing.get_value(),
+                                       expwin.jpgoptimize.get_active(),
+                                       expwin.jpgprogressive.get_active(),
+                                       expwin.jpgcomment.get_text(),
+                                       expwin.jpgsub.get_active(),
+                                       0,
+                                       restartfreq,
+                                       expwin.jpgdct.get_active())
+                elif ext == "psd":
+                    compress = 0
+                    if expwin.psdlzw.get_active():
+                        compress = 1
+                    elif expwin.psdpackbits.get_active():
+                        compress = 2
+                    # TODO! Figure out what fill-order actually does.
+                    pdb.file_psd_save(img, drw, fullname, name, compress, 0)
+                elif ext == "png":
+                    pdb.file_png_save2(img, drw, fullname, name,
+                                       expwin.pnginterlacing.get_active(),
+                                       expwin.pngcompress.get_value(),
+                                       expwin.pngbgcolor.get_active(),
+                                       expwin.pnggamma.get_active(),
+                                       expwin.pnglayeroffset.get_active(),
+                                       expwin.pngresolution.get_active(),
+                                       expwin.pngcreationtime.get_active(),
+                                       1,
+                                       expwin.pngcoloroftransp.get_active())
+                elif ext == "tif":
+                    compress = 0
+                    if expwin.tiflzw.get_active():
+                        compress = 1
+                    elif expwin.tifpackbits.get_active():
+                        compress = 2
+                    elif expwin.tifdeflate.get_active():
+                        compress = 3
+                    elif expwin.tifjpeg.get_active():
+                        compress = 4
+                    pdb.file_tiff_save2(img, drw, fullname, name, compress, expwin.tifcoloroftransp.get_active())
+                pdb.gimp_image_delete(img)
 
     def update_thumbs(self):
         # Update all thumbnails that have changed.

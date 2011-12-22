@@ -1,14 +1,20 @@
 NEXT
-- Add progress indicator when making thumbnails on loading new projects, and maybe in general.
-- Implement Layer Tagging
+- Progress bar (loading and export)
+-- Hide it, and put it over bottom of MainWin.
 - Export
--- Option to pick up comments from the xcf file. 
--- Disable comments on formats that don't support it.
--- Make comments visible and editable in browser.
+-- Resize ExportWin when different file formats are selected.
 -- Check that the different options are actually working.
+- Scale and crop are inconsistent. One is percent and the other pixels.
+-- Scale can be either or. Absolute or Relative.
+-- Crop almost needs a GUI. Use gimp_image_resize .... not crop.
 - Clenaup - New Book more like export with tables...maybe.
 - Make all text translateable.
 ***- Make pagestore a variable of Book, not GUI. (GUI=View, Book=Controller, ListStore=Model...more or less).
+
+NEW FEATURES
+- Layer tagging
+- Export page range.
+- Make comments available in browser...if comments are accessible.
 
 MENUS
 File
