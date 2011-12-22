@@ -322,7 +322,7 @@ class ExportWin(gtk.Window):
         formatt = gtk.Table(3,2)
         formatl = gtk.Label("File Format:")
         formatls = gtk.ListStore(gobject.TYPE_STRING)
-        formatoptions = [  "GIF image (*.gif)", "GIMP XCF image (*.xcf)", "JPEG image (*.jpg)", "PNG image (*.png)", "TIFF image (*.tif)" ]
+        formatoptions = [  "GIF image (*.gif)", "GIMP XCF image (*.xcf)", "JPEG image (*.jpg)", "Photoshop image (*.psd)", "PNG image (*.png)", "TIFF image (*.tif)" ]
         for formatoption in formatoptions:
             formatls.append([formatoption])
         self.formatm = gtk.ComboBox(formatls)
@@ -335,8 +335,9 @@ class ExportWin(gtk.Window):
         self.comment = gtk.Entry(256)
 
         self.gift = self.gif()
-        #self.xcf()
+        self.xcft = self.xcf()
         self.jpgt = self.jpg()
+        self.psdt = self.psd()
         self.pngt = self.png()
         self.tift = self.tif()
 
@@ -345,7 +346,9 @@ class ExportWin(gtk.Window):
         formatt.attach(commentl, 0,1,1,2)
         formatt.attach(self.comment, 1,2,1,2)
         formatt.attach(self.gift, 0,2,2,3)
+        formatt.attach(self.xcft, 0,2,2,3)
         formatt.attach(self.jpgt, 0,2,2,3)
+        formatt.attach(self.psdt, 0,2,2,3)
         formatt.attach(self.pngt, 0,2,2,3)
         formatt.attach(self.tift, 0,2,2,3)
         formatf.add(formatt)
@@ -365,14 +368,36 @@ class ExportWin(gtk.Window):
 
     def gif(self):
         # GIF save options GUI.
-        gift = gtk.Table(2,2)
+        gift = gtk.Table(4,2)
         self.gifgrayscale = gtk.CheckButton("Convert to Grayscale")
+        gifcolorsl = gtk.Label("Maximum Number of Colors:")
+        gifcolorsa = gtk.Adjustment(255, 2, 256, 1)
+        self.gifcolors = gtk.SpinButton(gifcolorsa)
+        gifdithl = gtk.Label("Color Dithering:")
+        gifdithls = gtk.ListStore(gobject.TYPE_STRING)
+        for g in [ "None", "Floyd-Steinberg (normal)", "Flogy-Steinberg (reduced color bleeding)", "Positioned" ]:
+            gifdithls.append([g])
+        gifdithc = gtk.CellRendererText()
+        self.gifdith = gtk.ComboBox(gifdithls)
+        self.gifdith.pack_start(gifdithc, True)
+        self.gifdith.add_attribute(gifdithc, 'text', 0)
+        self.gifdith.set_active(0)
         self.gifinterlace = gtk.CheckButton("Interlace")
-        gifcommentl = gtk.Label("Comment:")
-        self.gifcomment = gtk.Entry(256)
         gift.attach(self.gifgrayscale, 0,2,0,1)
-        gift.attach(self.gifinterlace, 0,2,1,2)
+        gift.attach(gifcolorsl, 0,1,1,2)
+        gift.attach(self.gifcolors, 1,2,1,2)
+        gift.attach(gifdithl, 0,1,2,3)
+        gift.attach(self.gifdith, 1,2,2,3)
+        gift.attach(self.gifinterlace, 0,2,3,4)
         return gift
+
+    def xcf(self):
+        # XCF save options GUI.
+        xcft = gtk.Table(1,2)
+        self.xcfflatten = gtk.CheckButton("Flatten")
+        self.xcfflatten.set_active(True)
+        xcft.attach(self.xcfflatten, 0,2,0,1)
+        return xcft
 
     def jpg(self):
         # JPEG save options GUI.
@@ -436,6 +461,28 @@ class ExportWin(gtk.Window):
         else:
             self.jpgfreq.set_sensitive(False)
 
+    def psd(self):
+        # PSD save options GUI.
+        psdt = gtk.Table(2,2)
+        self.psdflatten = gtk.CheckButton("Flatten")
+        self.psdflatten.set_active(True)
+        psdframe = gtk.Frame()
+        psdframe.set_shadow_type(gtk.SHADOW_NONE)
+        psdframel = gtk.Label("<b>Compression</b>")
+        psdframel.set_use_markup(True)
+        psdframe.set_label_widget(psdframel)
+        psdvbox = gtk.VBox(False, 5)
+        psdframe.add(psdvbox)
+        self.psdnone = gtk.RadioButton(None, "None")
+        psdvbox.pack_start(self.psdnone)
+        self.psdlzw = gtk.RadioButton(self.psdnone, "LZW")
+        psdvbox.pack_start(self.psdlzw)
+        self.psdpackbits = gtk.RadioButton(self.psdnone, "Pack Bits")
+        psdvbox.pack_start(self.psdpackbits)
+        psdt.attach(self.psdflatten, 0,2,0,1)
+        psdt.attach(psdframe, 0,2,1,2)
+        return psdt
+
     def png(self):
         # PNG save options GUI.
         pngt = gtk.Table(8,2)
@@ -484,6 +531,7 @@ class ExportWin(gtk.Window):
         tifvbox.pack_start(self.tifdeflate)
         self.tifjpeg = gtk.RadioButton(self.tifnone, "JPEG")
         tifvbox.pack_start(self.tifjpeg)
+        self.tifnone.set_active(True)
         self.tifcoloroftransp = gtk.CheckButton("Save color values from transparent pixels")
         tift.attach(tifframe, 0,2,0,1)
         tift.attach(self.tifcoloroftransp, 0,2,1,2)
@@ -515,13 +563,19 @@ class ExportWin(gtk.Window):
         # Enable/disable relevant file format options.
         ext = self.main.book.format_index_to_extension(self.formatm.get_active())
         self.gift.hide()
+        self.xcft.hide()
         self.jpgt.hide()
+        self.psdt.hide()
         self.pngt.hide()
         self.tift.hide()
         if ext == "gif":
             self.gift.show()
+        elif ext == "xcf":
+            self.xcft.show()
         elif ext == "jpg":
             self.jpgt.show()
+        elif ext == "psd":
+            self.psdt.show()
         elif ext == "png":
             self.pngt.show()
         elif ext == "tif":
@@ -709,9 +763,11 @@ class Book():
             return "xcf"
         elif formati == 2: # JPEG
             return "jpg"
-        elif formati == 3: # PNG
+        elif formati == 3: # PSD
+            return "psd"
+        elif formati == 4: # PNG
             return "png"
-        elif formati == 4: # TIFF
+        elif formati == 5: # TIFF
             return "tif"
         else:
             show_error_msg("Format index out of range")
@@ -751,7 +807,12 @@ class Book():
             fullname = os.path.join(outfolder, name)
             # Process image.
             img = pdb.gimp_file_load(original, original)
-            img.flatten()
+            if ext == "xcf" and not expwin.xcfflatten.get_active():
+                pass
+            elif ext == "psd" and not expwin.psdflatten.get_active():
+                pass
+            else:
+                img.flatten()
             if expwin.enablescaletb.get_active():
                 scale = expwin.sizesb.get_value() / 100
                 w = img.width
@@ -763,13 +824,21 @@ class Book():
             if expwin.enablecroptb.get_active():
                 # Run crop code.
                 print "Cropping page %s" % (p)
-            # Save the image.
             drw = pdb.gimp_image_get_active_layer(img)
+            # Save the image.
             if ext == "gif":
                 # Convert to grayscale
                 if expwin.gifgrayscale.get_active():
                     pdb.gimp_image_convert_grayscale(img)
-                # TODO! Images need to be converted to indexed color first, and more options are needed. :(
+                else:
+                    # TODO! Maybe support custom palettes and other GIF options...but not for now.
+                    pdb.gimp_image_convert_indexed(img,
+                                                   expwin.gifdith.get_active(),
+                                                   0,
+                                                   expwin.gifcolors.get_value(),
+                                                   False,
+                                                   False,
+                                                   "")
                 pdb.file_gif_save(img, drw, fullname, name,
                                        expwin.gifinterlace.get_active(),
                                        0,0,0)
@@ -789,8 +858,36 @@ class Book():
                                    0,
                                    restartfreq,
                                    expwin.jpgdct.get_active())
+            elif ext == "psd":
+                compress = 0
+                if expwin.psdlzw.get_active():
+                    compress = 1
+                elif expwin.psdpackbits.get_active():
+                    compress = 2
+                # TODO! Figure out what fill-order actually does.
+                pdb.file_psd_save(img, drw, fullname, name, compress, 0)
+            elif ext == "png":
+                pdb.file_png_save2(img, drw, fullname, name,
+                                   expwin.pnginterlacing.get_active(),
+                                   expwin.pngcompress.get_value(),
+                                   expwin.pngbgcolor.get_active(),
+                                   expwin.pnggamma.get_active(),
+                                   expwin.pnglayeroffset.get_active(),
+                                   expwin.pngresolution.get_active(),
+                                   expwin.pngcreationtime.get_active(),
+                                   1,
+                                   expwin.pngcoloroftransp.get_active())
             elif ext == "tif":
-                pass
+                compress = 0
+                if self.tiflzw.get_active():
+                    compress = 1
+                elif self.tifpackbits.get_active():
+                    compress = 2
+                elif self.tifdeflate.get_active():
+                    compress = 3
+                elif self.tifjpeg.get_active():
+                    compress = 4
+                pdb.file_tiff_save2(img, drw, fullname, name, compress, expwin.tifcoloroftransp.get_active())
             pdb.gimp_image_delete(img)
 
     def update_thumbs(self):

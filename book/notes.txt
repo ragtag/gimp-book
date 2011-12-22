@@ -1,9 +1,11 @@
 NEXT
-- Export
--- TIF, PNG, GIF
--- Add settings for making images indexed for GIF.
--- Check that the different options are actually working.
 - Add progress indicator when making thumbnails on loading new projects, and maybe in general.
+- Implement Layer Tagging
+- Export
+-- Option to pick up comments from the xcf file. 
+-- Disable comments on formats that don't support it.
+-- Make comments visible and editable in browser.
+-- Check that the different options are actually working.
 - Clenaup - New Book more like export with tables...maybe.
 - Make all text translateable.
 ***- Make pagestore a variable of Book, not GUI. (GUI=View, Book=Controller, ListStore=Model...more or less).
