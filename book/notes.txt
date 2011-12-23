@@ -2,11 +2,10 @@ NEXT
 - Progress bar (loading and export)
 -- Hide it, and put it over bottom of MainWin.
 - Disable of deleting pages when there is only one page.
-- Scale and crop are inconsistent. One is percent and the other pixels.
--- Scale w,h (pixel/percent) - linked
--- Crop absolute
---- Top, Bottom, Inner, Outer (makes sense for book pages) + increases size, - crops
---- Background Color (of each page), This Color [], Transparent
+- Margins
+-- Background Color of Page, Transparent, This Color []
+-- Add Percent based margins.
+-- 
 - Export
 -- Resize ExportWin when different file formats are selected.
 -- Check that the different options are actually working.

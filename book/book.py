@@ -242,13 +242,13 @@ class ExportWin(gtk.Window):
         self.rangeto = gtk.SpinButton(rangetoa, 1, 1,)
         self.rangeto.connect("changed", self.rangetochanged)
 
-        # Enable scaling and cropping
+        # Enable scaling and margins
         self.enablescaletb = gtk.ToggleButton("Enable Resizing")
         self.enablescaletb.set_active(False)
         self.enablescaletb.connect("clicked", self.toggle_resize)
-        self.enablecroptb = gtk.ToggleButton("Enable Crop")
-        self.enablecroptb.set_active(False)
-        self.enablecroptb.connect("clicked", self.toggle_crop)
+        self.enablemargtb = gtk.ToggleButton("Enable Margins")
+        self.enablemargtb.set_active(False)
+        self.enablemargtb.connect("clicked", self.toggle_margin)
 
         # Attach stuff to the table
         destt.attach(destl, 0,2,0,1)
@@ -260,50 +260,47 @@ class ExportWin(gtk.Window):
         destt.attach(rangel, 0,2,3,4)
         destt.attach(self.rangefrom, 2,3,3,4)
         destt.attach(self.rangeto, 3,4,3,4)
-        destt.attach(self.enablecroptb, 0,2,4,5)
+        destt.attach(self.enablemargtb, 0,2,4,5)
         destt.attach(self.enablescaletb, 2,4,4,5)
         cont.add(destt)
+        # Margin frame
+        self.margf = gtk.Frame()
+        self.margf.set_sensitive(False)
+        self.margf.set_shadow_type(gtk.SHADOW_NONE)
+        margfl = gtk.Label("<b>Margins</b>")
+        margfl.set_use_markup(True)
+        self.margf.set_label_widget(margfl)
+        cont.add(self.margf)
 
-        # Crop frame
-        self.cropf = gtk.Frame()
-        self.cropf.set_sensitive(False)
-        self.cropf.set_shadow_type(gtk.SHADOW_NONE)
-        cropfl = gtk.Label("<b>Image Crop</b>")
-        cropfl.set_use_markup(True)
-        self.cropf.set_label_widget(cropfl)
-        cont.add(self.cropf)
+        # Marg table
+        margt = gtk.Table(4,2)
+        margtopl = gtk.Label("Top:")
+        margtopa = gtk.Adjustment(0, -65536, 65536, 1, 10)
+        self.margtop = gtk.SpinButton(margtopa, 1, 0)
+        self.margtop.set_numeric(True)
+        margbotl = gtk.Label("Bottom:")
+        margbota = gtk.Adjustment(0, -65536, 65536, 1, 10)
+        self.margbot = gtk.SpinButton(margbota, 1, 0)
+        self.margtop.set_numeric(True)
+        marginnerl = gtk.Label("Inner:")
+        marginnera = gtk.Adjustment(0, -65536, 65536, 1, 10)
+        self.marginner = gtk.SpinButton(marginnera, 1, 0)
+        self.marginner.set_numeric(True)
+        margouterl = gtk.Label("Outer:")
+        margoutera = gtk.Adjustment(0, -65536, 65536, 1, 10)
+        self.margouter = gtk.SpinButton(margoutera, 1, 0)
+        self.margouter.set_numeric(True)
 
-        # Crop table
-        cropt = gtk.Table(4,2)
-        cropwha = gtk.Adjustment(1024, 1, 65536, 1, 10)
-        cropwl = gtk.Label("Width:")
-        self.cropwsb = gtk.SpinButton(cropwha, 1, 0)
-        self.cropwsb.set_numeric(True)
-        self.cropwsb.set_text("100")
-        crophl = gtk.Label("Height:")
-        self.crophsb = gtk.SpinButton(cropwha, 1, 0)
-        self.crophsb.set_numeric(True)
-        self.crophsb.set_text("100")
-        
-        cropxya = gtk.Adjustment(0, 0, 65536, 1, 10)
-        cropxl = gtk.Label("Offset X:")
-        self.cropxsb = gtk.SpinButton(cropxya, 1, 0)
-        self.cropxsb.set_text("0")
-        self.cropxsb.set_numeric(True)
-        cropyl = gtk.Label("Offset Y:")
-        self.cropysb = gtk.SpinButton(cropxya, 1, 0)
-        self.cropysb.set_text("0")
-        self.cropysb.set_numeric(True)
+        margt.attach(margtopl, 0,1,0,1)
+        margt.attach(self.margtop, 1,2,0,1)
+        margt.attach(margbotl, 0,1,1,2)
+        margt.attach(self.margbot, 1,2,1,2)
+        margt.attach(marginnerl, 0,1,2,3)
+        margt.attach(self.marginner, 1,2,2,3)
+        margt.attach(margouterl, 0,1,3,4)
+        margt.attach(self.margouter, 1,2,3,4)
+        self.margf.add(margt)
 
-        cropt.attach(cropwl, 0,1,0,1)
-        cropt.attach(self.cropwsb, 1,2,0,1)
-        cropt.attach(crophl, 0,1,1,2)
-        cropt.attach(self.crophsb, 1,2,1,2)
-        cropt.attach(cropxl, 0,1,2,3)
-        cropt.attach(self.cropxsb, 1,2,2,3)
-        cropt.attach(cropyl, 0,1,3,4)
-        cropt.attach(self.cropysb, 1,2,3,4)
-        self.cropf.add(cropt)
 
         # Size frame
         self.templatew, self.templateh = self.main.book.get_template_size()
@@ -476,12 +473,12 @@ class ExportWin(gtk.Window):
         else:
             self.scalef.set_sensitive(False)
 
-    def toggle_crop(self, croptb):
-        # Enable/disable the image resize frame
-        if croptb.get_active():
-            self.cropf.set_sensitive(True)
+    def toggle_margin(self, margtb):
+        # Enable/disable the margins frame
+        if margtb.get_active():
+            self.margf.set_sensitive(True)
         else:
-            self.cropf.set_sensitive(False)
+            self.margf.set_sensitive(False)
 
     def format_changed(self, formatm):
         # Enable/disable relevant file format options.
@@ -919,16 +916,27 @@ class Book():
                     pass
                 else:
                     img.flatten()
-                if expwin.enablecroptb.get_active():
-                    if expwin.cropwsb.get_value() > (img.width+1) or expwin.crophsb.get_value() > (img.height+1):
-                        show_error_msg("Crop  bigger than %s, no cropping done." % (p[0]))
-                    else:
-                        pdb.gimp_image_crop(img,
-                                            expwin.cropwsb.get_value(),
-                                            expwin.crophsb.get_value(),
-                                            expwin.cropxsb.get_value(),
-                                            expwin.cropysb.get_value())
+                drw = pdb.gimp_image_get_active_layer(img)
+                if expwin.enablemargtb.get_active():
+                    # Add/Remove margins.
+                    top = expwin.margtop.get_value()
+                    bottom = expwin.margbot.get_value()
+                    inner = expwin.marginner.get_value()
+                    outer = expwin.margouter.get_value()
+                    w = inner + outer + img.width
+                    h = top + bottom + img.height
+                    x = 0
+                    y = top
+                    if i%2 == 0: # Left hand page.
+                        x = outer
+                    else: # Right hand page.
+                        x = inner
+                    pdb.gimp_image_resize(img, w, h, x, y)
+                    # TODO! Test xcf and psd layered export.
+                    pdb.gimp_layer_resize_to_image_size(drw)
                 if expwin.enablescaletb.get_active():
+                    print "Scaling image"
+                    # Scale the image.
                     nw = 0 
                     nh = 0
                     if expwin.scaletype.get_active(): # Pixel
@@ -938,8 +946,9 @@ class Book():
                         nw = int((expwin.scalew.get_value() / 100) * img.width)
                         nh = int((expwin.scaleh.get_value() / 100) * img.height)
                     pdb.gimp_image_scale_full(img, nw, nh, expwin.interp.get_active())
-                drw = pdb.gimp_image_get_active_layer(img)
                 # Save the image.
+                print img.width
+                print img.height
                 if ext == "gif":
                     # Convert to grayscale
                     if expwin.gifgrayscale.get_active():
