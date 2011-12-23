@@ -306,22 +306,43 @@ class ExportWin(gtk.Window):
         self.cropf.add(cropt)
 
         # Size frame
-        self.sizef = gtk.Frame()
-        self.sizef.set_sensitive(False)
-        self.sizef.set_shadow_type(gtk.SHADOW_NONE)
-        sizefl = gtk.Label("<b>Image Size</b>")
-        sizefl.set_use_markup(True)
-        self.sizef.set_label_widget(sizefl)
-        cont.add(self.sizef)
+        self.templatew, self.templateh = self.main.book.get_template_size()
+        self.wfactor = float(self.templateh) / float(self.templatew)
+        self.hfactor = float(self.templatew) / float(self.templateh)
+        self.scalef = gtk.Frame()
+        self.scalef.set_sensitive(False)
+        self.scalef.set_shadow_type(gtk.SHADOW_NONE)
+        scalefl = gtk.Label("<b>Image Size</b>")
+        scalefl.set_use_markup(True)
+        self.scalef.set_label_widget(scalefl)
+        cont.add(self.scalef)
         # Size table
-        sizet = gtk.Table(2,2)
-        sizel = gtk.Label("Size %:")
-        sizea = gtk.Adjustment(100, 1, 65536, 1, 10)
-        # TODO! Add pixel or absolute scale.
-        self.sizesb = gtk.SpinButton(sizea, 1, 1)
-        self.sizesb.set_text("100")
-        self.sizesb.set_numeric(True)
-        self.sizesb.set_text("100")
+        scalet = gtk.Table(3,4)
+        scalewl = gtk.Label("Width:") 
+        scalewa = gtk.Adjustment(100, 1, 65536, 1, 10)
+        self.scalew = gtk.SpinButton(scalewa, 1, 1)
+        self.scalew.set_numeric(True)
+        self.scalew.set_text("100")
+        self.scalew.connect("value-changed", self.scalew_changed) # TODO! When entering values, only works with percent???
+        scalehl = gtk.Label("Height:")
+        scaleha = gtk.Adjustment(100, 1, 65536, 1, 10)
+        self.scaleh = gtk.SpinButton(scaleha, 1, 1)
+        self.scaleh.set_numeric(True)
+        self.scaleh.set_text("100")
+        self.scaleh.connect("value-changed", self.scaleh_changed)
+        self.scalelink = gtk.ToggleButton("]")
+        self.scalelink.set_active(True)
+        self.scalelink.connect("clicked", self.scalelink_toggled)
+        scaletypels = gtk.ListStore(gobject.TYPE_STRING)
+        for o in [ "Percent", "Pixels" ]:
+            scaletypels.append([o])
+        self.scaletype = gtk.ComboBox(scaletypels)
+        scaletypec = gtk.CellRendererText()
+        self.scaletype.pack_start(scaletypec, True)
+        self.scaletype.add_attribute(scaletypec, 'text', 0)
+        self.scaletype.set_active(0)
+        self.scaletype.connect("changed", self.scaletype_changed)
+
         interpl = gtk.Label("Interpolation:")
         interpls = gtk.ListStore(gobject.TYPE_STRING)
         for o in [ "None", "Linear", "Cubic", "Sinc (Lanczos3)" ]:
@@ -331,11 +352,15 @@ class ExportWin(gtk.Window):
         self.interp.pack_start(interpc, True)
         self.interp.add_attribute(interpc, 'text', 0)
         self.interp.set_active(3)
-        sizet.attach(sizel, 0,1,0,1)
-        sizet.attach(self.sizesb, 1,2,0,1)
-        sizet.attach(interpl, 0,1,1,2)
-        sizet.attach(self.interp, 1,2,1,2)
-        self.sizef.add(sizet)
+        scalet.attach(scalewl, 0,1,0,1)
+        scalet.attach(self.scalew, 1,2,0,1)
+        scalet.attach(scalehl, 0,1,1,2)
+        scalet.attach(self.scaleh, 1,2,1,2)
+        scalet.attach(self.scalelink, 2,3,0,2)
+        scalet.attach(self.scaletype, 3,4,1,2)
+        scalet.attach(interpl, 0,2,2,3)
+        scalet.attach(self.interp, 2,4,2,3)
+        self.scalef.add(scalet)
 
         # File format frame
         formatf = gtk.Frame()
@@ -405,12 +430,51 @@ class ExportWin(gtk.Window):
         if self.rangefrom.get_value() > self.rangeto.get_value():
             self.rangefrom.set_value(self.rangeto.get_value())
 
-    def toggle_resize(self, sizetb):
-        # Enable/disable the image resize frame
-        if sizetb.get_active():
-            self.sizef.set_sensitive(True)
+    def scalew_changed(self, sb):
+        # Keep width and height relative, if scalelink is on.
+        if self.scalelink.get_active():
+            if self.scaletype.get_active(): # Pixels
+                self.scaleh.set_value( self.scalew.get_value() * self.wfactor )
+            else: # Percent
+                self.scaleh.set_value(self.scalew.get_value())
+
+    def scaleh_changed(self, sb):
+        # Keep widht and height relative, if scalelink is on.
+        if self.scalelink.get_active():
+            if self.scaletype.get_active(): # Pixels
+                self.scalew.set_value( self.scaleh.get_value() * self.hfactor )
+            else: # Percent
+                self.scalew.set_value(self.scaleh.get_value())
+
+    def scalelink_toggled(self, scalelink):
+        # Scale link has been toggled. Adjust numbers if link on.
+        if scalelink.get_active(): # Link on
+            self.scalew_changed(self.scalew)
+            scalelink.set_label("]")
         else:
-            self.sizef.set_sensitive(False)
+            scalelink.set_label(" ")
+
+    def scaletype_changed(self, scaletype):
+        # Scale type toggled between pixels and percent.
+        if scaletype.get_active(): # Pixels
+            self.scalew.set_value( int((self.scalew.get_value() / 100) * self.templatew) )
+            if not self.scalelink.get_active():
+                self.scaleh.set_value( self.scalew.get_value() * self.wfactor )
+            self.scalew.set_digits(0)
+            self.scaleh.set_digits(0)
+        else: # Percent
+            self.scalew.set_digits(1)
+            self.scaleh.set_digits(1)
+            self.scalew.set_value( (self.scalew.get_value() / self.templatew) * 100 )
+            if not self.scalelink.get_active():
+                self.scaleh.set_value(self.scalew.get_value())
+
+    def toggle_resize(self, scaletb):
+        # Enable/disable the image resize frame
+        if scaletb.get_active():
+            self.scalef.set_sensitive(True)
+        else:
+            self.scalef.set_sensitive(False)
 
     def toggle_crop(self, croptb):
         # Enable/disable the image resize frame
@@ -790,6 +854,12 @@ class Book():
         except Exception, err:
             show_error_msg(err)
 
+    def get_template_size(self):
+        # Return the size of the template in pixels x,y
+        template = os.path.join(self.pagepath, self.pagestore[0][0])
+        img = pdb.gimp_file_load(template, template)
+        return img.width, img.height
+
     def format_index_to_extension(self, formati):
         # Convert the format index to an extension.
         if formati == 0: # GIF
@@ -849,26 +919,25 @@ class Book():
                     pass
                 else:
                     img.flatten()
-                w = img.width
-                h = img.height
                 if expwin.enablecroptb.get_active():
-                    if expwin.cropwsb.get_value() > (w+1) or expwin.crophsb.get_value() > (h+1):
+                    if expwin.cropwsb.get_value() > (img.width+1) or expwin.crophsb.get_value() > (img.height+1):
                         show_error_msg("Crop  bigger than %s, no cropping done." % (p[0]))
                     else:
-                        print("Cropping the image to %s %s %s %s" % (expwin.cropwsb.get_value(), expwin.crophsb.get_value(),expwin.cropxsb.get_value(), expwin.cropysb.get_value()))
                         pdb.gimp_image_crop(img,
                                             expwin.cropwsb.get_value(),
                                             expwin.crophsb.get_value(),
                                             expwin.cropxsb.get_value(),
                                             expwin.cropysb.get_value())
                 if expwin.enablescaletb.get_active():
-                    scale = expwin.sizesb.get_value() / 100
-                    nw = int(scale * w)
-                    nh = int(scale * h)
-                    if nw < 1 or nh < 1:
-                        show_error_msg("%s not scaled, as the result would be less than 1 pixel big." % (p[0]))
-                    else:
-                        pdb.gimp_image_scale_full(img, nw, nh, expwin.interp.get_active())
+                    nw = 0 
+                    nh = 0
+                    if expwin.scaletype.get_active(): # Pixel
+                        nw = int(expwin.scalew.get_value())
+                        nh = int(expwin.scaleh.get_value())
+                    else: # Percent
+                        nw = int((expwin.scalew.get_value() / 100) * img.width)
+                        nh = int((expwin.scaleh.get_value() / 100) * img.height)
+                    pdb.gimp_image_scale_full(img, nw, nh, expwin.interp.get_active())
                 drw = pdb.gimp_image_get_active_layer(img)
                 # Save the image.
                 if ext == "gif":
