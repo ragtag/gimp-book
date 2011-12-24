@@ -219,9 +219,8 @@ class ExportWin(gtk.Window):
 
         namel = gtk.Label("Name Pages Using:")
         namels = gtk.ListStore(gobject.TYPE_STRING)
-        nameoptions = [ "Book Name", "Page Names", "Page Numbers", "Custom Name" ]
-        for nameoption in nameoptions:
-            namels.append([nameoption])
+        for o in [ "Book Name", "Page Names", "Page Numbers", "Custom Name" ]:
+            namels.append([o])
         self.namem = gtk.ComboBox(namels)
         namec = gtk.CellRendererText()
         self.namem.pack_start(namec, True)
@@ -273,7 +272,7 @@ class ExportWin(gtk.Window):
         cont.add(self.margf)
 
         # Marg table
-        margt = gtk.Table(4,2)
+        margt = gtk.Table(5,2)
         margtopl = gtk.Label("Top:")
         margtopa = gtk.Adjustment(0, -65536, 65536, 1, 10)
         self.margtop = gtk.SpinButton(margtopa, 1, 0)
@@ -290,6 +289,30 @@ class ExportWin(gtk.Window):
         margoutera = gtk.Adjustment(0, -65536, 65536, 1, 10)
         self.margouter = gtk.SpinButton(margoutera, 1, 0)
         self.margouter.set_numeric(True)
+        # Background color
+        margcolf = gtk.Frame()
+        margcolf.set_shadow_type(gtk.SHADOW_NONE)
+        margcolfl = gtk.Label("<b>Background Color</b>")
+        margcolfl.set_use_markup(True)
+        margcolf.set_label_widget(margcolfl)
+        margcolt = gtk.Table(2,2)
+        margcolml = gtk.Label("Use:")
+        margcolls = gtk.ListStore(gobject.TYPE_STRING)
+        for o in [ "Page's Background Color", "Black", "White", "Custom Color" ]:
+            margcolls.append([o])
+        self.margcolm = gtk.ComboBox(margcolls)
+        margcolc = gtk.CellRendererText()
+        self.margcolm.pack_start(margcolc, True)
+        self.margcolm.add_attribute(margcolc, 'text', 0)
+        self.margcolm.set_active(0)
+        self.margcolm.connect("changed", self.bg_color_changed)
+        margcoll = gtk.Label("Background Color:")
+        self.margcol = gtk.ColorButton(gtk.gdk.Color(0,0,0))
+
+        margcolt.attach(margcolml, 0,1,0,1)
+        margcolt.attach(self.margcolm, 1,2,0,1)
+        margcolt.attach(margcoll, 0,1,1,2)
+        margcolt.attach(self.margcol, 1,2,1,2)
 
         margt.attach(margtopl, 0,1,0,1)
         margt.attach(self.margtop, 1,2,0,1)
@@ -299,8 +322,9 @@ class ExportWin(gtk.Window):
         margt.attach(self.marginner, 1,2,2,3)
         margt.attach(margouterl, 0,1,3,4)
         margt.attach(self.margouter, 1,2,3,4)
+        margt.attach(margcolf,0,2,4,5)
         self.margf.add(margt)
-
+        # HERE
 
         # Size frame
         self.templatew, self.templateh = self.main.book.get_template_size()
@@ -426,6 +450,13 @@ class ExportWin(gtk.Window):
         # Page to changed.
         if self.rangefrom.get_value() > self.rangeto.get_value():
             self.rangefrom.set_value(self.rangeto.get_value())
+
+    def bg_color_changed(self, w):
+        # The background color option was changed.
+        if self.margcolm.get_active() == 3:
+            self.margcol.set_active(True)
+        else:
+            self.margcol.set_active(False)
 
     def scalew_changed(self, sb):
         # Keep width and height relative, if scalelink is on.
@@ -919,6 +950,7 @@ class Book():
                 drw = pdb.gimp_image_get_active_layer(img)
                 if expwin.enablemargtb.get_active():
                     # Add/Remove margins.
+                    # TODO! Add support or percentile margins...maybe.
                     top = expwin.margtop.get_value()
                     bottom = expwin.margbot.get_value()
                     inner = expwin.marginner.get_value()
