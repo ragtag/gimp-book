@@ -8,7 +8,6 @@
 #
 # http://queertales.com
 import os
-# import sys
 import hashlib
 import json
 import shutil
@@ -205,10 +204,24 @@ class ExportWin(gtk.Window):
         self.main = main
         win = super(ExportWin, self).__init__()
         self.set_title("Export Book...")
-        self.set_size_request(350, 650)
+        self.set_size_request(400, 400)
         self.set_position(gtk.WIN_POS_CENTER)
-        # Box for divding the window in three parts, name, page and buttons.
+        # Divide the window into two columns, as it doesn't fit on one 1024x768 screen. :)
+        dtab = gtk.VBox()
+        mtab = gtk.VBox()
+        stab = gtk.VBox()
+        ftab = gtk.VBox()
+        tabs = gtk.Notebook()
+        dtabl = gtk.Label("Destination")
+        tabs.append_page(dtab, dtabl)
+        mtabl = gtk.Label("Page Margins")
+        tabs.append_page(mtab, mtabl)
+        stabl = gtk.Label("Image Size")
+        tabs.append_page(stab, stabl)
+        ftabl = gtk.Label("File Format")
+        tabs.append_page(ftab, ftabl)
         cont = gtk.VBox(False, 4)
+        cont.add(tabs)
         self.add(cont)
         # Destination table
         destt = gtk.Table(5, 4, True)
@@ -241,14 +254,6 @@ class ExportWin(gtk.Window):
         self.rangeto = gtk.SpinButton(rangetoa, 1, 1,)
         self.rangeto.connect("changed", self.rangetochanged)
 
-        # Enable scaling and margins
-        self.enablescaletb = gtk.ToggleButton("Enable Resizing")
-        self.enablescaletb.set_active(False)
-        self.enablescaletb.connect("clicked", self.toggle_resize)
-        self.enablemargtb = gtk.ToggleButton("Enable Margins")
-        self.enablemargtb.set_active(False)
-        self.enablemargtb.connect("clicked", self.toggle_margin)
-
         # Attach stuff to the table
         destt.attach(destl, 0,2,0,1)
         destt.attach(self.destb, 2,4,0,1)
@@ -259,17 +264,16 @@ class ExportWin(gtk.Window):
         destt.attach(rangel, 0,2,3,4)
         destt.attach(self.rangefrom, 2,3,3,4)
         destt.attach(self.rangeto, 3,4,3,4)
-        destt.attach(self.enablemargtb, 0,2,4,5)
-        destt.attach(self.enablescaletb, 2,4,4,5)
-        cont.add(destt)
+        dtab.add(destt)
+
+
         # Margin frame
         self.margf = gtk.Frame()
-        self.margf.set_sensitive(False)
         self.margf.set_shadow_type(gtk.SHADOW_NONE)
         margfl = gtk.Label("<b>Margins</b>")
         margfl.set_use_markup(True)
         self.margf.set_label_widget(margfl)
-        cont.add(self.margf)
+        mtab.add(self.margf)
 
         # Marg table
         margt = gtk.Table(5,2)
@@ -297,23 +301,25 @@ class ExportWin(gtk.Window):
         margcolf.set_label_widget(margcolfl)
         margcolt = gtk.Table(2,2)
         margcolml = gtk.Label("Use:")
-        margcolls = gtk.ListStore(gobject.TYPE_STRING)
+        margconts = gtk.ListStore(gobject.TYPE_STRING)
         for o in [ "Page's Background Color", "Black", "White", "Custom Color" ]:
-            margcolls.append([o])
-        self.margcolm = gtk.ComboBox(margcolls)
+            margconts.append([o])
+        self.margcolm = gtk.ComboBox(margconts)
         margcolc = gtk.CellRendererText()
         self.margcolm.pack_start(margcolc, True)
         self.margcolm.add_attribute(margcolc, 'text', 0)
         self.margcolm.set_active(0)
         self.margcolm.connect("changed", self.bg_color_changed)
-        margcoll = gtk.Label("Background Color:")
+        self.margcoll = gtk.Label("Background Color:")
+        self.margcoll.set_sensitive(False)
         self.margcol = gtk.ColorButton(gtk.gdk.Color(0,0,0))
+        self.margcol.set_sensitive(False)
 
         margcolt.attach(margcolml, 0,1,0,1)
         margcolt.attach(self.margcolm, 1,2,0,1)
-        margcolt.attach(margcoll, 0,1,1,2)
+        margcolt.attach(self.margcoll, 0,1,1,2)
         margcolt.attach(self.margcol, 1,2,1,2)
-
+        margcolf.add(margcolt)
         margt.attach(margtopl, 0,1,0,1)
         margt.attach(self.margtop, 1,2,0,1)
         margt.attach(margbotl, 0,1,1,2)
@@ -331,12 +337,11 @@ class ExportWin(gtk.Window):
         self.wfactor = float(self.templateh) / float(self.templatew)
         self.hfactor = float(self.templatew) / float(self.templateh)
         self.scalef = gtk.Frame()
-        self.scalef.set_sensitive(False)
         self.scalef.set_shadow_type(gtk.SHADOW_NONE)
         scalefl = gtk.Label("<b>Image Size</b>")
         scalefl.set_use_markup(True)
         self.scalef.set_label_widget(scalefl)
-        cont.add(self.scalef)
+        stab.add(self.scalef)
         # Size table
         scalet = gtk.Table(3,4)
         scalewl = gtk.Label("Width:") 
@@ -389,7 +394,7 @@ class ExportWin(gtk.Window):
         formatfl = gtk.Label("<b>File Formats</b>")
         formatfl.set_use_markup(True)
         formatf.set_label_widget(formatfl)
-        cont.add(formatf)
+        ftab.add(formatf)
         # Format table
         formatt = gtk.Table(2,2)
         formatl = gtk.Label("File Format:")
@@ -454,9 +459,11 @@ class ExportWin(gtk.Window):
     def bg_color_changed(self, w):
         # The background color option was changed.
         if self.margcolm.get_active() == 3:
-            self.margcol.set_active(True)
+            self.margcoll.set_sensitive(True)
+            self.margcol.set_sensitive(True)
         else:
-            self.margcol.set_active(False)
+            self.margcoll.set_sensitive(False)
+            self.margcol.set_sensitive(False)
 
     def scalew_changed(self, sb):
         # Keep width and height relative, if scalelink is on.
@@ -497,20 +504,6 @@ class ExportWin(gtk.Window):
             if not self.scalelink.get_active():
                 self.scaleh.set_value(self.scalew.get_value())
 
-    def toggle_resize(self, scaletb):
-        # Enable/disable the image resize frame
-        if scaletb.get_active():
-            self.scalef.set_sensitive(True)
-        else:
-            self.scalef.set_sensitive(False)
-
-    def toggle_margin(self, margtb):
-        # Enable/disable the margins frame
-        if margtb.get_active():
-            self.margf.set_sensitive(True)
-        else:
-            self.margf.set_sensitive(False)
-
     def format_changed(self, formatm):
         # Enable/disable relevant file format options.
         ext = self.main.book.format_index_to_extension(self.formatm.get_active())
@@ -537,7 +530,7 @@ class ExportWin(gtk.Window):
         # GIF save options GUI.
         gift = gtk.Table(4,2)
         self.gifgrayscale = gtk.CheckButton("Convert to Grayscale")
-        gifcolorsl = gtk.Label("Maximum Number of Colors:")
+        gifcolorsl = gtk.Label("Colors:")
         gifcolorsa = gtk.Adjustment(255, 2, 256, 1)
         self.gifcolors = gtk.SpinButton(gifcolorsa)
         gifdithl = gtk.Label("Color Dithering:")
@@ -948,39 +941,38 @@ class Book():
                 else:
                     img.flatten()
                 drw = pdb.gimp_image_get_active_layer(img)
-                if expwin.enablemargtb.get_active():
-                    # Add/Remove margins.
-                    # TODO! Add support or percentile margins...maybe.
-                    top = expwin.margtop.get_value()
-                    bottom = expwin.margbot.get_value()
-                    inner = expwin.marginner.get_value()
-                    outer = expwin.margouter.get_value()
-                    w = inner + outer + img.width
-                    h = top + bottom + img.height
-                    x = 0
-                    y = top
-                    if i%2 == 0: # Left hand page.
-                        x = outer
-                    else: # Right hand page.
-                        x = inner
+                # Add/Remove margins.
+                # TODO! Add support or percentile margins...maybe.
+                top = expwin.margtop.get_value()
+                bottom = expwin.margbot.get_value()
+                inner = expwin.marginner.get_value()
+                outer = expwin.margouter.get_value()
+                w = inner + outer + img.width
+                h = top + bottom + img.height
+                x = 0
+                y = top
+                if i%2 == 0: # Left hand page.
+                    x = outer
+                else: # Right hand page.
+                    x = inner
+                if not top == 0 or not bottom == 0 or not inner == 0 or not outer == 0:
+                    print("Adjusting margins")
                     pdb.gimp_image_resize(img, w, h, x, y)
-                    # TODO! Test xcf and psd layered export.
+                        # TODO! Test xcf and psd layered export.
                     pdb.gimp_layer_resize_to_image_size(drw)
-                if expwin.enablescaletb.get_active():
-                    print "Scaling image"
-                    # Scale the image.
-                    nw = 0 
-                    nh = 0
-                    if expwin.scaletype.get_active(): # Pixel
-                        nw = int(expwin.scalew.get_value())
-                        nh = int(expwin.scaleh.get_value())
-                    else: # Percent
-                        nw = int((expwin.scalew.get_value() / 100) * img.width)
-                        nh = int((expwin.scaleh.get_value() / 100) * img.height)
+                # Scale the image.
+                nw = 0 
+                nh = 0
+                if expwin.scaletype.get_active(): # Pixel
+                    nw = int(expwin.scalew.get_value())
+                    nh = int(expwin.scaleh.get_value())
+                else: # Percent
+                    nw = int((expwin.scalew.get_value() / 100) * img.width)
+                    nh = int((expwin.scaleh.get_value() / 100) * img.height)
+                if not nw == img.width or not nh == img.height:
+                    print("Scaling image")
                     pdb.gimp_image_scale_full(img, nw, nh, expwin.interp.get_active())
                 # Save the image.
-                print img.width
-                print img.height
                 if ext == "gif":
                     # Convert to grayscale
                     if expwin.gifgrayscale.get_active():
