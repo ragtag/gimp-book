@@ -232,7 +232,7 @@ class ExportWin(gtk.Window):
         destframelabel.set_use_markup(True)
         destframe.set_label_widget(destframelabel)
         # Destination table
-        destt = gtk.Table(5, 4, True)
+        destt = gtk.Table(4, 5, True)
         destl = gtk.Label("Destination Folder:")
         destd = gtk.FileChooserDialog("Export to", None, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         destd.set_default_response(gtk.RESPONSE_OK)
@@ -262,6 +262,23 @@ class ExportWin(gtk.Window):
         self.rangeto = gtk.SpinButton(rangetoa, 1, 1,)
         self.rangeto.connect("changed", self.rangetochanged)
 
+        # Layer tagging frame
+        tagf = gtk.Frame()
+        tagf.set_shadow_type(gtk.SHADOW_NONE)
+        tagfl = gtk.Label("<b>Layer Tags</b>")
+        tagfl.set_use_markup(True)
+        tagf.set_label_widget(tagfl)
+        tagt = gtk.Table(2,2)
+        taghidel = gtk.Label("Hide Layers Tagged With:")
+        self.taghide = gtk.Entry(4048)
+        tagshowl = gtk.Label("Show Layers Tagged With:")
+        self.tagshow = gtk.Entry(4048)
+        tagt.attach(taghidel, 0,1,0,1)
+        tagt.attach(self.taghide, 1,2,0,1)
+        tagt.attach(tagshowl, 0,1,1,2)
+        tagt.attach(self.tagshow, 1,2,1,2)
+        tagf.add(tagt)
+
         # Attach stuff to the table
         destt.attach(destl, 0,2,0,1)
         destt.attach(self.destb, 2,4,0,1)
@@ -272,6 +289,7 @@ class ExportWin(gtk.Window):
         destt.attach(rangel, 0,2,3,4)
         destt.attach(self.rangefrom, 2,3,3,4)
         destt.attach(self.rangeto, 3,4,3,4)
+        destt.attach(tagf, 0,4,4,5)
         destframe.add(destt)
         dtab.add(destframe)
 
@@ -339,7 +357,6 @@ class ExportWin(gtk.Window):
         margt.attach(self.margouter, 1,2,3,4)
         margt.attach(margcolf,0,2,4,5)
         self.margf.add(margt)
-        # HERE
 
         # Size frame
         self.templatew, self.templateh = self.main.book.get_template_size()
