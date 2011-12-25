@@ -1,16 +1,13 @@
 NEXT
-- Progress bar (loading and export)
--- Hide it, and put it over bottom of MainWin.
-- Disable of deleting pages when there is only one page.
+- Disable of deleting pages when there is only the template left.
 - Margins
--- Background Color of Page, Transparent, This Color []
 -- Add Percent based margins.
--- 
+- Add layer tagging
 - Export
--- Resize ExportWin when different file formats are selected.
 -- Check that the different options are actually working.
 - Clenaup - New Book more like export with tables...maybe.
 - Make all text translateable.
+- Size the widgets that look waaay too big for their own good.
 ***- Make pagestore a variable of Book, not GUI. (GUI=View, Book=Controller, ListStore=Model...more or less).
 
 NEW FEATURES

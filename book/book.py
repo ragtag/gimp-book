@@ -6,6 +6,8 @@
 # Copyright 2011 - Ragnar Brynjúlfsson
 # TODO! Add license info
 #
+# BUGS & LIMITATIONS
+# - 
 # http://queertales.com
 import os
 import hashlib
@@ -29,7 +31,6 @@ class Thumb():
 
     def build_thumb(self):
         # Build or rebuild a thumb for the image.
-        print self.imagepath
         img = pdb.gimp_xcf_load(0, self.imagepath, self.imagepath)
         pdb.gimp_file_save_thumbnail(img, self.imagepath)
         pdb.gimp_image_delete(img)
@@ -211,18 +212,25 @@ class ExportWin(gtk.Window):
         mtab = gtk.VBox()
         stab = gtk.VBox()
         ftab = gtk.VBox()
-        tabs = gtk.Notebook()
+        self.tabs = gtk.Notebook()
         dtabl = gtk.Label("Destination")
-        tabs.append_page(dtab, dtabl)
-        mtabl = gtk.Label("Page Margins")
-        tabs.append_page(mtab, mtabl)
+        self.tabs.append_page(dtab, dtabl)
+        mtabl = gtk.Label("Margins")
+        self.tabs.append_page(mtab, mtabl)
         stabl = gtk.Label("Image Size")
-        tabs.append_page(stab, stabl)
+        self.tabs.append_page(stab, stabl)
         ftabl = gtk.Label("File Format")
-        tabs.append_page(ftab, ftabl)
+        self.tabs.append_page(ftab, ftabl)
         cont = gtk.VBox(False, 4)
-        cont.add(tabs)
+        cont.add(self.tabs)
         self.add(cont)
+
+        # Destination frame
+        destframe = gtk.Frame()
+        destframe.set_shadow_type(gtk.SHADOW_NONE)
+        destframelabel = gtk.Label("<b>Destination</b>")
+        destframelabel.set_use_markup(True)
+        destframe.set_label_widget(destframelabel)
         # Destination table
         destt = gtk.Table(5, 4, True)
         destl = gtk.Label("Destination Folder:")
@@ -246,7 +254,7 @@ class ExportWin(gtk.Window):
 
         # Page range
         self.pagecount = len(self.main.book.pagestore)-1
-        rangel = gtk.Label("Pages from/to")
+        rangel = gtk.Label("Pages from/to:")
         rangefroma = gtk.Adjustment(1, 0, self.pagecount, 1)
         self.rangefrom = gtk.SpinButton(rangefroma, 1, 1)
         self.rangefrom.connect("changed", self.rangefromchanged)
@@ -264,7 +272,8 @@ class ExportWin(gtk.Window):
         destt.attach(rangel, 0,2,3,4)
         destt.attach(self.rangefrom, 2,3,3,4)
         destt.attach(self.rangeto, 3,4,3,4)
-        dtab.add(destt)
+        destframe.add(destt)
+        dtab.add(destframe)
 
 
         # Margin frame
@@ -391,7 +400,7 @@ class ExportWin(gtk.Window):
         # File format frame
         formatf = gtk.Frame()
         formatf.set_shadow_type(gtk.SHADOW_NONE)
-        formatfl = gtk.Label("<b>File Formats</b>")
+        formatfl = gtk.Label("<b>File Format</b>")
         formatfl.set_use_markup(True)
         formatf.set_label_widget(formatfl)
         ftab.add(formatf)
@@ -427,16 +436,21 @@ class ExportWin(gtk.Window):
         formatf.add(formatt)
 
         # Done buttons
-        doneb = gtk.HBox(True, 4)
+        self.doneb = gtk.HBox(True, 4)
         cancelb = gtk.Button("Cancel")
         cancelb.connect("clicked", self.close)
         exportb = gtk.Button("Export Pages")
         exportb.connect("clicked", self.export)
-        doneb.pack_start(cancelb)
-        doneb.pack_start(exportb)
-        cont.add(doneb)
+        self.doneb.pack_start(cancelb)
+        self.doneb.pack_start(exportb)
+        cont.add(self.doneb)
+
+        # Progress bar.
+        self.progress = gtk.ProgressBar()
+        cont.pack_end(self.progress, False, False, 0)
 
         self.show_all()
+        self.progress.hide()
         self.format_changed(2)
 
     def name_option_changed(self, namem):
@@ -703,20 +717,33 @@ class ExportWin(gtk.Window):
         
     def export(self, button):
         # Pass self to Book, and tell it to export.
+        self.tabs.set_sensitive(False)
+        self.doneb.set_sensitive(False)
+        self.progress.set_fraction(0)
+        self.progress.set_text("")
         outfolder = os.path.join(self.destb.get_filename(), self.main.book.bookname)
         if os.path.isdir(outfolder):
             overwrite = gtk.MessageDialog(None, 0, gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, '"%s" exists, do you want to overwrite it?' % (outfolder))
             response = overwrite.run()
             if response == gtk.RESPONSE_YES:
+                overwrite.hide()
+                self.progress.show()
                 self.main.book.export_book(self)
                 self.close(button)
+            else:
+                self.tabs.set_sensitive(True)
+                self.doneb.set_sensitive(True)
             overwrite.destroy()
         else:
+            self.progress.show()
+            self.tabs.set_sensitive(False)
+            self.doneb.set_sensitive(False)
             self.main.book.export_book(self)
             self.close(button)
 
     def close(self, button):
         # Close this window
+        self.main.set_sensitive(True)
         self.destroy()
 
 
@@ -777,7 +804,7 @@ class Book():
         else:
             show_error_msg("Destination does not exist.")
 
-    def load_book(self, bookfile):
+    def load_book(self, bookfile, mainwin):
         # Loads a selected book.
         if os.path.exists(bookfile):
             self.bookfile = bookfile
@@ -790,13 +817,24 @@ class Book():
             metatext = f.read()
             metadata = json.loads(metatext)
             f.close()
+            progressstep = float(1.0 / len(metadata['pages']))
+            progress = 0.0
             for p in metadata['pages']:
+                mainwin.progress.show()
+                mainwin.progress.set_text("Loading %s" % (p))
+                while gtk.events_pending():
+                    gtk.main_iteration()
                 # Create a page object, and add to a list.
                 thumb = Thumb(os.path.join(self.pagepath, p))
                 self.pagestore.append((p, thumb.thumbpix, thumb.path, thumb.mtime))
+                progress = progress + progressstep
+                mainwin.progress.set_fraction(progress)
+                while gtk.events_pending():
+                    gtk.main_iteration()
             self.pagestore.connect("row-deleted", self.row_deleted)
             self.pagestore.connect("row-inserted", self.row_inserted)
             self.pagestore.connect("row-changed", self.row_changed)
+            mainwin.progress.hide()
             return True
 
     def row_deleted(self, pagestore, destination_index):
@@ -914,6 +952,8 @@ class Book():
             padding = 3
         elif pagecount > 9:
             padding = 2
+        progress = 0.0
+        progressstep = float(1.0 / (expwin.rangeto.get_value() - expwin.rangefrom.get_value() + 1))
         # Find file extension.
         ext = self.format_index_to_extension(expwin.formatm.get_active())
         # Loop through pages
@@ -921,6 +961,9 @@ class Book():
             if i >= expwin.rangefrom.get_value() and i <= expwin.rangeto.get_value():
                 # Figure out the page name.
                 original = os.path.join(self.pagepath, p[0])
+                expwin.progress.set_text("Exporting %s" % (p[0]))
+                while gtk.events_pending():
+                    gtk.main_iteration()
                 pagenr = str(i).zfill(padding)
                 name=""
                 if namei == 0: # Book Name
@@ -956,9 +999,15 @@ class Book():
                 else: # Right hand page.
                     x = inner
                 if not top == 0 or not bottom == 0 or not inner == 0 or not outer == 0:
-                    print("Adjusting margins")
+                    if expwin.margcolm.get_active() == 1: # Black
+                        pdb.gimp_context_set_background((0,0,0))
+                    elif expwin.margcolm.get_active() == 2: # White
+                        pdb.gimp_context_set_background((255,255,255))
+                    elif expwin.margcolm.get_active() == 3: # Custom color
+                        color = expwin.margcol.get_color()
+                        pdb.gimp_context_set_background((color.red/257, color.green/257, color.blue/257))
                     pdb.gimp_image_resize(img, w, h, x, y)
-                        # TODO! Test xcf and psd layered export.
+                    # TODO! Test xcf and psd layered export.
                     pdb.gimp_layer_resize_to_image_size(drw)
                 # Scale the image.
                 nw = 0 
@@ -970,7 +1019,6 @@ class Book():
                     nw = int((expwin.scalew.get_value() / 100) * img.width)
                     nh = int((expwin.scaleh.get_value() / 100) * img.height)
                 if not nw == img.width or not nh == img.height:
-                    print("Scaling image")
                     pdb.gimp_image_scale_full(img, nw, nh, expwin.interp.get_active())
                 # Save the image.
                 if ext == "gif":
@@ -1036,6 +1084,11 @@ class Book():
                         compress = 4
                     pdb.file_tiff_save2(img, drw, fullname, name, compress, expwin.tifcoloroftransp.get_active())
                 pdb.gimp_image_delete(img)
+                progress = progress + progressstep
+                expwin.progress.set_fraction(progress)
+                while gtk.events_pending():
+                    gtk.main_iteration()
+
 
     def update_thumbs(self):
         # Update all thumbnails that have changed.
@@ -1136,10 +1189,14 @@ class Main(gtk.Window):
         self.scroll.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.scroll.add(self.thumbs)
         self.vbox.pack_start(self.scroll, True, True, 0)
-        
+
+        self.progress = gtk.ProgressBar()
+        self.vbox.pack_end(self.progress, False, False, 0)
+
         self.add(self.vbox)
         self.connect("destroy", gtk.main_quit)
         self.show_all()
+        self.progress.hide()
         return window    
 
     def update_thumbs(self, widget, arg):
@@ -1161,10 +1218,12 @@ class Main(gtk.Window):
         f.add_pattern("*.book")
         o.add_filter(f)
         response = o.run()
+        # filename = o.get_fielname()
         if response == gtk.RESPONSE_OK:
+            o.hide()
             self.close_book()
             self.book = Book()
-            self.book.load_book(o.get_filename())
+            self.book.load_book(o.get_filename(), self)
             self.show_book()
             self.loaded = True
             self.enable_controls()
@@ -1183,10 +1242,10 @@ class Main(gtk.Window):
         self.thumbs.connect("item-activated", self.book.open_page)
         self.thumbs.set_model(self.book.pagestore)
         self.set_title("GIMP Book - %s" % (self.book.bookname))
-        self.show_all()
         
     def export_win(self, widget):
         # Settings for exporting the book.
+        self.set_sensitive(False)
         exportWin = ExportWin(self)
 
     def select_page(self, thumbs):
@@ -1257,16 +1316,6 @@ class Main(gtk.Window):
         self.del_page.set_sensitive(True)
         self.ren_page.set_sensitive(True)
         self.file_export.set_sensitive(True)
-
-    def show_progress(self):
-        # Add a progress bar to the bottom of the window.
-        self.progress = gtk.ProgressBar()
-        self.progress.size_allocate(gtk.gdk.Rectangle(0, 0, 200, 5))
-        self.progress.queue_resize()
-        self.vbox.pack_end(self.progress)
-
-    def remove_progress(self):
-        self.progress.destroy()
 
     def close_book(self):
         if self.loaded:
