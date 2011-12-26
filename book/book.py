@@ -1,10 +1,28 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Script for managing multiple pages in GIMP, intended for working with comic books, illustrated childrens books,
-# sketchbooks or similar.
 #
-# Copyright 2011 - Ragnar Brynjúlfsson
-# TODO! Add license info
+# DESCRIPTION
+#   book.py is a plug-in for managing multiple pages in GIMP, for working with comic books, 
+#   illustrated childrens books, sketchbooks or similar.
+#
+# INSTALLATION
+#   Drop the script in your plug-ins folder. On Linux this is ~/.gimp-2.6/plug-ins/
+#
+#
+#   Copyright 2011 Ragnar Brynjúlfsson
+#
+#     This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # BUGS & LIMITATIONS
 # - 
@@ -16,6 +34,7 @@ import shutil
 import gtk
 import gobject
 import urllib
+import re
 from gimpfu import *
 from gimpenums import *
 from time import strftime
@@ -64,6 +83,7 @@ class NewBookWin(gtk.Window):
     # Interface for creating new books.
     def __init__(self, main):
         self.main = main
+        self.main.set_sensitive(False)
         # Create a new book.
         win = super(NewBookWin, self).__init__()
         self.set_title("Create a New Book...")
@@ -193,10 +213,15 @@ class NewBookWin(gtk.Window):
 
     def ok(self, widget):
         # Creates a new book.
-        self.book = Book()
+        self.main.close_book()
+        self.book = Book(self.main)
         self.book.make_book(self.destbutton.get_filename(), self.nameentry.get_text(), self.widthentry.get_value(), self.heightentry.get_value(), self.colormenu.get_active(), self.fillmenu.get_active())
         self.main.add_book(self.book)
         self.destroy()
+
+    def __del__(self):
+        # Destructor re-enables main window.
+        self.main.set_sensitive(True)
 
 class ExportWin(gtk.Window):
     # Windows for exporting the book in various formats.
@@ -205,7 +230,7 @@ class ExportWin(gtk.Window):
         self.main = main
         win = super(ExportWin, self).__init__()
         self.set_title("Export Book...")
-        self.set_size_request(400, 400)
+        self.set_size_request(500, 500)
         self.set_position(gtk.WIN_POS_CENTER)
         # Divide the window into two columns, as it doesn't fit on one 1024x768 screen. :)
         dtab = gtk.VBox()
@@ -232,7 +257,7 @@ class ExportWin(gtk.Window):
         destframelabel.set_use_markup(True)
         destframe.set_label_widget(destframelabel)
         # Destination table
-        destt = gtk.Table(4, 5, True)
+        destt = gtk.Table(4, 5, False)
         destl = gtk.Label("Destination Folder:")
         destd = gtk.FileChooserDialog("Export to", None, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         destd.set_default_response(gtk.RESPONSE_OK)
@@ -244,7 +269,7 @@ class ExportWin(gtk.Window):
             namels.append([o])
         self.namem = gtk.ComboBox(namels)
         namec = gtk.CellRendererText()
-        self.namem.pack_start(namec, True)
+        self.namem.pack_start(namec, False)
         self.namem.add_attribute(namec, 'text', 0)
         self.namem.set_active(0)
         entl = gtk.Label("Custom Name:")
@@ -268,15 +293,28 @@ class ExportWin(gtk.Window):
         tagfl = gtk.Label("<b>Layer Tags</b>")
         tagfl.set_use_markup(True)
         tagf.set_label_widget(tagfl)
-        tagt = gtk.Table(2,2)
-        taghidel = gtk.Label("Hide Layers Tagged With:")
-        self.taghide = gtk.Entry(4048)
+        tagt = gtk.Table(2,3)
+
         tagshowl = gtk.Label("Show Layers Tagged With:")
         self.tagshow = gtk.Entry(4048)
+        taghidel = gtk.Label("Hide Layers Tagged With:")
+        self.taghide = gtk.Entry(4048)
+        tagunl = gtk.Label("Action for Untagged Layers:")
+        tagunls = gtk.ListStore(gobject.TYPE_STRING)
+        for o in [ "Don't Touch", "Show", "Hide" ]:
+            tagunls.append([o])
+        self.tagunm = gtk.ComboBox(tagunls)
+        tagunc = gtk.CellRendererText()
+        self.tagunm.pack_start(tagunc, False)
+        self.tagunm.add_attribute(tagunc, 'text', 0)
+        self.tagunm.set_active(0)
+
         tagt.attach(taghidel, 0,1,0,1)
         tagt.attach(self.taghide, 1,2,0,1)
         tagt.attach(tagshowl, 0,1,1,2)
         tagt.attach(self.tagshow, 1,2,1,2)
+        tagt.attach(tagunl, 0,1,2,3)
+        tagt.attach(self.tagunm, 1,2,2,3)
         tagf.add(tagt)
 
         # Attach stuff to the table
@@ -746,7 +784,7 @@ class ExportWin(gtk.Window):
                 overwrite.hide()
                 self.progress.show()
                 self.main.book.export_book(self)
-                self.close(button)
+                self.destroy()
             else:
                 self.tabs.set_sensitive(True)
                 self.doneb.set_sensitive(True)
@@ -756,19 +794,23 @@ class ExportWin(gtk.Window):
             self.tabs.set_sensitive(False)
             self.doneb.set_sensitive(False)
             self.main.book.export_book(self)
-            self.close(button)
+            self.destroy()
 
     def close(self, button):
-        # Close this window
-        self.main.set_sensitive(True)
+        # Close the export window.
         self.destroy()
+
+    def __del__(self):
+        # Destructor makes sure main window is sensitive.
+        self.main.set_sensitive(True)
 
 
 class Book():
     # Stores and manages the data for the book.
-    def __init__(self):
+    def __init__(self, main):
         # Defines basic variables to store.
         # pagestore columns = pagenmae, thumb Pixbuf, thumb path, thumb mtime
+        self.main = main
         self.pagestore = gtk.ListStore(str, gtk.gdk.Pixbuf, str, str)
         self.bookfile = ""  # The *.book for this book.
         self.bookname = ""  # The name of the book.
@@ -813,7 +855,7 @@ class Book():
                 img.add_layer(bglayer, 0)
                 pdb.gimp_xcf_save(0, img, None, os.path.join(fullpath, "pages", "Template.xcf") , "Template.xcf")
                 # Load the newly created book.
-                self.load_book(os.path.join(fullpath, name+".book"))
+                self.load_book(os.path.join(fullpath, name+".book"), self.main)
                 # TODO! Check if everything was created correctly.
                 return True
             else:
@@ -992,8 +1034,24 @@ class Book():
                 elif namei == 3: # Custom Name
                     name = pagenr+"_"+expwin.namee.get_text()+"."+ext
                 fullname = os.path.join(outfolder, name)
-                # Process image.
                 img = pdb.gimp_file_load(original, original)
+                # Show and hide tagged layers.
+                hidetags = expwin.taghide.get_text().split(',')
+                showtags = expwin.tagshow.get_text().split(',')
+                regex = re.compile("\[(.*?)\]")
+                for i in range(pdb.gimp_image_get_layers(img)[0]):
+                    # Show and hide layers. Hide wins over show, if layer has two matching tags.
+                    layername = pdb.gimp_layer_get_name(img.layers[i])
+                    layertags = regex.findall(layername)
+                    if set(hidetags) & set(layertags):
+                        pdb.gimp_layer_set_visible(img.layers[i],False)
+                    elif set(showtags) & set(layertags):
+                        pdb.gimp_layer_set_visible(img.layers[i], True)
+                    elif expwin.tagunm.get_active() == 1: # Show all by default.
+                        pdb.gimp_layer_set_visible(img.layers[i], True)
+                    elif expwin.tagunm.get_active() == 2: # Hide all by default.
+                        pdb.gimp_layer_set_visible(img.layers[i], False)
+                # Process image.
                 if ext == "xcf" and not expwin.xcfflatten.get_active():
                     pass
                 elif ext == "psd" and not expwin.psdflatten.get_active():
@@ -1223,7 +1281,6 @@ class Main(gtk.Window):
 
     def new_book(self, widget):
         # Helper for opening up the New Book window.
-        self.close_book()
         nb = NewBookWin(self)
 
     def open_book(self, widget):
@@ -1239,7 +1296,7 @@ class Main(gtk.Window):
         if response == gtk.RESPONSE_OK:
             o.hide()
             self.close_book()
-            self.book = Book()
+            self.book = Book(self)
             self.book.load_book(o.get_filename(), self)
             self.show_book()
             self.loaded = True
@@ -1282,6 +1339,7 @@ class Main(gtk.Window):
             if response == gtk.RESPONSE_ACCEPT:
                 if text:
                     self.book.add_page(text, dest)
+                    self.del_page.set_sensitive(True)
                 else:
                     show_error_msg("No page name entered.")
         else:
@@ -1301,6 +1359,8 @@ class Main(gtk.Window):
         response = areyousure.run()
         if response == gtk.RESPONSE_YES:
             self.book.delete_page()
+            if len(self.book.pagestore) < 2:
+                self.del_page.set_sensitive(False)
             areyousure.destroy()
 
     def name_dialog(self, title, label):
@@ -1330,7 +1390,8 @@ class Main(gtk.Window):
     def enable_controls(self):
         # Enable the controles that are disabled when no book is loaded.
         self.add_page.set_sensitive(True)
-        self.del_page.set_sensitive(True)
+        if len(self.book.pagestore) > 1:
+            self.del_page.set_sensitive(True)
         self.ren_page.set_sensitive(True)
         self.file_export.set_sensitive(True)
 
@@ -1356,8 +1417,8 @@ def show_error_msg( msg ):
 # This is the plugin registration function
 register(
     "python_fu_book",    
-    "Tool for managing multiple pages of a comic book, childrens book or your sketch book.",
-    "GNU GPL v2 or later.",
+    "Tool for managing multiple pages of a comic book, childrens book, sketch book or similar.",
+    "GNU GPL v3 or later.",
     "Ragnar Brynjúlfsson",
     "Ragnar Brynjúlfsson",
     "July 2011",

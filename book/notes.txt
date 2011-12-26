@@ -1,13 +1,14 @@
 NEXT
-- Add layer tagging (implement)
-- Disable deleting pages when there is only the template left.
 - Margins
 -- Add Percent based margins.
--- Check that the different options are actually working.
+-- Check that the different file format options are actually working.
 - Clenaup 
+-- Check limitiations on page names, and what breaks the code.
 -- New Book more like export with tables...maybe.
 -- Size the widgets that look waaay too big for their own good.
+-- Tooltips.
 -- Make all text translateable.
+-- Website and documentation.
 - Beta Test
 ***- Make pagestore a variable of Book, not GUI. (GUI=View, Book=Controller, ListStore=Model...more or less).
 

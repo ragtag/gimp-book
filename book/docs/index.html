@@ -1,0 +1,29 @@
+<html>
+  <head>
+    <title>GIMP Book Plug-In</title>
+  </head>
+  <body>
+    <h1>IMPORTANT!</h1>
+    <p>This is an early beta release of GIMP Book. I have only tested it under Ubuntu 10.04, and don't know if it will work on Windows or OSX. Creating a comic book is a lot of work, work you don't want to loose, so make sure you make a backup of all your files regularly!</p>
+    <h1>GIMP Book Plug-In</h1>
+    <p>GIMP Book, is a plug-in for managing multiple pages in <a href="http://gimp.org">the GIMP</a>. It opens a separete window with thumbnails of all your pages, where you can add, delete, sort and rename your pages. And once you're done you can export the book in various formats, including support for scaling and adjusting the margins as you export.</p>
+    <h2>Installation</h2>
+    <p>Copy the book.py file into ~/gimp-2.6/plug-ins/.  The next time you start the GIMP, you should find it under the Windows menu.</p>
+    <h2>Creating a Book</h2>
+    <p>Start by opening the GIMP, and the GIMP Book interface from the Windows>Book... menu. You'll be presented with an empty Book window, in which you can choose File>New Book (Ctrl-N).</p>
+    <p>In the Create a New Book dialog, enter a name for your book, and choose a destination. GIMP Book will create a folder at that destination, with the name of your book, a a couple of subfolders for and a *.book file.</p>
+    <p>The othera subset of those you get when creating a new image in the GIMP, these are used to create the original template.</p>
+    <h3>The Template</h3>
+    <p>When you create a book, you'll see a Template.xcf thumbnail show up in your Book window. This is used as a template for all new pages that you add. You can double click it to open it in the GIMP, and make any adjustments to it you like. It's a good idea to spend some time adjusting the resolution, adding print markings, default layers and any other things you may need for the pages of your book. You can adjust the template at any time later, but changes to it, won't affect existing pages.</p>
+    <p>The template is always shown as the first page of the book. It is numbered as page zero, when exporting, and is not exported by default.</p>
+    <h3>Thumbnail Size</h3>
+    <p>The thumbnails used in GIMP Book, are standard GTK thumbnails. This means that their size is controlled by the GIMP itself. To get bigger thumbnails, got the the Edit>Preferences menu in the GIMP, under Environment, and change Size of thumbnails to "Large (256x256)". This won't affect existing thumbnails until the next time the file is saved, or you delete the thumbnail cache.</p>
+    <h2>Opening an Existing Book</h2>
+    <p>To open a book simply choose File>Open Book... from the Book window, and use the standard open dialog to locate your *.book file. The book will open in the Book window, and you can start working with it.</p>
+    <p>To open a page, simply double click it, and it will load in the GIMP.</p>
+    <h2>Managing Pages</h2>
+    <p>At the top of the Book window there is a toolbar with three buttons you can use to manage your pages.</p>
+    <h3>Adding Pages</h3>
+    <p>The first button, is for adding new pages. When you click it you will be asked to give the page a name. You can use a descriptive name, that helps you remember what's on the page. Pagenumbers are added later, so you don't need to give your pages numbers, unless you want to.</p>
+  </body>
+</html>
