@@ -19,11 +19,38 @@
     <h3>Thumbnail Size</h3>
     <p>The thumbnails used in GIMP Book, are standard GTK thumbnails. This means that their size is controlled by the GIMP itself. To get bigger thumbnails, got the the Edit>Preferences menu in the GIMP, under Environment, and change Size of thumbnails to "Large (256x256)". This won't affect existing thumbnails until the next time the file is saved, or you delete the thumbnail cache.</p>
     <h2>Opening an Existing Book</h2>
-    <p>To open a book simply choose File>Open Book... from the Book window, and use the standard open dialog to locate your *.book file. The book will open in the Book window, and you can start working with it.</p>
+    <p>To open a book simply choose File>Open Book... from the Book window, and use the standard open dialog to locate your *.book file. The book will open in the Book window, and you can start working with it. If thumbnails have not been generated for your book (which for instance happens if you move it to a different folder, loading will take a short while as new thumbnails are generated.</p>
     <p>To open a page, simply double click it, and it will load in the GIMP.</p>
     <h2>Managing Pages</h2>
     <p>At the top of the Book window there is a toolbar with three buttons you can use to manage your pages.</p>
-    <h3>Adding Pages</h3>
-    <p>The first button, is for adding new pages. When you click it you will be asked to give the page a name. You can use a descriptive name, that helps you remember what's on the page. Pagenumbers are added later, so you don't need to give your pages numbers, unless you want to.</p>
+    <h3>Adding a Page</h3>
+    <p>The first button, is for adding new pages. When you click it you will be asked to give the page a name. You can use a descriptive name, that helps you remember what's on the page. Pagenumbers are added on export, so you don't need to number your pages, unless you want to. New pages are added to the end of the book, if no page is selected, or at the selected page if one is.</p>
+    <h3>Deleting a Page</h3>
+    <p>To delete a page, simply select the page, and hit the delete button. You'll be asked to confirm that you really want to delete the page.</p>
+    <p>When you delete a page in GIMP Book, it is not deleted permanently, but moved to your_book/trash/date_pagename.xcf, in case you want to get something from it later. You can freely delete the content of your_book/trash, if you want to free up disk space.</p>
+    <h3>Renaming a Page</h3>
+    <p>Select the page you want to rename, and hit the rename toolbutton. Enter a new name, and you're done.</p>
+    <h3>Sorting Pages</h3>
+    <p>To reorder the pages, simply drag them around to where you want them.</p>
+    <h2>Exporting Your Book</h2>
+    <p>Once you're finished with your book, you can export it to several different formats. To do this simply choose File>Export Book... from the menu in the Book window.</p>
+    <h3>Destination Tab</h3>
+    <p>At the top of the tab, you can choose the name of the folder you want to export your book to. GIMP Book will create a new folder with the name of your book at that destination, and fill it with images in the format you specify.</p>
+    <p>For naming the pages you can choose between using the name of the book (e.g. 1_My Book.jpg), the name of the pages, simply using page numbers with no name, or using a custom name that you enter in the Custom Name field.</p>
+    <p>You can choose the page range you wish to export. Page 0 is the template, which you probably don't want to include in your export.</p>
+    <h4>Layer Tags</h4>
+    <p>Layer tags are used to hide and show tagged layers. It can be used if doing multi-lingual comics, to hide sketch layers, and so on. To tag a layer simply put any tag between square brackets [] in the layer name. For instance "[en] Speech Buble" or "[sketch] Car Chase". Layers can have multiple tags, but if the tags match both hide and show, show wins.</p>
+    <p>To hide or show layers, simply enter a comma separated list of tags, without the square brackets [], in the appropriate hide or show field (e.g. "en,de,no,sketch"). On export, layers matching the tag will be hidden or shown, before exporting.</p>
+    <p>For the remining layers, that don't match any tag, you can choose to either leave their visibility as is, hide or show them.</p>
+    <h3>Margins Tab</h3>
+    <p>On export you can change the margins of your pages. This is similar to Canvas Size in GIMP, but uses slightly different values. Negative values, vill crop the image, while positive will make the canvas bigger. You can choose between using the background color saved in the image, black, white or a custom color, for the background when you make the image bigger.</p>
+    <h3>Image Size Tab</h3>
+    <p>The image size tab is basically the same as the standard GIMP one. You can choose width or height, as pixels or percentiles, and choose the interpolation method to use. GIMP Book uses the template for you book, to decide the aspect ratio, when choosing scale values.</p>
+    <h3>File Format Tab</h3>
+    <p>You can choose to export your book as a sequence of gif, xcf, jpg, psd, png or tiff files. The save options for the different file formats are basically the same as in GIMP. For xcf and psd, you can choose not to flatten the image, keeping layer data intact to work on the files further.</p>
+    <p>When you've chosen all your export options, hit the Export Pages button, and GIMP Book will start processing your pages. This can take a short while, as each page needs to be loaded, possibly modified, and then saved out again.</p>
+    <h2>Behin the Scenes</h2>
+    <p>If you just want to use GIMP Book, you can stop reading here. If, on the other hand, you want to know a little bit more about what it does, keep reading.</p>
+    
   </body>
 </html>
