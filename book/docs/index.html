@@ -11,13 +11,14 @@
     <p>Copy the book.py file into ~/gimp-2.6/plug-ins/.  The next time you start the GIMP, you should find it under the Windows menu.</p>
     <h2>Creating a Book</h2>
     <p>Start by opening the GIMP, and the GIMP Book interface from the Windows>Book... menu. You'll be presented with an empty Book window, in which you can choose File>New Book (Ctrl-N).</p>
-    <p>In the Create a New Book dialog, enter a name for your book, and choose a destination. GIMP Book will create a folder at that destination, with the name of your book, a a couple of subfolders for and a *.book file.</p>
-    <p>The othera subset of those you get when creating a new image in the GIMP, these are used to create the original template.</p>
+    <p>In the Create a New Book dialog, enter a name for your book, size and destination. GIMP Book will create a folder at that destination, with the name of your book, a a couple of subfolders for and a *.book file.</p>
     <h3>The Template</h3>
     <p>When you create a book, you'll see a Template.xcf thumbnail show up in your Book window. This is used as a template for all new pages that you add. You can double click it to open it in the GIMP, and make any adjustments to it you like. It's a good idea to spend some time adjusting the resolution, adding print markings, default layers and any other things you may need for the pages of your book. You can adjust the template at any time later, but changes to it, won't affect existing pages.</p>
     <p>The template is always shown as the first page of the book. It is numbered as page zero, when exporting, and is not exported by default.</p>
     <h3>Thumbnail Size</h3>
     <p>The thumbnails used in GIMP Book, are standard GTK thumbnails. This means that their size is controlled by the GIMP itself. To get bigger thumbnails, got the the Edit>Preferences menu in the GIMP, under Environment, and change Size of thumbnails to "Large (256x256)". This won't affect existing thumbnails until the next time the file is saved, or you delete the thumbnail cache.</p>
+    <h2>Saving Your Book</h2>
+    <p>There is no need to save your book. When you add pages, move them around, or delete them, GIMP Book saves those changes instantly. The only thing you need to save, is the actual GIMP xcf files, when you work on them. The thumbnails for images you've changed and saved, are updated the next time the GIMP Book window receives focus.</p>
     <h2>Opening an Existing Book</h2>
     <p>To open a book simply choose File>Open Book... from the Book window, and use the standard open dialog to locate your *.book file. The book will open in the Book window, and you can start working with it. If thumbnails have not been generated for your book (which for instance happens if you move it to a different folder, loading will take a short while as new thumbnails are generated.</p>
     <p>To open a page, simply double click it, and it will load in the GIMP.</p>
@@ -51,6 +52,18 @@
     <p>When you've chosen all your export options, hit the Export Pages button, and GIMP Book will start processing your pages. This can take a short while, as each page needs to be loaded, possibly modified, and then saved out again.</p>
     <h2>Behin the Scenes</h2>
     <p>If you just want to use GIMP Book, you can stop reading here. If, on the other hand, you want to know a little bit more about what it does, keep reading.</p>
-    
+    <h3>The File Format</h3>
+    <p>GIMP Book stores the pages of your book in a simple file structure that looks like this.</p>
+    <pre>
+      MyBook/
+      |-- MyBook.book
+      |-- pages
+      |   `-- Template.xcf
+      `-- trash
+      </pre>
+    <p>All your pages and the Template are stores in the pages folder as plain .xcf files. Any pages you delete are moved to the trash folder. GIMP Book only touches the xcf files on three occassions, when you add a page a copy is made of the Template file, when you rename a page the xcf files gets renamed, and when you delete a page, it gets moved to the trash folder, and a time and date is added to the name.</p>
+    <h3>The *.book File</h3>
+    <p>The *.book file, is a simple JSON file, that contains a list of your pages, in the order they are shown. When you move pages around, all that happens is that the list of pages in the JSON file is changed. The *.book file keeps no record of pages that have been deleted or anything else at the moment. I may add more features to it in the future, but will try to keep them compatible with the current format.</p>
+    <p>Any time you do changes, such as move, rename, add or delete a page, the *.book file is automatically updated.</p>
   </body>
 </html>
