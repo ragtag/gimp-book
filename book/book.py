@@ -8,10 +8,10 @@
 # INSTALLATION
 #   Drop the script in your plug-ins folder. On Linux this is ~/.gimp-2.6/plug-ins/
 #
-#
+# LICENSE
 #   Copyright 2011 Ragnar Brynjúlfsson
 #
-#     This program is free software: you can redistribute it and/or modify
+#    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation, either version 3 of the License, or
 #    (at your option) any later version.
@@ -25,8 +25,10 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # BUGS & LIMITATIONS
-# - 
-# http://queertales.com
+# - NOT tested on Windows or OSX, only tested on Ubuntu 10.04 (though in theory it should work corss platform).
+# - Limited error checking on page names. Stick to A-z and 0-9, spaces and underscore to be on the safe side.
+#
+# TODO! Add contact information and website. http://queertales.com
 import os
 import hashlib
 import json
@@ -1431,3 +1433,15 @@ register(
 )
 
 main()
+
+
+# FUTURE FEATURES & FIXES
+# - Check limitiations on page names, and what breaks the code.
+# - Check that the different file format options are actually working.
+# - Add tooltips, to make it easier to use.
+# - Add Percent based margins.
+# - Make all text translateable.
+# - Add a website and finish documentation.
+# - Size the widgets that look waaay too big for their own good.
+# - New Book Window more like export with tables...maybe.
+# - Test, test and test!
