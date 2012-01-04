@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# GIMP Book 2012.1 rev $Revision$ alpha
+#  by Ragnar Brynjúlfsson
+#  Web: http://ragnarb.com/gimp/book TODO! Make the site.
+#  Contact: TODO!
+#
 # DESCRIPTION
 #   book.py is a plug-in for managing multiple pages in GIMP, for working with comic books, 
 #   illustrated childrens books, sketchbooks or similar.
@@ -25,10 +30,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # BUGS & LIMITATIONS
-# - NOT tested on Windows or OSX, only tested on Ubuntu 10.04 (though in theory it should work corss platform).
-# - Limited error checking on page names. Stick to A-z and 0-9, spaces and underscore to be on the safe side.
-#
-# TODO! Add contact information and website. http://queertales.com
+# - Only tested on Ubuntu 10.04 32bit, using Gimp 2.6.8 (though in theory it should work on all platforms).
+# - NOT tested on Windows or OSX.
+
 import os
 import hashlib
 import json
@@ -58,7 +62,6 @@ class Thumb():
         
     def find_thumb(self):
         # Find the pages thumbnail.
-        # TODO! Fails with some obscure characters like !?* ...needs testing.
         imagepathuri = urllib.quote(self.imagepath.encode("utf-8"))
         file_hash = hashlib.md5('file://'+imagepathuri).hexdigest()
         thumb = os.path.join(os.path.expanduser('~/.thumbnails/large'), file_hash) + '.png'
@@ -415,7 +418,7 @@ class ExportWin(gtk.Window):
         self.scalew = gtk.SpinButton(scalewa, 1, 1)
         self.scalew.set_numeric(True)
         self.scalew.set_text("100")
-        self.scalew.connect("value-changed", self.scalew_changed) # TODO! When entering values, only works with percent???
+        self.scalew.connect("value-changed", self.scalew_changed)
         scalehl = gtk.Label("Height:")
         scaleha = gtk.Adjustment(100, 1, 65536, 1, 10)
         self.scaleh = gtk.SpinButton(scaleha, 1, 1)
@@ -858,7 +861,6 @@ class Book():
                 pdb.gimp_xcf_save(0, img, None, os.path.join(fullpath, "pages", "Template.xcf") , "Template.xcf")
                 # Load the newly created book.
                 self.load_book(os.path.join(fullpath, name+".book"), self.main)
-                # TODO! Check if everything was created correctly.
                 return True
             else:
                 show_error_msg("Name was left empty")
@@ -1084,7 +1086,6 @@ class Book():
                         color = expwin.margcol.get_color()
                         pdb.gimp_context_set_background((color.red/257, color.green/257, color.blue/257))
                     pdb.gimp_image_resize(img, w, h, x, y)
-                    # TODO! Test xcf and psd layered export.
                     pdb.gimp_layer_resize_to_image_size(drw)
                 # Scale the image.
                 nw = 0 
@@ -1136,7 +1137,6 @@ class Book():
                         compress = 1
                     elif expwin.psdpackbits.get_active():
                         compress = 2
-                    # TODO! Figure out what fill-order actually does.
                     pdb.file_psd_save(img, drw, fullname, name, compress, 0)
                 elif ext == "png":
                     pdb.file_png_save2(img, drw, fullname, name,
@@ -1339,11 +1339,10 @@ class Main(gtk.Window):
         if self.loaded:
             response, text = self.name_dialog("Add a Page", "Enter Page Description: ")
             if response == gtk.RESPONSE_ACCEPT:
-                if text:
+                if self.valid_name(text):
+                    text = self.valid_name(text)
                     self.book.add_page(text, dest)
                     self.del_page.set_sensitive(True)
-                else:
-                    show_error_msg("No page name entered.")
         else:
             show_error_msg("You need to create or load a book, before adding pages to it.")
 
@@ -1352,7 +1351,8 @@ class Main(gtk.Window):
         if self.book.selected > -1:
             response, text = self.name_dialog("Rename Page", "Ente Page Description: ")
             if response == gtk.RESPONSE_ACCEPT:
-                if text:
+                if self.valid_name(text):
+                    text = self.valid_name(text)
                     self.book.rename_page(text)
 
     def ask_delete_page(self, widget):
@@ -1367,7 +1367,6 @@ class Main(gtk.Window):
 
     def name_dialog(self, title, label):
         # Dialog for entering page names.
-        # TODO! Show message on illegal characters and duplicate file creation.
         dialog = gtk.Dialog(title,
                             None,
                             gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
@@ -1388,6 +1387,30 @@ class Main(gtk.Window):
         text = entry.get_text()
         dialog.destroy()
         return response, text
+
+    def valid_name(self, name):
+        # Replaces illegal characters:  \ / : * ? " < > | ^ ' ! with _. Removes - and . from filename, and limits length to 255 characters, including extension.
+        if len(name) < 1:
+            show_error_msg("No page name entered.")
+            return False
+        loop = True
+        while loop:
+            if name[0] == "." or name[0] == "-":
+                name = name[1:]
+            else:
+                loop = False
+        illegalcs =  "\\", "/", ":", "*", "?", "\"", "<", "<", ">", "|", "^", "'", "!"
+        for c in illegalcs:
+            name = name.replace(c, "_")
+        if len(name) > 251:
+            name = name[:250]
+            show_error_msg("Warning! Page name truncated to 255 characters.")
+            return False
+        if os.path.exists(os.path.join(self.book.pagepath, ("%s.xcf" % (name)))):
+            # TODO! Support case insensitive names on Windows.
+            show_error_msg("A page called '%s.xcf' exists. Page names must be unique." % (name))
+            return False
+        return name
 
     def enable_controls(self):
         # Enable the controles that are disabled when no book is loaded.
@@ -1423,7 +1446,7 @@ register(
     "GNU GPL v3 or later.",
     "Ragnar Brynjúlfsson",
     "Ragnar Brynjúlfsson",
-    "July 2011",
+    "January 2012",
     "<Toolbox>/Windows/Book...",
     "",
     [
@@ -1437,18 +1460,17 @@ main()
 
 # FUTURE FEATURES & FIXES
 #  HIGH
-# - Catch illegal characters in page names, while still supporting international characters.
+# - Add a website and finish documentation.
 # - Check that the different file format options are actually working.
-# - Add tooltips, to make it easier to use.
 # - Test, test and test!
 #  MEDIUM
-# - Add a website and finish documentation.
 # - Add Percent based margins.
 # - Make all text translateable.
+# - Add tooltips, to make it easier to use.
 # - Size the widgets that look waaay too big for their own good.
 # - New Book Window more like export with tables...maybe.
 #  LOW
+# - Left to right or right to left reading option when exporting.
 # - Add right click menu to the pages, for adding pages, renmaing, deleting etc.
 # - Support color coding pages, making it easy to divide up the story into chapters or mark pages.
-# - Left to right or right to left reading.
 # - Batch (destructive operations on the whole book...maybe not safe to include)
