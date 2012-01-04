@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# GIMP Book 2012.1 rev $Revision$ alpha
+# GIMP Book 2012.1 rev $Revision: $ alpha
 #  by Ragnar Brynjúlfsson
 #  Web: http://ragnarb.com/gimp/book TODO! Make the site.
 #  Contact: TODO!
