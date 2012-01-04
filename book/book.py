@@ -1436,12 +1436,19 @@ main()
 
 
 # FUTURE FEATURES & FIXES
-# - Check limitiations on page names, and what breaks the code.
+#  HIGH
+# - Catch illegal characters in page names, while still supporting international characters.
 # - Check that the different file format options are actually working.
 # - Add tooltips, to make it easier to use.
+# - Test, test and test!
+#  MEDIUM
+# - Add a website and finish documentation.
 # - Add Percent based margins.
 # - Make all text translateable.
-# - Add a website and finish documentation.
 # - Size the widgets that look waaay too big for their own good.
 # - New Book Window more like export with tables...maybe.
-# - Test, test and test!
+#  LOW
+# - Add right click menu to the pages, for adding pages, renmaing, deleting etc.
+# - Support color coding pages, making it easy to divide up the story into chapters or mark pages.
+# - Left to right or right to left reading.
+# - Batch (destructive operations on the whole book...maybe not safe to include)
