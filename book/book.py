@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# GIMP Book 2012.1 rev $Revision: $ alpha
+# GIMP Book 2012.1 rev 32 beta
 #  by Ragnar Brynjúlfsson
-#  Web: http://ragnarb.com/gimp/book TODO! Make the site.
+#  Web: TODO!
 #  Contact: TODO!
 #
 # DESCRIPTION
@@ -30,7 +30,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # BUGS & LIMITATIONS
-# - Only tested on Ubuntu 10.04 32bit, using Gimp 2.6.8 (though in theory it should work on all platforms).
+# - This is an beta release, and may still contain some bugs.
+# - Only tested on Ubuntu 10.04 32bit and Ubuntu 11.10 64bit, using Gimp 2.6.8 and 2.6.11
 # - NOT tested on Windows or OSX.
 
 import os
