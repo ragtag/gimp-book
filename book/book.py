@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# GIMP Book 2012.1 rev 32 beta
+# GIMP Book 2012.1 rev 33 beta
 #  by Ragnar Brynjúlfsson
 #  Web: TODO!
 #  Contact: TODO!
@@ -74,7 +74,7 @@ class Thumb():
             self.mtime = os.stat(thumb).st_mtime
             return True
         else:
-            self.thumb = os.path.join(os.path.expanduser('~/.thumbnails/normal'), file_hash) + '.png'
+            thumb = os.path.join(os.path.expanduser('~/.thumbnails/normal'), file_hash) + '.png'
             if os.path.exists(thumb):
                 if float(os.stat(thumb).st_mtime) < float(os.stat(self.imagepath).st_mtime):
                     return False
