@@ -1192,7 +1192,7 @@ class Main(gtk.Window):
     def __init__ (self):
         window = super(Main, self).__init__()
         self.set_title("Book")
-        self.set_size_request(600, 600)
+        self.set_size_request(300, 300)
         self.set_position(gtk.WIN_POS_CENTER)
         self.loaded = False  # If there is a book loaded in the interface.
         self.connect('notify::is-active', self.update_thumbs)
