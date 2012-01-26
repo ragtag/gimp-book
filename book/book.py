@@ -63,13 +63,17 @@ class Thumb():
         
     def find_thumb(self):
         # Find the pages thumbnail.
-        print self.imagepath
         imagepathuri = urllib.quote(self.imagepath.encode("utf-8"))
         file_hash = hashlib.md5('file://'+imagepathuri).hexdigest()
         if os.name == 'nt':
-            # TODO!
-            file_hash = hashlib.md5('file:///'+self.imagepath).hexdigest
-        thumb = os.path.join(os.path.expanduser('~/.thumbnails/large'), file_hash) + '.png'
+            winimagepath = repr(self.imagepath).replace('\\', '/')
+            file_hash = hashlib.md5('file:///'+winimagepath).hexdigest
+        thumbpath = os.path.join(os.path.expanduser('~'), '.thumbnails')
+        thumb = os.path.join(thumbpath, 'large', file_hash + '.png')
+        if not os.path.exists(os.path.join(thumbpath, 'large')):
+            os.makedirs(os.path.join(thumbpath, 'large'))
+        if not os.path.exists(os.path.join(thumbpath, 'normal')):
+            os.makedirs(os.path.join(thumbpath, 'normal'))
         if os.path.exists(thumb):
             if float(os.stat(thumb).st_mtime) < float(os.stat(self.imagepath).st_mtime):
                 return False
@@ -78,7 +82,7 @@ class Thumb():
             self.mtime = os.stat(thumb).st_mtime
             return True
         else:
-            thumb = os.path.join(os.path.expanduser('~/.thumbnails/normal'), file_hash) + '.png'
+            thumb = os.path.join(thumbpath, 'normal', file_hash + '.png')
             if os.path.exists(thumb):
                 if float(os.stat(thumb).st_mtime) < float(os.stat(self.imagepath).st_mtime):
                     return False
