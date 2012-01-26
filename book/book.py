@@ -63,8 +63,12 @@ class Thumb():
         
     def find_thumb(self):
         # Find the pages thumbnail.
+        print self.imagepath
         imagepathuri = urllib.quote(self.imagepath.encode("utf-8"))
         file_hash = hashlib.md5('file://'+imagepathuri).hexdigest()
+        if os.name == 'nt':
+            # TODO!
+            file_hash = hashlib.md5('file:///'+self.imagepath).hexdigest
         thumb = os.path.join(os.path.expanduser('~/.thumbnails/large'), file_hash) + '.png'
         if os.path.exists(thumb):
             if float(os.stat(thumb).st_mtime) < float(os.stat(self.imagepath).st_mtime):
@@ -1390,7 +1394,7 @@ class Main(gtk.Window):
         return response, text
 
     def valid_name(self, name):
-        # Replaces illegal characters:  \ / : * ? " < > | ^ ' ! with _. Removes - and . from filename, and limits length to 255 characters, including extension.
+        # Replaces illegal characters with _. Removes - and . from filename, and limits length to 255 characters, including extension.
         if len(name) < 1:
             show_error_msg("No page name entered.")
             return False
@@ -1400,7 +1404,7 @@ class Main(gtk.Window):
                 name = name[1:]
             else:
                 loop = False
-        illegalcs =  "\\", "/", ":", "*", "?", "\"", "<", "<", ">", "|", "^", "'", "!"
+        illegalcs =  "\\", "/", ":", "*", "?", "\"", "<", "<", ">", "|", "^", "'", "!", "$", "@", "&", "(", ")", "+", "~", ",", "="
         for c in illegalcs:
             name = name.replace(c, "_")
         if len(name) > 251:
