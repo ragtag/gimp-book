@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# GIMP Book 2012.1 rev 33 beta
+# GIMP Book 2012.2 rev 36 beta
 #  by Ragnar Brynjúlfsson
-#  Web: TODO!
+#  Web: http://registry.gimp.org/node/25975
 #  Contact: TODO!
 #
 # DESCRIPTION
@@ -31,8 +31,8 @@
 #
 # BUGS & LIMITATIONS
 # - This is an beta release, and may still contain some bugs.
-# - Only tested on Ubuntu 10.04 32bit and Ubuntu 11.10 64bit, using Gimp 2.6.8 and 2.6.11
-# - NOT tested on Windows or OSX.
+# - utf-8 names (i.e. Chinese, Japanese etc) for pages not working on Windows.
+# - NOT tested on OSX.
 
 import os
 import hashlib
@@ -66,8 +66,10 @@ class Thumb():
         imagepathuri = urllib.quote(self.imagepath.encode("utf-8"))
         file_hash = hashlib.md5('file://'+imagepathuri).hexdigest()
         if os.name == 'nt':
-            winimagepath = repr(self.imagepath).replace('\\', '/')
-            file_hash = hashlib.md5('file:///'+winimagepath).hexdigest
+            # TODO! Get Windows to support utf-8 file paths.
+            self.imagepath = self.imagepath.encode('utf-8')
+            winimagepath = repr(self.imagepath).replace('\\\\', '/')[1:-1]
+            file_hash = hashlib.md5('file:///'+str(winimagepath)).hexdigest()
         thumbpath = os.path.join(os.path.expanduser('~'), '.thumbnails')
         thumb = os.path.join(thumbpath, 'large', file_hash + '.png')
         if not os.path.exists(os.path.join(thumbpath, 'large')):
@@ -940,7 +942,7 @@ class Book():
     def add_page(self, p, dest):
         # Copy the template to a new page.
         try:
-            p = p+".xcf"
+            p = p+'.xcf'
             unique = True
             for a in self.pagestore:
                 if a[0] == p:
