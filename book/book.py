@@ -1479,6 +1479,7 @@ main()
 # - Add Percent based margins.
 # - Make all text translateable.
 # - Add tooltips, to make it easier to use.
+# - Add support for using MyPaint .ora format instead of .xcf, if Gimp .ora plug-in is present (file-ora.py). 
 # - Add some form of page number display, either in page names or on mouse over.
 #  LOW
 # - Size the widgets that look waaay too big for their own good.
