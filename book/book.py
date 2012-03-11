@@ -1471,17 +1471,18 @@ main()
 
 # FUTURE FEATURES & FIXES
 #  HIGH
-# - Add a website and finish documentation.
 # - Check that the different file format options are actually working.
+# - Add right click menu to the pages, for adding pages, renmaing etc.
+# - Add number of pages to title.
 # - Test, test and test!
 #  MEDIUM
 # - Add Percent based margins.
 # - Make all text translateable.
 # - Add tooltips, to make it easier to use.
+# - Add some form of page number display, either in page names or on mouse over.
+#  LOW
 # - Size the widgets that look waaay too big for their own good.
 # - New Book Window more like export with tables...maybe.
-#  LOW
 # - Left to right or right to left reading option when exporting.
-# - Add right click menu to the pages, for adding pages, renmaing, deleting etc.
 # - Support color coding pages, making it easy to divide up the story into chapters or mark pages.
 # - Batch (destructive operations on the whole book...maybe not safe to include)
