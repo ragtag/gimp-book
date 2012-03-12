@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# GIMP Book 2012.2 rev 36 beta
+# GIMP Book 2012.3 rev 40 beta
 #  by Ragnar Brynjúlfsson
 #  Web: http://registry.gimp.org/node/25975
 #  Contact: TODO!
 #
 # DESCRIPTION
 #   book.py is a plug-in for managing multiple pages in GIMP, for working with comic books, 
-#   illustrated childrens books, sketchbooks or similar.
+#   illustrated childrens books, sketchbooks, storyboards or similar.
 #
 # INSTALLATION
 #   Drop the script in your plug-ins folder. On Linux this is ~/.gimp-2.6/plug-ins/
@@ -29,10 +29,18 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# BUGS & LIMITATIONS
+# KNOWN BUGS & LIMITATIONS
 # - This is an beta release, and may still contain some bugs.
 # - utf-8 names (i.e. Chinese, Japanese etc) for pages not working on Windows.
 # - NOT tested on OSX.
+#
+# CHANGELOG
+# - Added storyboard mode, where the pages flow, rather than display in two columns.
+# - Doubled the default size of the Book window, to 600x600.
+# - Added page numbers to title bar.
+# - Added right click menu to pages, for quicker access to adding, deleting and renaming pages.
+# - Bugfix - Clicking 'No' button in the delete page dialog now works.
+
 
 import os
 import hashlib
@@ -832,7 +840,7 @@ class Book():
         self.bookname = ""  # The name of the book.
         self.pagepath = ""  # Path to the "pages" subfolder.
         self.trashpath = "" # Path to trash folder.
-        self.selected = -1  # Index of the currently selected page, -1 if none.
+        self.selected = 0  # Index of the currently selected page, -1 if none.
 
     def make_book(self, dest, name, w, h, color, fill):
         # Build the files and folders needed for the book.
@@ -1192,7 +1200,7 @@ class Main(gtk.Window):
     def __init__ (self):
         window = super(Main, self).__init__()
         self.set_title("Book")
-        self.set_size_request(300, 300)
+        self.set_size_request(600, 600)
         self.set_position(gtk.WIN_POS_CENTER)
         self.loaded = False  # If there is a book loaded in the interface.
         self.connect('notify::is-active', self.update_thumbs)
@@ -1244,6 +1252,24 @@ class Main(gtk.Window):
 
         mb.append(i_file)
 
+        # Popup Menu
+        self.popup = gtk.Menu()
+        addpage = gtk.ImageMenuItem(gtk.STOCK_NEW)
+        addpage.set_label("Add Page")
+        addpage.connect("activate", self.ask_add_page)
+        self.popup.append(addpage)
+        addpage.show()
+        deletepage = gtk.ImageMenuItem(gtk.STOCK_DELETE)
+        deletepage.set_label("Delete Page")
+        deletepage.connect("activate", self.ask_delete_page)
+        self.popup.append(deletepage)
+        deletepage.show()
+        renamepage = gtk.ImageMenuItem(gtk.STOCK_PROPERTIES)
+        renamepage.set_label("Rename Page")
+        renamepage.connect("activate", self.ask_rename_page)
+        self.popup.append(renamepage)
+        renamepage.show()
+
         # Main toolbar
         toolbar = gtk.Toolbar()
         toolbar.set_style(gtk.TOOLBAR_ICONS)
@@ -1255,13 +1281,20 @@ class Main(gtk.Window):
         self.del_page.connect("clicked", self.ask_delete_page)
         self.del_page.set_sensitive(False)
         self.del_page.set_tooltip_text("Delete the selected page.")
-        self.ren_page = gtk.ToolButton(gtk.STOCK_PROPERTIES)
+        self.ren_page = gtk.ToolButton(gtk.STOCK_EDIT)
         self.ren_page.connect("clicked", self.ask_rename_page)
         self.ren_page.set_sensitive(False)
         self.ren_page.set_tooltip_text("Rename the selected page.")
+        sep = gtk.SeparatorToolItem()
+        self.storyboard = gtk.ToolButton(gtk.STOCK_ABOUT)
+        self.storyboard.set_sensitive(False)
+        self.storyboard.set_tooltip_text("Toggle storyboard view mode.")
+        self.storyboard.connect("clicked", self.toggle_storyboard_mode)
         toolbar.insert(self.add_page, 0)
         toolbar.insert(self.del_page, 1)
         toolbar.insert(self.ren_page, 2)
+        toolbar.insert(sep, 3)
+        toolbar.insert(self.storyboard, 4)
 
         self.vbox = gtk.VBox(False, 2)
         self.vbox.pack_start(mb, False, False, 0)
@@ -1327,8 +1360,23 @@ class Main(gtk.Window):
         # Load the pages into an IconView.
         self.thumbs.connect("selection-changed", self.select_page)
         self.thumbs.connect("item-activated", self.book.open_page)
+        self.thumbs.connect("button-press-event", self.button_press, self.popup)
         self.thumbs.set_model(self.book.pagestore)
-        self.set_title("GIMP Book - %s" % (self.book.bookname))
+        self.thumbs.select_path(0)
+        self.update_title()
+
+    def update_title(self):
+        # Update the title bar.
+        self.set_title("GIMP Book - %s (page %s of %s)" % (self.book.bookname, self.book.selected, len(self.book.pagestore)-1))
+
+    def button_press(self, widget, event, menu):
+        # Capture buttons presses on thumbs.
+        if event.type == gtk.gdk.BUTTON_PRESS and event.button == 3:
+            path = widget.get_path_at_pos(int(event.x), int(event.y))
+            if path:
+                widget.select_path(widget.get_path_at_pos(int(event.x), int(event.y)))
+            menu.popup(None, None, None, event.button, event.time)
+            pass
         
     def export_win(self, widget):
         # Settings for exporting the book.
@@ -1339,6 +1387,7 @@ class Main(gtk.Window):
         # A page has been selected.
         if self.thumbs.get_selected_items():
             self.book.selected = self.thumbs.get_selected_items()[0][0]
+            self.update_title()
         else:
             self.book.selected = -1
 
@@ -1354,6 +1403,7 @@ class Main(gtk.Window):
                     text = self.valid_name(text)
                     self.book.add_page(text, dest)
                     self.del_page.set_sensitive(True)
+                    self.update_title()
         else:
             show_error_msg("You need to create or load a book, before adding pages to it.")
 
@@ -1374,6 +1424,9 @@ class Main(gtk.Window):
             self.book.delete_page()
             if len(self.book.pagestore) < 2:
                 self.del_page.set_sensitive(False)
+            self.update_title()
+            areyousure.destroy()
+        else:
             areyousure.destroy()
 
     def name_dialog(self, title, label):
@@ -1430,6 +1483,14 @@ class Main(gtk.Window):
             self.del_page.set_sensitive(True)
         self.ren_page.set_sensitive(True)
         self.file_export.set_sensitive(True)
+        self.storyboard.set_sensitive(True)
+
+    def toggle_storyboard_mode(self, widget):
+        # Have the pages flow, rather than be shown in two columns. Handy for storyboarding.
+        if int(self.thumbs.get_columns()) == 2:
+            self.thumbs.set_columns(0)
+        else:
+            self.thumbs.set_columns(2)
 
     def close_book(self):
         if self.loaded:
@@ -1471,19 +1532,14 @@ main()
 
 # FUTURE FEATURES & FIXES
 #  HIGH
-# - Check that the different file format options are actually working.
-# - Add right click menu to the pages, for adding pages, renmaing etc.
-# - Add number of pages to title.
-# - Test, test and test!
+# - Ad contact info to the script (need to set up account).
+# - Add support for using MyPaint .ora format instead of .xcf, if Gimp .ora plug-in is present (file-ora.py). 
 #  MEDIUM
+# - Left to right or right to left reading option when exporting.
 # - Add Percent based margins.
 # - Make all text translateable.
-# - Add tooltips, to make it easier to use.
-# - Add support for using MyPaint .ora format instead of .xcf, if Gimp .ora plug-in is present (file-ora.py). 
-# - Add some form of page number display, either in page names or on mouse over.
 #  LOW
 # - Size the widgets that look waaay too big for their own good.
 # - New Book Window more like export with tables...maybe.
-# - Left to right or right to left reading option when exporting.
 # - Support color coding pages, making it easy to divide up the story into chapters or mark pages.
 # - Batch (destructive operations on the whole book...maybe not safe to include)
