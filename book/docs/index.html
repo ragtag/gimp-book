@@ -4,11 +4,11 @@
   </head>
   <body>
     <h1>IMPORTANT!</h1>
-    <p>This is an early beta release of GIMP Book. I have only tested it under Ubuntu 10.04, and don't know if it will work on Windows or OSX. Creating a comic book is a lot of work, work you don't want to loose, so make sure you make a backup of all your files regularly!</p>
+    <p>Creating a comic book is a lot of work, work you don't want to loose, so make sure you make a backup of all your files regularly!</p>
     <h1>GIMP Book Plug-In</h1>
     <p>GIMP Book, is a plug-in for managing multiple pages in <a href="http://gimp.org">the GIMP</a>. It opens a separete window with thumbnails of all your pages, where you can add, delete, sort and rename your pages. And once you're done you can export the book in various formats, including support for scaling and adjusting the margins as you export.</p>
     <h2>Installation</h2>
-    <p>Copy the book.py file into ~/gimp-2.6/plug-ins/.  The next time you start the GIMP, you should find it under the Windows menu.</p>
+    <p>Copy the book.py and gimp.svg file into ~/gimp-2.6/plug-ins/.  The next time you start the GIMP, you should find it under the Windows menu. On linux make sure book.py is executable (chmod a+x book.py).</p>
     <h2>Creating a Book</h2>
     <p>Start by opening the GIMP, and the GIMP Book interface from the Windows>Book... menu. You'll be presented with an empty Book window, in which you can choose File>New Book (Ctrl-N).</p>
     <p>In the Create a New Book dialog, enter a name for your book, size and destination. GIMP Book will create a folder at that destination, with the name of your book, a a couple of subfolders for and a *.book file.</p>
@@ -33,6 +33,8 @@
     <p>Select the page you want to rename, and hit the rename toolbutton. Enter a new name, and you're done.</p>
     <h3>Sorting Pages</h3>
     <p>To reorder the pages, simply drag them around to where you want them.</p>
+    <h3>Storyboard Mode</h3>
+    <p>Storyboard mode toggles the page view between two column book view, and a flowing storyboard view that fits the width of the Book window. This is handy for making storyboards, as opposed to comic books.</p>
     <h2>Exporting Your Book</h2>
     <p>Once you're finished with your book, you can export it to several different formats. To do this simply choose File>Export Book... from the menu in the Book window.</p>
     <h3>Destination Tab</h3>
