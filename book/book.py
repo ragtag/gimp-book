@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# GIMP Book 2012.3 rev 40 beta
+# GIMP Book 2012.4 rev 42
 #  by Ragnar Brynjúlfsson
 #  Web: http://registry.gimp.org/node/25975
 #  Contact: TODO!
@@ -36,9 +36,9 @@
 #
 # CHANGELOG
 # - Added storyboard mode, where the pages flow, rather than display in two columns.
-# - Doubled the default size of the Book window, to 600x600.
 # - Added page numbers to title bar.
 # - Added right click menu to pages, for quicker access to adding, deleting and renaming pages.
+# - Added gimp icon to dialog and windows..
 # - Bugfix - Clicking 'No' button in the delete page dialog now works.
 # - Bugfix - Window can be made smaller.
 
@@ -108,12 +108,9 @@ class NewBookWin(gtk.Window):
     def __init__(self, main):
         self.main = main
         self.main.set_sensitive(False)
-        self.set_icon_from_file("/home/ragnar/Projects/gimp/book/book.png")
-        statusIcon = gtk.StatusIcon()
-        statusIcon.set_from_file("/home/ragnar/Projects/gimp/book/book.png")
-        statusIcon.set_visible(True)
         # Create a new book.
         win = super(NewBookWin, self).__init__()
+        self.set_transient_for(main)
         self.set_title("Create a New Book...")
         self.set_size_request(400, 400)
         self.set_position(gtk.WIN_POS_CENTER)
@@ -140,7 +137,7 @@ class NewBookWin(gtk.Window):
         namebox.pack_start(namelabel)
         namebox.pack_start(self.nameentry)
         # Destination dialog
-        destdialog = gtk.FileChooserDialog("Create a New Book", None, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        destdialog = gtk.FileChooserDialog("Create a New Book", self.main, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         destdialog.set_default_response(gtk.RESPONSE_OK)
         # Destination
         destbox = gtk.HBox(False, 2)
@@ -231,7 +228,7 @@ class NewBookWin(gtk.Window):
 
     def help(self, widget):
         # Displays help for the new book dialog.
-        helpdialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, "TODO! Help for this window")
+        helpdialog = gtk.MessageDialog(self.main, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, "TODO! Help for this window")
         helpdialog.run()
         helpdialog.destroy()
 
@@ -257,6 +254,7 @@ class ExportWin(gtk.Window):
         # Build the export window.
         self.main = main
         win = super(ExportWin, self).__init__()
+        self.set_transient_for(main)
         self.set_title("Export Book...")
         self.set_size_request(500, 500)
         self.set_position(gtk.WIN_POS_CENTER)
@@ -287,7 +285,7 @@ class ExportWin(gtk.Window):
         # Destination table
         destt = gtk.Table(4, 5, False)
         destl = gtk.Label("Destination Folder:")
-        destd = gtk.FileChooserDialog("Export to", None, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        destd = gtk.FileChooserDialog("Export to", self.main, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         destd.set_default_response(gtk.RESPONSE_OK)
         self.destb = gtk.FileChooserButton(destd)
 
@@ -806,7 +804,7 @@ class ExportWin(gtk.Window):
         self.progress.set_text("")
         outfolder = os.path.join(self.destb.get_filename(), self.main.book.bookname)
         if os.path.isdir(outfolder):
-            overwrite = gtk.MessageDialog(None, 0, gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, '"%s" exists, do you want to overwrite it?' % (outfolder))
+            overwrite = gtk.MessageDialog(self.main, 0, gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, '"%s" exists, do you want to overwrite it?' % (outfolder))
             response = overwrite.run()
             if response == gtk.RESPONSE_YES:
                 overwrite.hide()
@@ -845,6 +843,7 @@ class Book():
         self.pagepath = ""  # Path to the "pages" subfolder.
         self.trashpath = "" # Path to trash folder.
         self.selected = 0  # Index of the currently selected page, -1 if none.
+
 
     def make_book(self, dest, name, w, h, color, fill):
         # Build the files and folders needed for the book.
@@ -1208,6 +1207,10 @@ class Main(gtk.Window):
         self.set_position(gtk.WIN_POS_CENTER)
         self.loaded = False  # If there is a book loaded in the interface.
         self.connect('notify::is-active', self.update_thumbs)
+        try:
+            self.set_icon_from_file("gimp.svg")
+        except:
+            pass
 
         # Main menu
         mb = gtk.MenuBar()
@@ -1268,7 +1271,7 @@ class Main(gtk.Window):
         deletepage.connect("activate", self.ask_delete_page)
         self.popup.append(deletepage)
         deletepage.show()
-        renamepage = gtk.ImageMenuItem(gtk.STOCK_PROPERTIES)
+        renamepage = gtk.ImageMenuItem(gtk.STOCK_EDIT)
         renamepage.set_label("Rename Page")
         renamepage.connect("activate", self.ask_rename_page)
         self.popup.append(renamepage)
@@ -1335,7 +1338,7 @@ class Main(gtk.Window):
 
     def open_book(self, widget):
         # Interface for opening an existing book.
-        o = gtk.FileChooserDialog("Open Book", None, gtk.FILE_CHOOSER_ACTION_OPEN, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        o = gtk.FileChooserDialog("Open Book", self, gtk.FILE_CHOOSER_ACTION_OPEN, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         o.set_default_response(gtk.RESPONSE_OK)
         f = gtk.FileFilter()
         f.set_name("GIMP Book")
@@ -1422,7 +1425,7 @@ class Main(gtk.Window):
 
     def ask_delete_page(self, widget):
         # Delete the selected page.
-        areyousure = gtk.MessageDialog(None, 0, gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, 'Delete page "%s"?' % (self.book.pagestore[self.book.selected][0]))
+        areyousure = gtk.MessageDialog(self, 0, gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, 'Delete page "%s"?' % (self.book.pagestore[self.book.selected][0]))
         response = areyousure.run()
         if response == gtk.RESPONSE_YES:
             self.book.delete_page()
@@ -1436,7 +1439,7 @@ class Main(gtk.Window):
     def name_dialog(self, title, label):
         # Dialog for entering page names.
         dialog = gtk.Dialog(title,
-                            None,
+                            self,
                             gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
                             (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT,
                              gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
