@@ -40,7 +40,7 @@
 # - Added page numbers to title bar.
 # - Added right click menu to pages, for quicker access to adding, deleting and renaming pages.
 # - Bugfix - Clicking 'No' button in the delete page dialog now works.
-
+# - Bugfix - Window can be made smaller.
 
 import os
 import hashlib
@@ -108,6 +108,10 @@ class NewBookWin(gtk.Window):
     def __init__(self, main):
         self.main = main
         self.main.set_sensitive(False)
+        self.set_icon_from_file("/home/ragnar/Projects/gimp/book/book.png")
+        statusIcon = gtk.StatusIcon()
+        statusIcon.set_from_file("/home/ragnar/Projects/gimp/book/book.png")
+        statusIcon.set_visible(True)
         # Create a new book.
         win = super(NewBookWin, self).__init__()
         self.set_title("Create a New Book...")
@@ -1200,7 +1204,7 @@ class Main(gtk.Window):
     def __init__ (self):
         window = super(Main, self).__init__()
         self.set_title("Book")
-        self.set_size_request(600, 600)
+        self.set_default_size(400, 400)
         self.set_position(gtk.WIN_POS_CENTER)
         self.loaded = False  # If there is a book loaded in the interface.
         self.connect('notify::is-active', self.update_thumbs)
