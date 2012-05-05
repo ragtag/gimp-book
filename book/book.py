@@ -1539,6 +1539,7 @@ main()
 
 # FUTURE FEATURES & FIXES
 #  HIGH
+# - BUG! Book is not joined under Gimp in 2.8, and still has a ? icon in Unity.
 # - Ad contact info to the script (need to set up account).
 # - Add support for using MyPaint .ora format instead of .xcf, if Gimp .ora plug-in is present (file-ora.py). 
 #  MEDIUM
