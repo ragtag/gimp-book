@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# GIMP Book 2012.4 rev 42
+# GIMP Book 2012.5 rev 43
 #  by Ragnar Brynjúlfsson
 #  Web: http://registry.gimp.org/node/25975
 #  Contact: TODO!
@@ -35,6 +35,8 @@
 # - NOT tested on OSX.
 #
 # CHANGELOG
+# - Added page duplication.
+# - Added open page to right click menu.
 # - Added storyboard mode, where the pages flow, rather than display in two columns.
 # - Added page numbers to title bar.
 # - Added right click menu to pages, for quicker access to adding, deleting and renaming pages.
@@ -969,6 +971,26 @@ class Book():
         except Exception, err:
             show_error_msg(err)
 
+    def dupli_page(self, p, dest):
+        # Copy the template to a new page.
+        try:
+            p = p+'.xcf'
+            unique = True
+            for a in self.pagestore:
+                if a[0] == p:
+                    unique = False
+            if unique:
+                template = os.path.join(self.pagepath, self.pagestore[0][0])
+                src = os.path.join(self.pagepath, self.pagestore[dest][0])
+                shutil.copy(src, os.path.join(self.pagepath, p))
+                thumb = Thumb(os.path.join(self.pagepath, p))
+                self.pagestore.insert(dest, ( p, thumb.thumbpix, thumb.path, thumb.mtime))
+                return True
+            else:
+                show_error_msg("Page names must be unique")
+        except Exception, err:
+            show_error_msg(err)
+
     def rename_page(self, p):
         # Rename a page.
         p = p+".xcf"
@@ -1266,6 +1288,17 @@ class Main(gtk.Window):
         addpage.connect("activate", self.ask_add_page)
         self.popup.append(addpage)
         addpage.show()
+        openpage = gtk.ImageMenuItem(gtk.STOCK_OPEN)
+        openpage.set_label("Open Page")
+        openpage.connect("activate", self.open_page)
+        self.popup.append(openpage)
+        openpage.show()
+        # TODO! Find fitting stock icon
+        duplipage = gtk.ImageMenuItem(gtk.STOCK_COPY)
+        duplipage.set_label("Duplicate Page")
+        duplipage.connect("activate", self.ask_dupli_page)
+        self.popup.append(duplipage)
+        duplipage.show()
         deletepage = gtk.ImageMenuItem(gtk.STOCK_DELETE)
         deletepage.set_label("Delete Page")
         deletepage.connect("activate", self.ask_delete_page)
@@ -1284,6 +1317,10 @@ class Main(gtk.Window):
         self.add_page.connect("clicked", self.ask_add_page)
         self.add_page.set_sensitive(False)
         self.add_page.set_tooltip_text("Add a new page.")
+        self.dupli_page = gtk.ToolButton(gtk.STOCK_COPY)
+        self.dupli_page.connect("clicked", self.ask_dupli_page)
+        self.dupli_page.set_sensitive(False)
+        self.dupli_page.set_tooltip_text("Duplicate the selected page.")
         self.del_page = gtk.ToolButton(gtk.STOCK_DELETE)
         self.del_page.connect("clicked", self.ask_delete_page)
         self.del_page.set_sensitive(False)
@@ -1298,10 +1335,11 @@ class Main(gtk.Window):
         self.storyboard.set_tooltip_text("Toggle storyboard view mode.")
         self.storyboard.connect("clicked", self.toggle_storyboard_mode)
         toolbar.insert(self.add_page, 0)
-        toolbar.insert(self.del_page, 1)
-        toolbar.insert(self.ren_page, 2)
-        toolbar.insert(sep, 3)
-        toolbar.insert(self.storyboard, 4)
+        toolbar.insert(self.dupli_page, 1)
+        toolbar.insert(self.del_page, 2)
+        toolbar.insert(self.ren_page, 3)
+        toolbar.insert(sep, 4)
+        toolbar.insert(self.storyboard, 5)
 
         self.vbox = gtk.VBox(False, 2)
         self.vbox.pack_start(mb, False, False, 0)
@@ -1404,7 +1442,7 @@ class Main(gtk.Window):
         if self.book.selected < 1:
             dest = len(self.book.pagestore)
         if self.loaded:
-            response, text = self.name_dialog("Add a Page", "Enter Page Description: ")
+            response, text = self.name_dialog("Add a Page", "Enter Page Name: ")
             if response == gtk.RESPONSE_ACCEPT:
                 if self.valid_name(text):
                     text = self.valid_name(text)
@@ -1414,10 +1452,31 @@ class Main(gtk.Window):
         else:
             show_error_msg("You need to create or load a book, before adding pages to it.")
 
+    def open_page(self, widget):
+        # Open page from right click menu.
+        self.book.open_page(self.thumbs, [self.book.selected])
+
+    def ask_dupli_page(self, widget):
+        # Duplicate the selected page.
+        dest = self.book.selected
+        if self.book.selected < 0:
+            show_error_msg("No page selected to duplicate.")
+            return False
+        if self.loaded:
+            response, text = self.name_dialog("Duplicate Page", "Enter Name of Duplicate: ")
+            if response == gtk.RESPONSE_ACCEPT:
+                if self.valid_name(text):
+                    text = self.valid_name(text)
+                    self.book.dupli_page(text, dest)
+                    self.del_page.set_sensitive(True)
+                    self.update_title()
+        else:
+            show_error_msg("You need to create or load a book, before adding pages to it.")
+
     def ask_rename_page(self, widget):
         # Rename the selected page.
         if self.book.selected > -1:
-            response, text = self.name_dialog("Rename Page", "Ente Page Description: ")
+            response, text = self.name_dialog("Rename Page", "Ente Page Name: ")
             if response == gtk.RESPONSE_ACCEPT:
                 if self.valid_name(text):
                     text = self.valid_name(text)
@@ -1486,6 +1545,7 @@ class Main(gtk.Window):
     def enable_controls(self):
         # Enable the controles that are disabled when no book is loaded.
         self.add_page.set_sensitive(True)
+        self.dupli_page.set_sensitive(True)
         if len(self.book.pagestore) > 1:
             self.del_page.set_sensitive(True)
         self.ren_page.set_sensitive(True)
@@ -1539,9 +1599,11 @@ main()
 
 # FUTURE FEATURES & FIXES
 #  HIGH
+# - Restore deleted pages.
+# - Import page(s). Let's you import single or multiple pages in any of the formats supported by Gimp (converting to xcf on import).
 # - BUG! Book is not joined under Gimp in 2.8, and still has a ? icon in Unity.
 # - Ad contact info to the script (need to set up account).
-# - Add support for using MyPaint .ora format instead of .xcf, if Gimp .ora plug-in is present (file-ora.py). 
+# - Show large thumbnails if available (or figure out how to show the same size as the selected thumbnail size in gimp prefs).
 #  MEDIUM
 # - Left to right or right to left reading option when exporting.
 # - Add Percent based margins.
