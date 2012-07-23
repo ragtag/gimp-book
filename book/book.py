@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# GIMP Book 2012.5 rev 43
+# GIMP Book 2012.7 rev 46
 #  by Ragnar Brynjúlfsson
 #  Web: http://registry.gimp.org/node/25975
-#  Contact: TODO!
 #
 # DESCRIPTION
 #   book.py is a plug-in for managing multiple pages in GIMP, for working with comic books, 
@@ -1602,7 +1601,6 @@ main()
 # - Restore deleted pages.
 # - Import page(s). Let's you import single or multiple pages in any of the formats supported by Gimp (converting to xcf on import).
 # - BUG! Book is not joined under Gimp in 2.8, and still has a ? icon in Unity.
-# - Ad contact info to the script (need to set up account).
 # - Show large thumbnails if available (or figure out how to show the same size as the selected thumbnail size in gimp prefs).
 #  MEDIUM
 # - Left to right or right to left reading option when exporting.
