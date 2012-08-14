@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# GIMP Book 2012.8 rev 46
+# GIMP Book
 #  by Ragnar Brynjúlfsson
-#  Web: http://registry.gimp.org/node/25975
 #
 # DESCRIPTION
 #   book.py is a plug-in for managing multiple pages in GIMP, for working with comic books, 
@@ -12,26 +11,36 @@
 # INSTALLATION
 #   Drop the script in your plug-ins folder. On Linux this is ~/.gimp-2.8/plug-ins/
 #
+# VERSION
+version = "2012.8 rev 47"
+# AUTHOR 
+author = [ 'Ragnar Brynjúlfsson' ]
+# COPYRIGHT
+copyright = "Copyright 2011-2012 © Ragnar Brynjúlfsson"
+# WEBSITE
+website = "http://registry.gimp.org/node/25975"
+plugin = "Gimp Book"
 # LICENSE
-#   Copyright 2011-2012 Ragnar Brynjúlfsson
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+license = """Copyright 2011-2012 Ragnar Brynjúlfsson
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>."""
+
 # KNOWN BUGS & LIMITATIONS
 # - utf-8 names (i.e. Chinese, Japanese etc) for pages not working properly on Windows.
 # - NOT tested on OSX.
 # - Import does not yet support any options on importing files such as pdf or svg (resolution, page etc.).
+
 
 import os
 import hashlib
@@ -201,10 +210,6 @@ class NewBookWin(gtk.Window):
         # Buttons
         buttonbox = gtk.HBox(False, 2)
         cont.add(buttonbox)
-        # Help
-        helpbutton = gtk.Button("Help")
-        helpbutton.connect("clicked", self.help) # No pun intended!
-        buttonbox.pack_start(helpbutton)
         # Cancel
         cancelbutton = gtk.Button("Cancel")
         cancelbutton.connect("clicked", self.cancel)
@@ -215,13 +220,6 @@ class NewBookWin(gtk.Window):
         buttonbox.pack_start(okbutton)
 
         self.show_all()
-
-
-    def help(self, widget):
-        # Displays help for the new book dialog.
-        helpdialog = gtk.MessageDialog(self.main, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, "TODO! Help for this window")
-        helpdialog.run()
-        helpdialog.destroy()
 
     def cancel(self, widget):
         # Cancel book creation and close the window.
@@ -1296,6 +1294,27 @@ class Main(gtk.Window):
         file_close.connect("activate", gtk.main_quit)
         filemenu.append(file_close)
 
+        # View Menu
+        self.viewmenu = gtk.Menu()
+        i_view = gtk.MenuItem("View")
+        i_view.set_submenu(self.viewmenu)
+
+        toolbar = gtk.CheckMenuItem()
+        toolbar.set_label("Show Toolbar")
+        toolbar.set_active(True)
+        toolbar.connect("activate", self.toggle_toolbar)
+        self.viewmenu.append(toolbar)
+
+        viewsep = gtk.SeparatorMenuItem()
+        self.viewmenu.append(viewsep)
+
+        self.storyboardm = gtk.CheckMenuItem()
+        self.storyboardm.set_label("Storyboard Mode")
+        self.storyboardm.set_active(False)
+        self.storyboardm.set_sensitive(False)
+        self.storyboardm.connect("activate", self.toggle_storyboard_mode)
+        self.viewmenu.append(self.storyboardm)
+
         # Pages Menu
         self.pagemenu = gtk.Menu()
         i_page = gtk.MenuItem("Pages")
@@ -1358,12 +1377,38 @@ class Main(gtk.Window):
         self.pagemenu.append(self.importpage)
         self.importpage.show()
 
+        # Help Menu
+        self.helpmenu = gtk.Menu()
+        i_help = gtk.MenuItem("Help")
+        i_help.set_submenu(self.helpmenu)
+        
+        onlinehelp = gtk.MenuItem()
+        urlbutton = gtk.LinkButton("http://vg.no/", "Online Help")
+        urlbutton.show()
+        onlinehelp.add(urlbutton)
+        onlinehelp.show()
+        # WORKING HERE TODO!
+        #onlinehelp.set_label("Online Help")
+        #onlinehelp.connect("activate", self.online_help)
+        self.helpmenu.append(onlinehelp)
+
+        helpsep = gtk.SeparatorMenuItem()
+        self.helpmenu.append(helpsep)
+
+        about = gtk.MenuItem()
+        about.set_label("About Gimp Book")
+        about.connect("activate", self.about)
+        self.helpmenu.append(about)
+
         mb.append(i_file)
+        mb.append(i_view)
         mb.append(i_page)
+        mb.append(i_help)
+
 
         # Main toolbar
-        toolbar = gtk.Toolbar()
-        toolbar.set_style(gtk.TOOLBAR_ICONS)
+        self.toolbar = gtk.Toolbar()
+        self.toolbar.set_style(gtk.TOOLBAR_ICONS)
         self.add_page = gtk.ToolButton(gtk.STOCK_NEW)
         self.add_page.connect("clicked", self.ask_add_page)
         self.add_page.set_sensitive(False)
@@ -1385,16 +1430,16 @@ class Main(gtk.Window):
         self.storyboard.set_sensitive(False)
         self.storyboard.set_tooltip_text("Toggle storyboard view mode.")
         self.storyboard.connect("clicked", self.toggle_storyboard_mode)
-        toolbar.insert(self.add_page, 0)
-        toolbar.insert(self.dupli_page, 1)
-        toolbar.insert(self.ren_page, 2)
-        toolbar.insert(self.del_page, 3)
-        toolbar.insert(sep, 4)
-        toolbar.insert(self.storyboard, 5)
+        self.toolbar.insert(self.add_page, 0)
+        self.toolbar.insert(self.dupli_page, 1)
+        self.toolbar.insert(self.ren_page, 2)
+        self.toolbar.insert(self.del_page, 3)
+        self.toolbar.insert(sep, 4)
+        self.toolbar.insert(self.storyboard, 5)
 
         self.vbox = gtk.VBox(False, 2)
         self.vbox.pack_start(mb, False, False, 0)
-        self.vbox.pack_start(toolbar, False, False, 0)
+        self.vbox.pack_start(self.toolbar, False, False, 0)
 
         self.thumbs = gtk.IconView()
         self.thumbs.set_text_column(0)
@@ -1415,6 +1460,31 @@ class Main(gtk.Window):
         self.show_all()
         self.progress.hide()
         return window    
+
+    def online_help(self, widget):
+        # Link to Gimp Registry.
+        pass
+    
+    def about(self, widget):
+        # About dialog.
+        about = gtk.AboutDialog()
+        about.set_name(plugin)
+        about.set_version(version)
+        about.set_authors(author)
+        about.set_license(license)
+        about.set_copyright(copyright)
+        about.set_website(website)
+        about.set_website_label("Visit Gimp Book at the Gimp Registry")
+        response = about.run()
+        if response == gtk.RESPONSE_CANCEL:
+            about.destroy()
+
+    def toggle_toolbar(self, widget):
+        # Toggle the visibility of the toolbar.
+        if widget.active:
+            self.toolbar.show()
+        else:
+            self.toolbar.hide()
 
     def update_thumbs(self, widget, arg):
         # Tell Book to update the thumbnails on window receiving focus.
@@ -1646,6 +1716,7 @@ class Main(gtk.Window):
         self.ren_page.set_sensitive(True)
         self.file_export.set_sensitive(True)
         self.storyboard.set_sensitive(True)
+        self.storyboardm.set_sensitive(True)
         if len(self.book.pagestore) > 1:
             self.del_page.set_sensitive(True)
             self.deletepage.set_sensitive(True)
@@ -1660,8 +1731,10 @@ class Main(gtk.Window):
         # Have the pages flow, rather than be shown in two columns. Handy for storyboarding.
         if int(self.thumbs.get_columns()) == 2:
             self.thumbs.set_columns(0)
+            #self.storyboardm.set_active(True)
         else:
             self.thumbs.set_columns(2)
+            #self.storyboardm.set_active(False)
 
     def close_book(self):
         if self.loaded:
