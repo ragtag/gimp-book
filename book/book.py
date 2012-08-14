@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# GIMP Book 2012.7 rev 46
+# GIMP Book 2012.8 rev 46
 #  by Ragnar Brynjúlfsson
 #  Web: http://registry.gimp.org/node/25975
 #
@@ -10,10 +10,10 @@
 #   illustrated childrens books, sketchbooks, storyboards or similar.
 #
 # INSTALLATION
-#   Drop the script in your plug-ins folder. On Linux this is ~/.gimp-2.6/plug-ins/
+#   Drop the script in your plug-ins folder. On Linux this is ~/.gimp-2.8/plug-ins/
 #
 # LICENSE
-#   Copyright 2011 Ragnar Brynjúlfsson
+#   Copyright 2011-2012 Ragnar Brynjúlfsson
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,19 +29,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # KNOWN BUGS & LIMITATIONS
-# - This is an beta release, and may still contain some bugs.
-# - utf-8 names (i.e. Chinese, Japanese etc) for pages not working on Windows.
+# - utf-8 names (i.e. Chinese, Japanese etc) for pages not working properly on Windows.
 # - NOT tested on OSX.
-#
-# CHANGELOG
-# - Added page duplication.
-# - Added open page to right click menu.
-# - Added storyboard mode, where the pages flow, rather than display in two columns.
-# - Added page numbers to title bar.
-# - Added right click menu to pages, for quicker access to adding, deleting and renaming pages.
-# - Added gimp icon to dialog and windows..
-# - Bugfix - Clicking 'No' button in the delete page dialog now works.
-# - Bugfix - Window can be made smaller.
+# - No option dialogs when importing file formats that require it, such as svg and pdf.
 
 import os
 import hashlib
@@ -970,6 +960,33 @@ class Book():
         except Exception, err:
             show_error_msg(err)
 
+    def import_page(self, plist, dest):
+        # Import a page from an external source.
+        # TODO! Add support for format specific import settings, such as svg and pdf resolution.
+        for p in plist:
+            name,ext = os.path.splitext(os.path.basename(p))
+            name = name+'.xcf'
+            unique = True
+            for a in  self.pagestore:
+                if a[0] == name:
+                    unique = False
+            if unique:
+                img = pdb.gimp_file_load(p, p)
+                pdb.gimp_xcf_save(0, img, None, os.path.join(self.pagepath, name) , name)
+                thumb = Thumb(os.path.join(self.pagepath, p))
+                self.pagestore.insert(dest, (name, thumb.thumbpix, thumb.path, thumb.mtime))
+            else:
+                show_error_msg("Page name is not unique.")
+
+
+    def open_page(self, iconview, number):
+        # Open the page the user clicked in GIMP.
+        number = number[0]
+        pagetoopen = os.path.join(self.pagepath, self.pagestore[number][0])
+        img = pdb.gimp_file_load(pagetoopen, pagetoopen)
+        img.clean_all()
+        gimp.Display(img)
+
     def dupli_page(self, p, dest):
         # Copy the template to a new page.
         try:
@@ -1224,7 +1241,7 @@ class Main(gtk.Window):
     def __init__ (self):
         window = super(Main, self).__init__()
         self.set_title("Book")
-        self.set_default_size(400, 400)
+        self.set_default_size(570, 400)
         self.set_position(gtk.WIN_POS_CENTER)
         self.loaded = False  # If there is a book loaded in the interface.
         self.connect('notify::is-active', self.update_thumbs)
@@ -1236,6 +1253,7 @@ class Main(gtk.Window):
         # Main menu
         mb = gtk.MenuBar()
 
+        # File menu
         filemenu = gtk.Menu()
         i_file = gtk.MenuItem("File")
         i_file.set_submenu(filemenu)
@@ -1278,36 +1296,70 @@ class Main(gtk.Window):
         file_close.connect("activate", gtk.main_quit)
         filemenu.append(file_close)
 
-        mb.append(i_file)
+        # Pages Menu
+        self.pagemenu = gtk.Menu()
+        i_page = gtk.MenuItem("Pages")
+        i_page.set_submenu(self.pagemenu)
 
-        # Popup Menu
-        self.popup = gtk.Menu()
-        addpage = gtk.ImageMenuItem(gtk.STOCK_NEW)
-        addpage.set_label("Add Page")
-        addpage.connect("activate", self.ask_add_page)
-        self.popup.append(addpage)
-        addpage.show()
-        openpage = gtk.ImageMenuItem(gtk.STOCK_OPEN)
-        openpage.set_label("Open Page")
-        openpage.connect("activate", self.open_page)
-        self.popup.append(openpage)
-        openpage.show()
-        # TODO! Find fitting stock icon
-        duplipage = gtk.ImageMenuItem(gtk.STOCK_COPY)
-        duplipage.set_label("Duplicate Page")
-        duplipage.connect("activate", self.ask_dupli_page)
-        self.popup.append(duplipage)
-        duplipage.show()
-        deletepage = gtk.ImageMenuItem(gtk.STOCK_DELETE)
-        deletepage.set_label("Delete Page")
-        deletepage.connect("activate", self.ask_delete_page)
-        self.popup.append(deletepage)
-        deletepage.show()
-        renamepage = gtk.ImageMenuItem(gtk.STOCK_EDIT)
-        renamepage.set_label("Rename Page")
-        renamepage.connect("activate", self.ask_rename_page)
-        self.popup.append(renamepage)
-        renamepage.show()
+        self.openpage = gtk.MenuItem()
+        self.openpage.set_sensitive(False)
+        self.openpage.set_label("Open")
+        key, mod = gtk.accelerator_parse("Return")
+        self.openpage.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
+        self.openpage.connect("activate", self.open_page)
+        self.pagemenu.append(self.openpage)
+        self.openpage.show()
+
+        self.addpage = gtk.MenuItem()
+        self.addpage.set_sensitive(False)
+        self.addpage.set_label("Add")
+        key, mod = gtk.accelerator_parse("<Control>A")
+        self.addpage.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
+        self.addpage.connect("activate", self.ask_add_page)
+        self.pagemenu.append(self.addpage)
+        self.addpage.show()
+
+        self.duplipage = gtk.MenuItem()
+        self.duplipage.set_sensitive(False)
+        self.duplipage.set_label("Duplicate")
+        key, mod = gtk.accelerator_parse("<Control>D")
+        self.duplipage.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
+        self.duplipage.connect("activate", self.ask_dupli_page)
+        self.pagemenu.append(self.duplipage)
+        self.duplipage.show()
+
+        self.renamepage = gtk.MenuItem()
+        self.renamepage.set_sensitive(False)
+        self.renamepage.set_label("Rename")
+        key, mod = gtk.accelerator_parse("<Control>R")
+        self.renamepage.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
+        self.renamepage.connect("activate", self.ask_rename_page)
+        self.pagemenu.append(self.renamepage)
+        self.renamepage.show()
+
+        self.deletepage = gtk.MenuItem()
+        self.deletepage.set_sensitive(False)
+        self.deletepage.set_label("Delete")
+        key, mod = gtk.accelerator_parse("Delete")
+        self.deletepage.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
+        self.deletepage.connect("activate", self.ask_delete_page)
+        self.pagemenu.append(self.deletepage)
+        self.deletepage.show()
+
+        pagesep = gtk.SeparatorMenuItem()
+        self.pagemenu.append(pagesep)
+
+        self.importpage = gtk.MenuItem()
+        self.importpage.set_sensitive(False)
+        self.importpage.set_label("Import Page(s)")
+        key, mod = gtk.accelerator_parse("<Control>I")
+        self.importpage.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
+        self.importpage.connect("activate", self.ask_import_page)
+        self.pagemenu.append(self.importpage)
+        self.importpage.show()
+
+        mb.append(i_file)
+        mb.append(i_page)
 
         # Main toolbar
         toolbar = gtk.Toolbar()
@@ -1320,14 +1372,14 @@ class Main(gtk.Window):
         self.dupli_page.connect("clicked", self.ask_dupli_page)
         self.dupli_page.set_sensitive(False)
         self.dupli_page.set_tooltip_text("Duplicate the selected page.")
-        self.del_page = gtk.ToolButton(gtk.STOCK_DELETE)
-        self.del_page.connect("clicked", self.ask_delete_page)
-        self.del_page.set_sensitive(False)
-        self.del_page.set_tooltip_text("Delete the selected page.")
         self.ren_page = gtk.ToolButton(gtk.STOCK_EDIT)
         self.ren_page.connect("clicked", self.ask_rename_page)
         self.ren_page.set_sensitive(False)
         self.ren_page.set_tooltip_text("Rename the selected page.")
+        self.del_page = gtk.ToolButton(gtk.STOCK_DELETE)
+        self.del_page.connect("clicked", self.ask_delete_page)
+        self.del_page.set_sensitive(False)
+        self.del_page.set_tooltip_text("Delete the selected page.")
         sep = gtk.SeparatorToolItem()
         self.storyboard = gtk.ToolButton(gtk.STOCK_ABOUT)
         self.storyboard.set_sensitive(False)
@@ -1335,8 +1387,8 @@ class Main(gtk.Window):
         self.storyboard.connect("clicked", self.toggle_storyboard_mode)
         toolbar.insert(self.add_page, 0)
         toolbar.insert(self.dupli_page, 1)
-        toolbar.insert(self.del_page, 2)
-        toolbar.insert(self.ren_page, 3)
+        toolbar.insert(self.ren_page, 2)
+        toolbar.insert(self.del_page, 3)
         toolbar.insert(sep, 4)
         toolbar.insert(self.storyboard, 5)
 
@@ -1404,7 +1456,7 @@ class Main(gtk.Window):
         # Load the pages into an IconView.
         self.thumbs.connect("selection-changed", self.select_page)
         self.thumbs.connect("item-activated", self.book.open_page)
-        self.thumbs.connect("button-press-event", self.button_press, self.popup)
+        self.thumbs.connect("button-press-event", self.button_press, self.pagemenu)
         self.thumbs.set_model(self.book.pagestore)
         self.thumbs.select_path(0)
         self.update_title()
@@ -1453,7 +1505,47 @@ class Main(gtk.Window):
 
     def open_page(self, widget):
         # Open page from right click menu.
+        if self.book.selected < 0:
+            show_error_msg("No page selected to open.")
+            return False
         self.book.open_page(self.thumbs, [self.book.selected])
+
+    def ask_import_page(self, widget):
+        # Import page dialog.
+        dest = self.book.selected
+        if self.book.selected < 1:
+            dest = len(self.book.pagestore)
+        if self.loaded:
+            # Interface for opening an existing book.
+            i = gtk.FileChooserDialog("Import Page", self, gtk.FILE_CHOOSER_ACTION_OPEN, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+            i.set_default_response(gtk.RESPONSE_OK)
+            i.set_select_multiple(True)
+            f = gtk.FileFilter()
+            f.set_name("All Images")
+            f.add_pattern("*.jpg")
+            f.add_pattern("*.jpe")
+            f.add_pattern("*.jpeg")
+            f.add_pattern("*.xcf")
+            f.add_pattern("*.psd")
+            f.add_pattern("*.psp")
+            f.add_pattern("*.tif")
+            f.add_pattern("*.tiff")
+            f.add_pattern("*.png")
+            f.add_pattern("*.gif")
+            f.add_pattern("*.bmp")
+            f.add_pattern("*.svg")
+            f.add_pattern("*.pdf")
+            f.add_pattern("*.tga")
+            i.add_filter(f)
+            response = i.run()
+            # filename = o.get_fielname()
+            if response == gtk.RESPONSE_OK:
+                i.hide()
+                if self.valid_name(i.get_filename()):
+                    self.book.import_page(i.get_filenames(), dest)
+                    self.del_page.set_sensitive(True)
+                    self.update_title()
+            i.destroy()
 
     def ask_dupli_page(self, widget):
         # Duplicate the selected page.
@@ -1474,6 +1566,9 @@ class Main(gtk.Window):
 
     def ask_rename_page(self, widget):
         # Rename the selected page.
+        if self.book.selected < 0:
+            show_error_msg("No page selected to rename.")
+            return False
         if self.book.selected > -1:
             response, text = self.name_dialog("Rename Page", "Ente Page Name: ")
             if response == gtk.RESPONSE_ACCEPT:
@@ -1483,6 +1578,9 @@ class Main(gtk.Window):
 
     def ask_delete_page(self, widget):
         # Delete the selected page.
+        if self.book.selected < 0:
+            show_error_msg("No page selected to delete.")
+            return False
         areyousure = gtk.MessageDialog(self, 0, gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, 'Delete page "%s"?' % (self.book.pagestore[self.book.selected][0]))
         response = areyousure.run()
         if response == gtk.RESPONSE_YES:
@@ -1545,11 +1643,18 @@ class Main(gtk.Window):
         # Enable the controles that are disabled when no book is loaded.
         self.add_page.set_sensitive(True)
         self.dupli_page.set_sensitive(True)
-        if len(self.book.pagestore) > 1:
-            self.del_page.set_sensitive(True)
         self.ren_page.set_sensitive(True)
         self.file_export.set_sensitive(True)
         self.storyboard.set_sensitive(True)
+        if len(self.book.pagestore) > 1:
+            self.del_page.set_sensitive(True)
+            self.deletepage.set_sensitive(True)
+        self.openpage.set_sensitive(True)
+        self.addpage.set_sensitive(True)
+        self.duplipage.set_sensitive(True)
+        self.renamepage.set_sensitive(True)
+        self.deletepage.set_sensitive(True)
+        self.importpage.set_sensitive(True)
 
     def toggle_storyboard_mode(self, widget):
         # Have the pages flow, rather than be shown in two columns. Handy for storyboarding.
@@ -1598,8 +1703,7 @@ main()
 
 # FUTURE FEATURES & FIXES
 #  HIGH
-# - Restore deleted pages.
-# - Import page(s). Let's you import single or multiple pages in any of the formats supported by Gimp (converting to xcf on import).
+# - Restore deleted pages. ***
 # - BUG! Book is not joined under Gimp in 2.8, and still has a ? icon in Unity.
 # - Show large thumbnails if available (or figure out how to show the same size as the selected thumbnail size in gimp prefs).
 #  MEDIUM
@@ -1611,3 +1715,6 @@ main()
 # - New Book Window more like export with tables...maybe.
 # - Support color coding pages, making it easy to divide up the story into chapters or mark pages.
 # - Batch (destructive operations on the whole book...maybe not safe to include)
+
+
+
