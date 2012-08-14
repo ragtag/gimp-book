@@ -31,7 +31,7 @@
 # KNOWN BUGS & LIMITATIONS
 # - utf-8 names (i.e. Chinese, Japanese etc) for pages not working properly on Windows.
 # - NOT tested on OSX.
-# - No option dialogs when importing file formats that require it, such as svg and pdf.
+# - Import does not yet support any options on importing files such as pdf or svg (resolution, page etc.).
 
 import os
 import hashlib
@@ -835,7 +835,6 @@ class Book():
         self.trashpath = "" # Path to trash folder.
         self.selected = 0  # Index of the currently selected page, -1 if none.
 
-
     def make_book(self, dest, name, w, h, color, fill):
         # Build the files and folders needed for the book.
         width = int(w)
@@ -1245,8 +1244,9 @@ class Main(gtk.Window):
         self.set_position(gtk.WIN_POS_CENTER)
         self.loaded = False  # If there is a book loaded in the interface.
         self.connect('notify::is-active', self.update_thumbs)
+        #pdb.gimp_plugin_icon_register("book",pdb.ICON_TYPE_STOCK_ID, GIMP_STOCK_WILBER)
         try:
-            self.set_icon_from_file("gimp.svg")
+            self.set_icon_from_file("/usr/share/icons/hicolor/scalable/apps/gimp.svg")
         except:
             pass
 
@@ -1703,9 +1703,7 @@ main()
 
 # FUTURE FEATURES & FIXES
 #  HIGH
-# - Restore deleted pages. ***
-# - BUG! Book is not joined under Gimp in 2.8, and still has a ? icon in Unity.
-# - Show large thumbnails if available (or figure out how to show the same size as the selected thumbnail size in gimp prefs).
+# - BUG! Book is not joined under Gimp, and still has a ? icon in Unity.
 #  MEDIUM
 # - Left to right or right to left reading option when exporting.
 # - Add Percent based margins.

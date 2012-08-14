@@ -1,13 +1,18 @@
-CHANGELOG
-r46
++-----------+
+| CHANGELOG |
++-----------+
+
+# GIMP Book 2012.8 rev 47
 - Added keyboard shortcuts to page actions.
 - Added a page menu to the main menu bar, that contains the same as the right click menu.
 - Added page import.
 - Added error messages on attempting to rename, delete or duplicate pages with nothing selected.
-r45
+
+# GIMP Book 2012.7 rev 46
 - Added page duplication.
 - Added open page to right click menu.
-r40
+
+# GIMP Book 2012.3 rev 40 beta
 - Added storyboard mode, where the pages flow, rather than display in two columns.
 - Added page numbers to title bar.
 - Added right click menu to pages, for quicker access to adding, deleting and renaming pages.
