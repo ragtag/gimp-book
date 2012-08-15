@@ -20,8 +20,8 @@ if [ ! -d publish ]
 then
     mkdir publish
 fi
-zip -r "publish/$v.zip" $files -x *.svn*
+zip -r "publish/Gimp Book - $v.zip" $files -x *.svn*
 mv book.py.bak book.py
 mv index.html docs/index.html
 
-echo "New version saved to publish/$v.zip"
+echo "New version saved to publish/Gimp Book - $v.zip"
