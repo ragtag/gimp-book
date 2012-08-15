@@ -12,7 +12,7 @@
 #   Drop the script in your plug-ins folder. On Linux this is ~/.gimp-2.8/plug-ins/
 #
 # VERSION
-version = "2012.8 rev 50"
+version = "current_version"
 # AUTHOR 
 author = [ 'Ragnar Brynjúlfsson' ]
 # COPYRIGHT
