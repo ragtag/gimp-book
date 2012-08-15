@@ -2,6 +2,14 @@
 | CHANGELOG |
 +-----------+
 
+# GIMP Book 2012.8 rev 50
+- Added About dialog.
+- Added Help menu with link to online help.
+- Removed unused help button in a New Book window.
+- Semi-fixed the icon for GIMP Book, though it's still blurry at high resoltions.
+- Added a View menu for Storyboard mode and hiding the toolbar.
+- Made a simple packaging script, which combines book.py, docs and license in one zip file.
+
 # GIMP Book 2012.8 rev 47
 - Added keyboard shortcuts to page actions.
 - Added a page menu to the main menu bar, that contains the same as the right click menu.

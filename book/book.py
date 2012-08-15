@@ -21,7 +21,10 @@ copyright = "Copyright 2011-2012 © Ragnar Brynjúlfsson"
 website = "http://registry.gimp.org/node/25975"
 plugin = "Gimp Book"
 # LICENSE
-license = """Copyright 2011-2012 Ragnar Brynjúlfsson
+license = """
+GIMP Book
+A plug-in for managing multiple pages in GIMP.
+Copyright 2011-2012 Ragnar Brynjúlfsson
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

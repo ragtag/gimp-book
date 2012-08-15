@@ -1,0 +1,18 @@
+#!/bin/sh
+#
+# Simple script to package GIMP Book for publishing.
+
+files="book.py docs license.txt"
+echo "Preparing the followign files and folders for publishing:"
+echo $files
+
+version=`date +%Y.%-m` 
+revision=`svn log -l 1 book.py | grep ragtag | cut -d\  -f 1 | cut -dr -f2`
+v="$version rev $revision"
+
+if [ ! -d publish ]
+then
+    mkdir publish
+fi
+zip -r "publish/$v.zip" $files -x *.svn*
+echo "New version saved to publish/$v.zip"
