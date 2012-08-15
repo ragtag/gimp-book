@@ -7,7 +7,7 @@ echo "Preparing the followign files and folders for publishing:"
 echo $files
 
 version=`date +%Y.%-m` 
-revision=`svn log -l 1 book.py | grep ragtag | cut -d\  -f 1 | cut -dr -f2`
+revision=`svn info http://svn.ragtag.net/gimp | grep Revision | cut -d\  -f 2`
 v="$version rev $revision"
 
 mv book.py book.py.bak
