@@ -1,59 +1,130 @@
 <html>
   <head>
-    <title>GIMP Book Plug-In</title>
+    <title>GIMP Book Documentation</title>
+    <style type="text/css">
+      body { 
+      background-color: #333;
+      color: #ff9f22;
+      font-family: sans-serif;
+      width: 700px;
+      margin: auto auto;
+      padding-top: 15px;
+      }
+
+      pre {
+      border: 1px dashed #ff9e00;
+      padding: 20px 0 10px;
+      margin: 20px;
+      width: 650px;
+      font-size: 1.2em;
+      font-weight: bold;
+      background-color: #555;
+      color: ff9e44;
+      }
+      
+      
+    </style>
   </head>
   <body>
-    <h1>IMPORTANT!</h1>
-    <p>Creating a comic book is a lot of work, work you don't want to loose, so make sure you make a backup of all your files regularly!</p>
-    <h1>GIMP Book Plug-In</h1>
-    <p>GIMP Book, is a plug-in for managing multiple pages in <a href="http://gimp.org">the GIMP</a>. It opens a separete window with thumbnails of all your pages, where you can add, delete, sort and rename your pages. And once you're done you can export the book in various formats, including support for scaling and adjusting the margins as you export.</p>
-    <h2>Installation</h2>
-    <p>Copy the book.py and gimp.svg file into ~/gimp-2.6/plug-ins/.  The next time you start the GIMP, you should find it under the Windows menu. On linux make sure book.py is executable (chmod a+x book.py).</p>
+    <h1>GIMP Book - current version</h1>
+    <p><strong> - by Ragnar Brynj&uacute;lfsson</strong></p>
+    <img src="http://ragtag.net/xternal/gimp-book/GIMP%20Book%20-%20interface.jpg" />
+    <p>GIMP Book is a script for managing multiple pages in the GIMP, it's great for creating comic books, illustrated books, sketch books or similar. It opens a separete window with thumbnails of all your pages, where you can add, delete, sort and rename them. Once you're done you can export your book to various formats, for web or print.<p>
+      
+      <h4>IMPORTANT!</h4>
+      
+    <p>Creating a comic book is a lot of work, work you don't want to loose, so make sure you backup all your files regularly!<p>
+      
+      <h2>Installation</h2>
+    <p>Untar the tar.gz, and copy the book.py file into ~/gimp-2.6/plug-ins/. The next time you start the GIMP, you should find it under the Windows menu. GIMP Book is written for Gimp 2.6 and Python 2.6. If you're using Python 2.5, you need to install the json module manually.</p>
+    
     <h2>Creating a Book</h2>
     <p>Start by opening the GIMP, and the GIMP Book interface from the Windows>Book... menu. You'll be presented with an empty Book window, in which you can choose File>New Book (Ctrl-N).</p>
+    
     <p>In the Create a New Book dialog, enter a name for your book, size and destination. GIMP Book will create a folder at that destination, with the name of your book, a a couple of subfolders for and a *.book file.</p>
+    
     <h3>The Template</h3>
     <p>When you create a book, you'll see a Template.xcf thumbnail show up in your Book window. This is used as a template for all new pages that you add. You can double click it to open it in the GIMP, and make any adjustments to it you like. It's a good idea to spend some time adjusting the resolution, adding print markings, default layers and any other things you may need for the pages of your book. You can adjust the template at any time later, but changes to it, won't affect existing pages.</p>
+    
     <p>The template is always shown as the first page of the book. It is numbered as page zero, when exporting, and is not exported by default.</p>
+    
     <h3>Thumbnail Size</h3>
     <p>The thumbnails used in GIMP Book, are standard GTK thumbnails. This means that their size is controlled by the GIMP itself. To get bigger thumbnails, got the the Edit>Preferences menu in the GIMP, under Environment, and change Size of thumbnails to "Large (256x256)". This won't affect existing thumbnails until the next time the file is saved, or you delete the thumbnail cache.</p>
+    
     <h2>Saving Your Book</h2>
-    <p>There is no need to save your book. When you add pages, move them around, or delete them, GIMP Book saves those changes instantly. The only thing you need to save, is the actual GIMP xcf files, when you work on them. The thumbnails for images you've changed and saved, are updated the next time the GIMP Book window receives focus.</p>
+    <p>There is no need to save your book. When you add pages, move them around, or delete them, GIMP Book saves those changes instantly. The only thing you need to save, is the actual GIMP xcf files, when you work on them.</p>
+    
     <h2>Opening an Existing Book</h2>
     <p>To open a book simply choose File>Open Book... from the Book window, and use the standard open dialog to locate your *.book file. The book will open in the Book window, and you can start working with it. If thumbnails have not been generated for your book (which for instance happens if you move it to a different folder, loading will take a short while as new thumbnails are generated.</p>
+    
     <p>To open a page, simply double click it, and it will load in the GIMP.</p>
+    
     <h2>Managing Pages</h2>
-    <p>At the top of the Book window there is a toolbar with three buttons you can use to manage your pages.</p>
+    <p>To manage your pages you use the options in the Pages menu, as well as double clicking or dragging the thumbnails of the pages themselves. Alternately you can use the right click menu, the icons in the toolbar or keyboard shortcuts.</p>
+
+    <h3>Opening a page</h3>
+    <p>The easiest way to do this is simply to double click the page you want to open, and it will load up in the GIMP. You can also hit the return key with a page selected or choose Pages>Open to open it. Once you're done working on it, simply save and close it.</p>
+    
     <h3>Adding a Page</h3>
-    <p>The first button, is for adding new pages. When you click it you will be asked to give the page a name. You can use a descriptive name, that helps you remember what's on the page. Pagenumbers are added on export, so you don't need to number your pages, unless you want to. New pages are added to the end of the book, if no page is selected, or at the selected page if one is.</p>
-    <h3>Deleting a Page</h3>
-    <p>To delete a page, simply select the page, and hit the delete button. You'll be asked to confirm that you really want to delete the page.</p>
-    <p>When you delete a page in GIMP Book, it is not deleted permanently, but moved to your_book/trash/date_pagename.xcf, in case you want to get something from it later. You can freely delete the content of your_book/trash, if you want to free up disk space.</p>
+    <p>To add a new page based on your template simply choose Pages>Add (Ctrl+A). You will be asked to give the page a name. Use a unique and descriptive name that helps you identify the page. Pagenumbers are added on export, so you don't need to number your pages, unless you want to. New pages are added to the end of the book, if no page is selected, or at the selected page if one is.</p>
+    
+    <h3>Duplicating a Page</h3>
+    <p>With a page selected, choose Pages>Duplicate (Ctrl+D). You will be asked to enter a name for the newly created page.</p>
+
     <h3>Renaming a Page</h3>
-    <p>Select the page you want to rename, and hit the rename toolbutton. Enter a new name, and you're done.</p>
+    <p>Select the page you want to rename, and choose Pages>Rename (Ctrl+R). Enter a new name, and you're done. Make sure you don't have the page open in GIMP before renaming it.</p>
+    
+    <h3>Deleting a Page</h3>
+    <p>To delete a page, simply select the page, and hit the delete button. You'll be asked to confirm that you really want to delete the page. Make sure you don't have the page open in GIMP, before deleting it.</p>
+    
+    <p>When you delete a page in GIMP Book, it is not deleted permanently, but moved to your_book/trash/date_pagename.xcf, in case you want to get something from it later. You can freely delete the content of your_book/trash, if you want to free up disk space.</p>
+
+    <h3>Importing Pages</h3>
+    <p>You can import pages to your book by simply choosing Pages>Import Page(s), and selecting the page(s) you want to import. This can be handy for importing scanned sketches. The pages will show up at the resolution they are in, and will ignore the template you are using. On import they are converted to .xcf files. Importing supports most of the common image file format.</p>
+
+    <p>While import does support .svg and .pdf, it does not display any dialog letting you chose what resolution or page to retrive from those file format. If you need to import these formats, you're probably better of importing them manually into the GIMP first, and saving them out as .xcf files, which you can then import into GIMP Book.</p>
+
+    <p>Note that you can use the import feature to retrive pages you have previously deleted from you book. You can find these in [your_book]/trash/[date]_[pagename].xcf.</p>
+    
     <h3>Sorting Pages</h3>
     <p>To reorder the pages, simply drag them around to where you want them.</p>
+    
     <h3>Storyboard Mode</h3>
-    <p>Storyboard mode toggles the page view between two column book view, and a flowing storyboard view that fits the width of the Book window. This is handy for making storyboards, as opposed to comic books.</p>
+    <p>Storyboard mode toggles the page view between two column book view, and a flowing storyboard view that fills the width of the Book window. To toggle between the two modes, use the View>Storyboard Mode menu or the star in the toolbar.</p>
+    
     <h2>Exporting Your Book</h2>
     <p>Once you're finished with your book, you can export it to several different formats. To do this simply choose File>Export Book... from the menu in the Book window.</p>
+    
     <h3>Destination Tab</h3>
     <p>At the top of the tab, you can choose the name of the folder you want to export your book to. GIMP Book will create a new folder with the name of your book at that destination, and fill it with images in the format you specify.</p>
+    
     <p>For naming the pages you can choose between using the name of the book (e.g. 1_My Book.jpg), the name of the pages, simply using page numbers with no name, or using a custom name that you enter in the Custom Name field.</p>
+
     <p>You can choose the page range you wish to export. Page 0 is the template, which you probably don't want to include in your export.</p>
-    <h4>Layer Tags</h4>
-    <p>Layer tags are used to hide and show tagged layers. It can be used if doing multi-lingual comics, to hide sketch layers, and so on. To tag a layer simply put any tag between square brackets [] in the layer name. For instance "[en] Speech Buble" or "[sketch] Car Chase". Layers can have multiple tags, but if the tags match both hide and show, show wins.</p>
+    
+    <h3>Layer Tags</h3>
+    <p>Layer tags are used to hide or show tagged layers. It can be used for doing multi-lingual comics, to hide sketch layers, and so on. To tag a layer simply put any tag between square brackets [] in the layer name. For instance "[en] Speech Buble" or "[sketch] Car Chase". Layers can have multiple tags, but if the tags match both hide and show, show wins.</p>
+    
     <p>To hide or show layers, simply enter a comma separated list of tags, without the square brackets [], in the appropriate hide or show field (e.g. "en,de,no,sketch"). On export, layers matching the tag will be hidden or shown, before exporting.</p>
+    
     <p>For the remining layers, that don't match any tag, you can choose to either leave their visibility as is, hide or show them.</p>
+    
+    <p>You can tag layer groups too in GIMP 2.7 or later. If you hide a layer group, everything within it will be hidden independently of the tag used on those layers.</p>
+    
     <h3>Margins Tab</h3>
-    <p>On export you can change the margins of your pages. This is similar to Canvas Size in GIMP, but uses slightly different values. Negative values, vill crop the image, while positive will make the canvas bigger. You can choose between using the background color saved in the image, black, white or a custom color, for the background when you make the image bigger.</p>
-    <h3>Image Size Tab</h3>
+    <p>On export you can change the margins of your pages. This is similar to Canvas Size in GIMP, but uses relative page margins instead of width and height and an offset. Negative values, vill crop the image, while positive will make the canvas bigger. You can choose between using the background color saved in the image, black, white or a custom color, for the background when you make the image bigger.<p>
+
+      <h3>Image Size Tab</h3>
     <p>The image size tab is basically the same as the standard GIMP one. You can choose width or height, as pixels or percentiles, and choose the interpolation method to use. GIMP Book uses the template for you book, to decide the aspect ratio, when choosing scale values.</p>
+    
     <h3>File Format Tab</h3>
     <p>You can choose to export your book as a sequence of gif, xcf, jpg, psd, png or tiff files. The save options for the different file formats are basically the same as in GIMP. For xcf and psd, you can choose not to flatten the image, keeping layer data intact to work on the files further.</p>
+    
     <p>When you've chosen all your export options, hit the Export Pages button, and GIMP Book will start processing your pages. This can take a short while, as each page needs to be loaded, possibly modified, and then saved out again.</p>
-    <h2>Behin the Scenes</h2>
+    
+    <h2>Behind the Scenes</h2>
     <p>If you just want to use GIMP Book, you can stop reading here. If, on the other hand, you want to know a little bit more about what it does, keep reading.</p>
+    
     <h3>The File Format</h3>
     <p>GIMP Book stores the pages of your book in a simple file structure that looks like this.</p>
     <pre>
@@ -62,10 +133,25 @@
       |-- pages
       |   `-- Template.xcf
       `-- trash
-      </pre>
-    <p>All your pages and the Template are stores in the pages folder as plain .xcf files. Any pages you delete are moved to the trash folder. GIMP Book only touches the xcf files on three occassions, when you add a page a copy is made of the Template file, when you rename a page the xcf files gets renamed, and when you delete a page, it gets moved to the trash folder, and a time and date is added to the name.</p>
+    </pre>      
+    <p>All your pages and the Template are stores in the pages folder as plain .xcf files. Any pages you delete are moved to the trash folder. GIMP Book only touches the xcf files on a few occassions, when adding, duplicating, renaming, deleting and importing pages.</p>
+    
     <h3>The *.book File</h3>
-    <p>The *.book file, is a simple JSON file, that contains a list of your pages, in the order they are shown. When you move pages around, all that happens is that the list of pages in the JSON file is changed. The *.book file keeps no record of pages that have been deleted or anything else at the moment. I may add more features to it in the future, but will try to keep them compatible with the current format.</p>
+    <p>The *.book file, is a simple JSON text file, that contains a list of your pages in the order they are shown. That looks like this:</p>
+    <pre>
+    {
+        "pages": [
+            "template.xcf", 
+            "Outside the Museum.xcf", 
+            "Burglar Climbing in Window.xcf", 
+            "Knocing Out Security Guard.xcf"
+        ]
+    }
+    </pre>
+    <p>When you move pages around, all that happens is that the list of pages in the *.book file is changed. The *.book file keeps no record of pages that have been deleted or anything else at the moment. I may add more features to it in the future, but will try to keep them compatible with the current format.</p>
+
     <p>Any time you do changes, such as move, rename, add or delete a page, the *.book file is automatically updated.</p>
+
+    <a href="changelog.txt">Changelog</a>
   </body>
 </html>

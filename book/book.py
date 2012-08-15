@@ -1316,6 +1316,12 @@ class Main(gtk.Window):
         self.storyboardm.connect("activate", self.toggle_storyboard_mode)
         self.viewmenu.append(self.storyboardm)
 
+        #self.direction = gtk.CheckMenuItem()
+        #self.direction.set_label("Read Left to Right")
+        #self.direction.set_active(True)
+        #self.direction.connect("activate", self.toggle_reading_direction)
+        #self.viewmenu.append(self.direction)
+
         # Pages Menu
         self.pagemenu = gtk.Menu()
         i_page = gtk.MenuItem("Pages")
@@ -1458,9 +1464,6 @@ class Main(gtk.Window):
         self.progress.hide()
         return window    
 
-    def nothing(self, widget):
-        show_error_msg("This one is behind")
-
     def online_help(self, widget):
         # Link to Gimp Registry page for this book.
         self.urlbutton.clicked()
@@ -1486,10 +1489,30 @@ class Main(gtk.Window):
         else:
             self.toolbar.hide()
 
+    def toggle_reading_direction(self, widget):
+        # TODO! In development, not fully working.
+        # Toggle reading direction between left-to-right and right-to-left.
+        pagecount = len(self.book.pagestore)
+        order = []
+        show_error_msg(pagecount)
+        for r in range(0, pagecount):
+            show_error_msg(r)
+            if r%2 == 0: # Even
+                if r == pagecount-1:
+                    order.append(r)
+                else:
+                    order.append(r+1)
+            else: # Odd
+                order.append(r-1)
+        show_error_msg(order)
+        self.book.pagestore.reorder(order)
+
     def update_thumbs(self, widget, arg):
         # Tell Book to update the thumbnails on window receiving focus.
         if self.is_active() and self.loaded:
             self.book.update_thumbs()
+            # TODO! Right-to-left order of icons. Not working.
+            #self.thumbs.scroll_to_path(':1', True, 0.0, 1.0)
 
     def new_book(self, widget):
         # Helper for opening up the New Book window.

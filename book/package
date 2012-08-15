@@ -11,7 +11,10 @@ revision=`svn log -l 1 book.py | grep ragtag | cut -d\  -f 1 | cut -dr -f2`
 v="$version rev $revision"
 
 mv book.py book.py.bak
+mv docs/index.html index.html
 cat book.py.bak | sed "s/current_version/$v/" > book.py
+cat index.html | sed "s/current_version/$v/" > docs/index.html
+
 
 if [ ! -d publish ]
 then
@@ -19,5 +22,6 @@ then
 fi
 zip -r "publish/$v.zip" $files -x *.svn*
 mv book.py.bak book.py
+mv index.html docs/index.html
 
 echo "New version saved to publish/$v.zip"
