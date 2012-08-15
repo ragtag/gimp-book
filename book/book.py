@@ -12,7 +12,7 @@
 #   Drop the script in your plug-ins folder. On Linux this is ~/.gimp-2.8/plug-ins/
 #
 # VERSION
-version = "2012.8 rev 47"
+version = "2012.8 rev 50"
 # AUTHOR 
 author = [ 'Ragnar Brynjúlfsson' ]
 # COPYRIGHT
@@ -50,9 +50,11 @@ import gtk
 import gobject
 import urllib
 import re
+from sys import path
 from gimpfu import *
 from gimpenums import *
 from time import strftime
+
 
 class Thumb():
     # Managing thumbnails, and creating new ones when needed.
@@ -1237,16 +1239,12 @@ class Main(gtk.Window):
     # Builds a GTK windows for managing the pages of a book.
     def __init__ (self):
         window = super(Main, self).__init__()
-        self.set_title("Book")
+        self.set_title("GIMP Book")
         self.set_default_size(570, 400)
         self.set_position(gtk.WIN_POS_CENTER)
         self.loaded = False  # If there is a book loaded in the interface.
         self.connect('notify::is-active', self.update_thumbs)
-        #pdb.gimp_plugin_icon_register("book",pdb.ICON_TYPE_STOCK_ID, GIMP_STOCK_WILBER)
-        try:
-            self.set_icon_from_file("/usr/share/icons/hicolor/scalable/apps/gimp.svg")
-        except:
-            pass
+        self.set_icon_name('gimp')
 
         # Main menu
         mb = gtk.MenuBar()
@@ -1383,13 +1381,9 @@ class Main(gtk.Window):
         i_help.set_submenu(self.helpmenu)
         
         onlinehelp = gtk.MenuItem()
-        urlbutton = gtk.LinkButton("http://vg.no/", "Online Help")
-        urlbutton.show()
-        onlinehelp.add(urlbutton)
-        onlinehelp.show()
-        # WORKING HERE TODO!
-        #onlinehelp.set_label("Online Help")
-        #onlinehelp.connect("activate", self.online_help)
+        self.urlbutton = gtk.LinkButton(website, "Online Help")
+        onlinehelp.add(self.urlbutton)
+        onlinehelp.connect("activate", self.online_help)
         self.helpmenu.append(onlinehelp)
 
         helpsep = gtk.SeparatorMenuItem()
@@ -1461,9 +1455,12 @@ class Main(gtk.Window):
         self.progress.hide()
         return window    
 
+    def nothing(self, widget):
+        show_error_msg("This one is behind")
+
     def online_help(self, widget):
-        # Link to Gimp Registry.
-        pass
+        # Link to Gimp Registry page for this book.
+        self.urlbutton.clicked()
     
     def about(self, widget):
         # About dialog.
@@ -1776,7 +1773,6 @@ main()
 
 # FUTURE FEATURES & FIXES
 #  HIGH
-# - BUG! Book is not joined under Gimp, and still has a ? icon in Unity.
 #  MEDIUM
 # - Left to right or right to left reading option when exporting.
 # - Add Percent based margins.
@@ -1785,7 +1781,6 @@ main()
 # - Size the widgets that look waaay too big for their own good.
 # - New Book Window more like export with tables...maybe.
 # - Support color coding pages, making it easy to divide up the story into chapters or mark pages.
-# - Batch (destructive operations on the whole book...maybe not safe to include)
 
 
 
