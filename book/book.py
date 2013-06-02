@@ -1371,6 +1371,15 @@ class Main(gtk.Window):
         self.pagemenu.append(self.openpage)
         self.openpage.show()
 
+        self.importpage = gtk.MenuItem()
+        self.importpage.set_sensitive(False)
+        self.importpage.set_label(_("Import"))
+        key, mod = gtk.accelerator_parse(_("<Control>I"))
+        self.importpage.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
+        self.importpage.connect("activate", self.ask_import_page)
+        self.pagemenu.append(self.importpage)
+        self.importpage.show()
+
         self.addpage = gtk.MenuItem()
         self.addpage.set_sensitive(False)
         self.addpage.set_label(_("Add"))
@@ -1407,18 +1416,6 @@ class Main(gtk.Window):
         self.pagemenu.append(self.deletepage)
         self.deletepage.show()
 
-        pagesep = gtk.SeparatorMenuItem()
-        self.pagemenu.append(pagesep)
-
-        self.importpage = gtk.MenuItem()
-        self.importpage.set_sensitive(False)
-        self.importpage.set_label(_("Import Page(s)"))
-        key, mod = gtk.accelerator_parse(_("<Control>I"))
-        self.importpage.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
-        self.importpage.connect("activate", self.ask_import_page)
-        self.pagemenu.append(self.importpage)
-        self.importpage.show()
-
         # Help Menu
         self.helpmenu = gtk.Menu()
         i_help = gtk.MenuItem(_("Help"))
@@ -1448,6 +1445,14 @@ class Main(gtk.Window):
         self.icondir = os.path.join(gimp.directory, 'plug-ins', 'icons')
         self.toolbar = gtk.Toolbar()
         self.toolbar.set_style(gtk.TOOLBAR_ICONS)
+
+        self.imp_icon = gtk.Image()
+        self.imp_icon.set_from_file(os.path.join(self.icondir, 'import.svg'))
+        self.imp_icon.show()
+        self.imp_page = gtk.ToolButton(self.imp_icon)
+        self.imp_page.connect("clicked", self.ask_import_page)
+        self.imp_page.set_sensitive(False)
+        self.imp_page.set_tooltip_text(_("Import page(s)"))
 
         self.add_icon = gtk.Image()
         self.add_icon.set_from_file(os.path.join(self.icondir, 'add.svg'))
@@ -1481,27 +1486,11 @@ class Main(gtk.Window):
         self.del_page.set_sensitive(False)
         self.del_page.set_tooltip_text(_("Delete the selected page."))
 
-        self.imp_icon = gtk.Image()
-        self.imp_icon.set_from_file(os.path.join(self.icondir, 'import.svg'))
-        self.imp_icon.show()
-        self.imp_page = gtk.ToolButton(self.imp_icon)
-        self.imp_page.connect("clicked", self.ask_import_page)
-        self.imp_page.set_sensitive(False)
-        self.imp_page.set_tooltip_text(_("Import page(s)"))
-
-        self.storyboard = gtk.ToolButton(gtk.STOCK_ABOUT)
-        self.storyboard.set_sensitive(False)
-        self.storyboard.set_tooltip_text(_("Toggle storyboard view mode."))
-        self.storyboard.connect("clicked", self.toggle_storyboard_mode)
-        sep = gtk.SeparatorToolItem()
-        self.toolbar.insert(self.add_page, 0)
-        self.toolbar.insert(self.dupli_page, 1)
-        self.toolbar.insert(self.ren_page, 2)
-        self.toolbar.insert(self.del_page, 3)
-        self.toolbar.insert(sep, 4)
-        self.toolbar.insert(self.imp_page,5)
-        self.toolbar.insert(sep, 6)
-        self.toolbar.insert(self.storyboard, 7)
+        self.toolbar.insert(self.imp_page, 0)
+        self.toolbar.insert(self.add_page, 1)
+        self.toolbar.insert(self.dupli_page, 2)
+        self.toolbar.insert(self.ren_page, 3)
+        self.toolbar.insert(self.del_page, 4)
 
         self.vbox = gtk.VBox(False, 2)
         self.vbox.pack_start(mb, False, False, 0)
@@ -1676,7 +1665,7 @@ class Main(gtk.Window):
             dest = len(self.book.pagestore)
         if self.loaded:
             # Interface for opening an existing book.
-            i = gtk.FileChooserDialog(_("Import Page"), self, gtk.FILE_CHOOSER_ACTION_OPEN, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+            i = gtk.FileChooserDialog(_("Import Page(s)"), self, gtk.FILE_CHOOSER_ACTION_OPEN, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
             i.set_default_response(gtk.RESPONSE_OK)
             i.set_select_multiple(True)
             f = gtk.FileFilter()
@@ -1808,7 +1797,6 @@ class Main(gtk.Window):
         self.ren_page.set_sensitive(True)
         self.imp_page.set_sensitive(True)
         self.file_export.set_sensitive(True)
-        self.storyboard.set_sensitive(True)
         self.storyboardm.set_sensitive(True)
         if len(self.book.pagestore) > 1:
             self.del_page.set_sensitive(True)
@@ -1824,10 +1812,8 @@ class Main(gtk.Window):
         # Have the pages flow, rather than be shown in two columns. Handy for storyboarding.
         if int(self.thumbs.get_columns()) == 2:
             self.thumbs.set_columns(0)
-            #self.storyboardm.set_active(True)
         else:
             self.thumbs.set_columns(2)
-            #self.storyboardm.set_active(False)
 
     def close_book(self):
         if self.loaded:
