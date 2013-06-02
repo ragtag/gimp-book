@@ -1,0 +1,91 @@
+# French translations for .gimp package.
+# Copyright (C) 2013 THE .gimp'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the .gimp package.
+# Ragnar Brynjúlfsson <bug@ragnarb.com>, 2013.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: .gimp 2.8\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-05-30 21:15+0200\n"
+"PO-Revision-Date: 2013-06-02 01:24+0200\n"
+"Last-Translator: Ragnar Brynjlfsson <bug@ragnarb.com>\n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: book.py:71
+#, python-format
+msgid "Failed to find or build thumb for %s."
+msgstr ""
+
+#: book.py:121
+msgid "Create a New Book..."
+msgstr "Translated"
+
+#: book.py:132
+msgid "<b>Book</b>"
+msgstr "<b>Livre</b>"
+
+#: book.py:142
+msgid "Name:"
+msgstr ""
+
+#: book.py:147
+msgid "Create a New Book"
+msgstr ""
+
+#: book.py:152
+msgid "Destination:"
+msgstr ""
+
+#: book.py:160
+msgid "<b>Page</b>"
+msgstr ""
+
+#: book.py:170
+msgid "Width:"
+msgstr ""
+
+#: book.py:173 book.py:182
+msgid "pixels"
+msgstr ""
+
+#: book.py:179
+msgid "Height:"
+msgstr ""
+
+#: book.py:189
+msgid "Color Space:"
+msgstr ""
+
+#: book.py:191
+msgid "RBG color"
+msgstr ""
+
+#: book.py:191
+msgid "Grayscale"
+msgstr ""
+
+#: book.py:204
+msgid "Fill with:"
+msgstr ""
+
+#: book.py:206
+msgid "Foreground color"
+msgstr ""
+
+#: book.py:206
+msgid "Background color"
+msgstr ""
+
+#: book.py:206
+msgid "White"
+msgstr ""
+
+#: book.py:206
+msgid "Transparency"
+msgstr ""

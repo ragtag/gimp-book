@@ -58,6 +58,11 @@ from gimpfu import *
 from gimpenums import *
 from time import strftime
 
+import i18n
+_ = i18n.language.ugettext #use ugettext instead of getttext to avoid unicode errors
+
+import gettext
+
 
 class Thumb():
     # Managing thumbnails, and creating new ones when needed.
@@ -66,7 +71,7 @@ class Thumb():
         if not self.find_thumb():
             self.build_thumb()
             if not self.find_thumb():
-                show_error_msg('Failed to find or build thumb for %s.' % self.imagepath)
+                show_error_msg(_('Failed to find or build thumb for %s.') % self.imagepath)
 
     def build_thumb(self):
         # Build or rebuild a thumb for the image.
@@ -116,7 +121,7 @@ class NewBookWin(gtk.Window):
         # Create a new book.
         win = super(NewBookWin, self).__init__()
         self.set_transient_for(main)
-        self.set_title("Create a New Book...")
+        self.set_title(_("Create a New Book..."))
         self.set_size_request(400, 400)
         self.set_position(gtk.WIN_POS_CENTER)
 
@@ -1793,6 +1798,12 @@ register(
     [],
     show_book,
 )
+
+#transLoc = "/home/ragnar/.gimp-2.8/plug-ins/i18n"
+#gettext.bindtextdomain('book', '/home/ragnar/.gimp-2.8/plug-ins/i18n')
+#gettext.textdomain('book')
+#gettext.translation('book', "/home/ragnar/.gimp-2.8/plug-ins/i18n", languages=['fr'], fallback=False)
+#_ = gettext.gettext
 
 main()
 
