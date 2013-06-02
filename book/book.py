@@ -61,9 +61,6 @@ from time import strftime
 import i18n
 _ = i18n.language.ugettext #use ugettext instead of getttext to avoid unicode errors
 
-import gettext
-
-
 class Thumb():
     # Managing thumbnails, and creating new ones when needed.
     def __init__(self, imagepath):
@@ -1799,11 +1796,6 @@ register(
     show_book,
 )
 
-#transLoc = "/home/ragnar/.gimp-2.8/plug-ins/i18n"
-#gettext.bindtextdomain('book', '/home/ragnar/.gimp-2.8/plug-ins/i18n')
-#gettext.textdomain('book')
-#gettext.translation('book', "/home/ragnar/.gimp-2.8/plug-ins/i18n", languages=['fr'], fallback=False)
-#_ = gettext.gettext
 
 main()
 
