@@ -155,7 +155,7 @@ class NewBookWin(gtk.Window):
         # Frame for the book name and path.
         bookframe = gtk.Frame()
         bookframe.set_shadow_type(gtk.SHADOW_NONE)
-        bookframelabel = gtk.Label("<b>Book</b>")
+        bookframelabel = gtk.Label(_("<b>Book</b>"))
         bookframelabel.set_use_markup(True)
         bookframe.set_label_widget(bookframelabel)
         cont.add(bookframe)
@@ -165,17 +165,17 @@ class NewBookWin(gtk.Window):
         # Name entry field
         namebox = gtk.HBox(False, 2)
         bookbox.pack_start(namebox)
-        namelabel = gtk.Label("Name:")
+        namelabel = gtk.Label(_("Name:"))
         self.nameentry = gtk.Entry()
         namebox.pack_start(namelabel)
         namebox.pack_start(self.nameentry)
         # Destination dialog
-        destdialog = gtk.FileChooserDialog("Create a New Book", self.main, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        destdialog = gtk.FileChooserDialog(_("Create a New Book"), self.main, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         destdialog.set_default_response(gtk.RESPONSE_OK)
         # Destination
         destbox = gtk.HBox(False, 2)
         bookbox.pack_start(destbox)
-        destlabel = gtk.Label("Destination:")
+        destlabel = gtk.Label(_("Destination:"))
         self.destbutton = gtk.FileChooserButton(destdialog)
         destbox.pack_start(destlabel)
         destbox.pack_start(self.destbutton)
@@ -183,7 +183,7 @@ class NewBookWin(gtk.Window):
         # Frame for the page size and color space.
         pageframe = gtk.Frame()
         pageframe.set_shadow_type(gtk.SHADOW_NONE)
-        pageframelabel = gtk.Label("<b>Page</b>")
+        pageframelabel = gtk.Label(_("<b>Page</b>"))
         pageframelabel.set_use_markup(True)
         pageframe.set_label_widget(pageframelabel)
         cont.add(pageframe)
@@ -193,28 +193,28 @@ class NewBookWin(gtk.Window):
         # Width and height fields.
         widthbox = gtk.HBox(False, 2)
         pagebox.pack_start(widthbox)
-        widthlabel = gtk.Label("Width:")
+        widthlabel = gtk.Label(_("Width:"))
         widthadjust = gtk.Adjustment(1024, 1, 262144, 1, 100)
         self.widthentry = gtk.SpinButton(widthadjust)
-        widthpixels = gtk.Label("pixels")
+        widthpixels = gtk.Label(_("pixels"))
         widthbox.pack_start(widthlabel)
         widthbox.pack_start(self.widthentry)
         widthbox.pack_start(widthpixels)
         heightbox = gtk.HBox(False, 2)
         pagebox.pack_start(heightbox)
-        heightlabel = gtk.Label("Height:")
+        heightlabel = gtk.Label(_("Height:"))
         heightadjust = gtk.Adjustment(1024, 1, 262144, 1, 100)
         self.heightentry = gtk.SpinButton(heightadjust)
-        heightpixels = gtk.Label("pixels")
+        heightpixels = gtk.Label(_("pixels"))
         heightbox.pack_start(heightlabel)
         heightbox.pack_start(self.heightentry)
         heightbox.pack_start(heightpixels)
         # Color space:
         colorbox = gtk.HBox(False, 2)
         pagebox.pack_start(colorbox)
-        colorlabel = gtk.Label("Color Space:")
+        colorlabel = gtk.Label(_("Color Space:"))
         colorlist = gtk.ListStore(gobject.TYPE_STRING)
-        colors = [ "RBG color", "Grayscale" ]
+        colors = [ _("RBG color"), _("Grayscale") ]
         for color in colors:
             colorlist.append([color])
         self.colormenu = gtk.ComboBox(colorlist)
@@ -227,9 +227,9 @@ class NewBookWin(gtk.Window):
         # Background fill.
         fillbox = gtk.HBox(False, 2)
         pagebox.pack_start(fillbox)
-        filllabel = gtk.Label("Fill with:")
+        filllabel = gtk.Label(_("Fill with:"))
         filllist = gtk.ListStore(gobject.TYPE_STRING)
-        fills = [ "Foreground color", "Background color", "White", "Transparency" ]
+        fills = [ _("Foreground color"), _("Background color"), _("White"), _("Transparency") ]
         for fill in fills:
             filllist.append([fill])
         self.fillmenu = gtk.ComboBox(filllist)
@@ -244,11 +244,11 @@ class NewBookWin(gtk.Window):
         buttonbox = gtk.HBox(False, 2)
         cont.add(buttonbox)
         # Cancel
-        cancelbutton = gtk.Button("Cancel")
+        cancelbutton = gtk.Button(_("Cancel"))
         cancelbutton.connect("clicked", self.cancel)
         buttonbox.pack_start(cancelbutton)
         # OK
-        okbutton = gtk.Button("Ok")
+        okbutton = gtk.Button(_("Ok"))
         okbutton.connect("clicked", self.ok)
         buttonbox.pack_start(okbutton)
 
@@ -277,7 +277,7 @@ class ExportWin(gtk.Window):
         self.main = main
         win = super(ExportWin, self).__init__()
         self.set_transient_for(main)
-        self.set_title("Export Book...")
+        self.set_title(_("Export Book..."))
         self.set_size_request(500, 500)
         self.set_position(gtk.WIN_POS_CENTER)
         # Divide the window into two columns, as it doesn't fit on one 1024x768 screen. :)
@@ -286,13 +286,13 @@ class ExportWin(gtk.Window):
         stab = gtk.VBox()
         ftab = gtk.VBox()
         self.tabs = gtk.Notebook()
-        dtabl = gtk.Label("Destination")
+        dtabl = gtk.Label(_("Destination"))
         self.tabs.append_page(dtab, dtabl)
-        mtabl = gtk.Label("Margins")
+        mtabl = gtk.Label(_("Margins"))
         self.tabs.append_page(mtab, mtabl)
-        stabl = gtk.Label("Image Size")
+        stabl = gtk.Label(_("Image Size"))
         self.tabs.append_page(stab, stabl)
-        ftabl = gtk.Label("File Format")
+        ftabl = gtk.Label(_("File Format"))
         self.tabs.append_page(ftab, ftabl)
         cont = gtk.VBox(False, 4)
         cont.add(self.tabs)
@@ -301,33 +301,33 @@ class ExportWin(gtk.Window):
         # Destination frame
         destframe = gtk.Frame()
         destframe.set_shadow_type(gtk.SHADOW_NONE)
-        destframelabel = gtk.Label("<b>Destination</b>")
+        destframelabel = gtk.Label(_("<b>Destination</b>"))
         destframelabel.set_use_markup(True)
         destframe.set_label_widget(destframelabel)
         # Destination table
         destt = gtk.Table(4, 5, False)
-        destl = gtk.Label("Destination Folder:")
-        destd = gtk.FileChooserDialog("Export to", self.main, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        destl = gtk.Label(_("Destination Folder:"))
+        destd = gtk.FileChooserDialog(_("Export to"), self.main, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         destd.set_default_response(gtk.RESPONSE_OK)
         self.destb = gtk.FileChooserButton(destd)
 
-        namel = gtk.Label("Name Pages Using:")
+        namel = gtk.Label(_("Name Pages Using:"))
         namels = gtk.ListStore(gobject.TYPE_STRING)
-        for o in [ "Book Name", "Page Names", "Page Numbers", "Custom Name" ]:
+        for o in [ _("Book Name"), _("Page Names"), _("Page Numbers"), _("Custom Name") ]:
             namels.append([o])
         self.namem = gtk.ComboBox(namels)
         namec = gtk.CellRendererText()
         self.namem.pack_start(namec, False)
         self.namem.add_attribute(namec, 'text', 0)
         self.namem.set_active(0)
-        entl = gtk.Label("Custom Name:")
+        entl = gtk.Label(_("Custom Name:"))
         self.namee = gtk.Entry(128)
         self.namee.set_sensitive(False)
         self.namem.connect("changed", self.name_option_changed)
 
         # Page range
         self.pagecount = len(self.main.book.pagestore)-1
-        rangel = gtk.Label("Pages from/to:")
+        rangel = gtk.Label(_("Pages from/to:"))
         rangefroma = gtk.Adjustment(1, 0, self.pagecount, 1)
         self.rangefrom = gtk.SpinButton(rangefroma, 1, 1)
         self.rangefrom.connect("changed", self.rangefromchanged)
@@ -338,18 +338,18 @@ class ExportWin(gtk.Window):
         # Layer tagging frame
         tagf = gtk.Frame()
         tagf.set_shadow_type(gtk.SHADOW_NONE)
-        tagfl = gtk.Label("<b>Layer Tags</b>")
+        tagfl = gtk.Label(_("<b>Layer Tags</b>"))
         tagfl.set_use_markup(True)
         tagf.set_label_widget(tagfl)
         tagt = gtk.Table(2,3)
 
-        tagshowl = gtk.Label("Show Layers Tagged With:")
+        tagshowl = gtk.Label(_("Show Layers Tagged With:"))
         self.tagshow = gtk.Entry(4048)
-        taghidel = gtk.Label("Hide Layers Tagged With:")
+        taghidel = gtk.Label(_("Hide Layers Tagged With:"))
         self.taghide = gtk.Entry(4048)
-        tagunl = gtk.Label("Action for Untagged Layers:")
+        tagunl = gtk.Label(_("Action for Untagged Layers:"))
         tagunls = gtk.ListStore(gobject.TYPE_STRING)
-        for o in [ "Don't Touch", "Show", "Hide" ]:
+        for o in [ _("Don't Touch"), _("Show"), _("Hide") ]:
             tagunls.append([o])
         self.tagunm = gtk.ComboBox(tagunls)
         tagunc = gtk.CellRendererText()
@@ -383,39 +383,39 @@ class ExportWin(gtk.Window):
         # Margin frame
         self.margf = gtk.Frame()
         self.margf.set_shadow_type(gtk.SHADOW_NONE)
-        margfl = gtk.Label("<b>Margins</b>")
+        margfl = gtk.Label(_("<b>Margins</b>"))
         margfl.set_use_markup(True)
         self.margf.set_label_widget(margfl)
         mtab.add(self.margf)
 
         # Marg table
         margt = gtk.Table(5,2)
-        margtopl = gtk.Label("Top:")
+        margtopl = gtk.Label(_("Top:"))
         margtopa = gtk.Adjustment(0, -65536, 65536, 1, 10)
         self.margtop = gtk.SpinButton(margtopa, 1, 0)
         self.margtop.set_numeric(True)
-        margbotl = gtk.Label("Bottom:")
+        margbotl = gtk.Label(_("Bottom:"))
         margbota = gtk.Adjustment(0, -65536, 65536, 1, 10)
         self.margbot = gtk.SpinButton(margbota, 1, 0)
         self.margtop.set_numeric(True)
-        marginnerl = gtk.Label("Inner:")
+        marginnerl = gtk.Label(_("Inner:"))
         marginnera = gtk.Adjustment(0, -65536, 65536, 1, 10)
         self.marginner = gtk.SpinButton(marginnera, 1, 0)
         self.marginner.set_numeric(True)
-        margouterl = gtk.Label("Outer:")
+        margouterl = gtk.Label(_("Outer:"))
         margoutera = gtk.Adjustment(0, -65536, 65536, 1, 10)
         self.margouter = gtk.SpinButton(margoutera, 1, 0)
         self.margouter.set_numeric(True)
         # Background color
         margcolf = gtk.Frame()
         margcolf.set_shadow_type(gtk.SHADOW_NONE)
-        margcolfl = gtk.Label("<b>Background Color</b>")
+        margcolfl = gtk.Label(_("<b>Background Color</b>"))
         margcolfl.set_use_markup(True)
         margcolf.set_label_widget(margcolfl)
         margcolt = gtk.Table(2,2)
-        margcolml = gtk.Label("Use:")
+        margcolml = gtk.Label(_("Use:"))
         margconts = gtk.ListStore(gobject.TYPE_STRING)
-        for o in [ "Page's Background Color", "Black", "White", "Custom Color" ]:
+        for o in [ _("Page's Background Color"), _("Black"), _("White"), _("Custom Color") ]:
             margconts.append([o])
         self.margcolm = gtk.ComboBox(margconts)
         margcolc = gtk.CellRendererText()
@@ -423,7 +423,7 @@ class ExportWin(gtk.Window):
         self.margcolm.add_attribute(margcolc, 'text', 0)
         self.margcolm.set_active(0)
         self.margcolm.connect("changed", self.bg_color_changed)
-        self.margcoll = gtk.Label("Background Color:")
+        self.margcoll = gtk.Label(_("Background Color:"))
         self.margcoll.set_sensitive(False)
         self.margcol = gtk.ColorButton(gtk.gdk.Color(0,0,0))
         self.margcol.set_sensitive(False)
@@ -450,19 +450,19 @@ class ExportWin(gtk.Window):
         self.hfactor = float(self.templatew) / float(self.templateh)
         self.scalef = gtk.Frame()
         self.scalef.set_shadow_type(gtk.SHADOW_NONE)
-        scalefl = gtk.Label("<b>Image Size</b>")
+        scalefl = gtk.Label(_("<b>Image Size</b>"))
         scalefl.set_use_markup(True)
         self.scalef.set_label_widget(scalefl)
         stab.add(self.scalef)
         # Size table
         scalet = gtk.Table(3,4)
-        scalewl = gtk.Label("Width:") 
+        scalewl = gtk.Label(_("Width:")) 
         scalewa = gtk.Adjustment(100, 1, 65536, 1, 10)
         self.scalew = gtk.SpinButton(scalewa, 1, 1)
         self.scalew.set_numeric(True)
         self.scalew.set_text("100")
         self.scalew.connect("value-changed", self.scalew_changed)
-        scalehl = gtk.Label("Height:")
+        scalehl = gtk.Label(_("Height:"))
         scaleha = gtk.Adjustment(100, 1, 65536, 1, 10)
         self.scaleh = gtk.SpinButton(scaleha, 1, 1)
         self.scaleh.set_numeric(True)
@@ -472,7 +472,7 @@ class ExportWin(gtk.Window):
         self.scalelink.set_active(True)
         self.scalelink.connect("clicked", self.scalelink_toggled)
         scaletypels = gtk.ListStore(gobject.TYPE_STRING)
-        for o in [ "Percent", "Pixels" ]:
+        for o in [ _("Percent"), _("Pixels") ]:
             scaletypels.append([o])
         self.scaletype = gtk.ComboBox(scaletypels)
         scaletypec = gtk.CellRendererText()
@@ -481,9 +481,9 @@ class ExportWin(gtk.Window):
         self.scaletype.set_active(0)
         self.scaletype.connect("changed", self.scaletype_changed)
 
-        interpl = gtk.Label("Interpolation:")
+        interpl = gtk.Label(_("Interpolation:"))
         interpls = gtk.ListStore(gobject.TYPE_STRING)
-        for o in [ "None", "Linear", "Cubic", "Sinc (Lanczos3)" ]:
+        for o in [ _("None"), _("Linear"), _("Cubic"), _("Sinc (Lanczos3)") ]:
             interpls.append([o])
         self.interp = gtk.ComboBox(interpls)
         interpc = gtk.CellRendererText()
@@ -503,15 +503,15 @@ class ExportWin(gtk.Window):
         # File format frame
         formatf = gtk.Frame()
         formatf.set_shadow_type(gtk.SHADOW_NONE)
-        formatfl = gtk.Label("<b>File Format</b>")
+        formatfl = gtk.Label(_("<b>File Format</b>"))
         formatfl.set_use_markup(True)
         formatf.set_label_widget(formatfl)
         ftab.add(formatf)
         # Format table
         formatt = gtk.Table(2,2)
-        formatl = gtk.Label("File Format:")
+        formatl = gtk.Label(_("File Format:"))
         formatls = gtk.ListStore(gobject.TYPE_STRING)
-        formatoptions = [  "GIF image (*.gif)", "GIMP XCF image (*.xcf)", "JPEG image (*.jpg)", "Photoshop image (*.psd)", "PNG image (*.png)", "TIFF image (*.tif)" ]
+        formatoptions = [  _("GIF image (*.gif)"), _("GIMP XCF image (*.xcf)"), _("JPEG image (*.jpg)"), _("Photoshop image (*.psd)"), _("PNG image (*.png)"), _("TIFF image (*.tif)") ]
         for formatoption in formatoptions:
             formatls.append([formatoption])
         self.formatm = gtk.ComboBox(formatls)
@@ -540,9 +540,9 @@ class ExportWin(gtk.Window):
 
         # Done buttons
         self.doneb = gtk.HBox(True, 4)
-        cancelb = gtk.Button("Cancel")
+        cancelb = gtk.Button(_("Cancel"))
         cancelb.connect("clicked", self.close)
-        exportb = gtk.Button("Export Pages")
+        exportb = gtk.Button(_("Export Pages"))
         exportb.connect("clicked", self.export)
         self.doneb.pack_start(cancelb)
         self.doneb.pack_start(exportb)
@@ -646,20 +646,20 @@ class ExportWin(gtk.Window):
     def gif(self):
         # GIF save options GUI.
         gift = gtk.Table(4,2)
-        self.gifgrayscale = gtk.CheckButton("Convert to Grayscale")
-        gifcolorsl = gtk.Label("Colors:")
+        self.gifgrayscale = gtk.CheckButton(_("Convert to Grayscale"))
+        gifcolorsl = gtk.Label(_("Colors:"))
         gifcolorsa = gtk.Adjustment(255, 2, 256, 1)
         self.gifcolors = gtk.SpinButton(gifcolorsa)
-        gifdithl = gtk.Label("Color Dithering:")
+        gifdithl = gtk.Label(_("Color Dithering:"))
         gifdithls = gtk.ListStore(gobject.TYPE_STRING)
-        for g in [ "None", "Floyd-Steinberg (normal)", "Flogy-Steinberg (reduced color bleeding)", "Positioned" ]:
+        for g in [ _("None"), _("Floyd-Steinberg (normal)"), _("Flogy-Steinberg (reduced color bleeding)"), _("Positioned") ]:
             gifdithls.append([g])
         gifdithc = gtk.CellRendererText()
         self.gifdith = gtk.ComboBox(gifdithls)
         self.gifdith.pack_start(gifdithc, True)
         self.gifdith.add_attribute(gifdithc, 'text', 0)
         self.gifdith.set_active(0)
-        self.gifinterlace = gtk.CheckButton("Interlace")
+        self.gifinterlace = gtk.CheckButton(_("Interlace"))
         gift.attach(self.gifgrayscale, 0,2,0,1)
         gift.attach(gifcolorsl, 0,1,1,2)
         gift.attach(self.gifcolors, 1,2,1,2)
@@ -671,7 +671,7 @@ class ExportWin(gtk.Window):
     def xcf(self):
         # XCF save options GUI.
         xcft = gtk.Table(1,2)
-        self.xcfflatten = gtk.CheckButton("Flatten")
+        self.xcfflatten = gtk.CheckButton(_("Flatten"))
         self.xcfflatten.set_active(True)
         xcft.attach(self.xcfflatten, 0,2,0,1)
         return xcft
@@ -679,26 +679,26 @@ class ExportWin(gtk.Window):
     def jpg(self):
         # JPEG save options GUI.
         jpgt = gtk.Table(9,2)
-        jpgqualityl = gtk.Label("Quality:")
+        jpgqualityl = gtk.Label(_("Quality:"))
         jpgqualitya = gtk.Adjustment(85, 0, 100, 1, 10, 10)
         self.jpgquality = gtk.HScale(jpgqualitya)
         self.jpgquality.set_digits(0)
-        jpgsmoothingl = gtk.Label("Smoothing:")
+        jpgsmoothingl = gtk.Label(_("Smoothing:"))
         jpgsmoothinga = gtk.Adjustment(0.00, 0.00, 1.00, 0.01, 0.1, 0.1)
         self.jpgsmoothing = gtk.HScale(jpgsmoothinga)
         self.jpgsmoothing.set_digits(2)
-        self.jpgoptimize = gtk.CheckButton("Optimize")
+        self.jpgoptimize = gtk.CheckButton(_("Optimize"))
         self.jpgoptimize.set_active(True)
-        self.jpgprogressive = gtk.CheckButton("Progressive")
-        self.jpgrestart = gtk.CheckButton("Restart Markers")
+        self.jpgprogressive = gtk.CheckButton(_("Progressive"))
+        self.jpgrestart = gtk.CheckButton(_("Restart Markers"))
         self.jpgrestart.connect("clicked", self.jpgrestartchecked)
-        jpgfreql = gtk.Label("Marker Frequency:")
+        jpgfreql = gtk.Label(_("Marker Frequency:"))
         jpgfreqa = gtk.Adjustment(1, 1, 64, 1)
         self.jpgfreq = gtk.SpinButton(jpgfreqa)
         self.jpgfreq.set_sensitive(False)
-        jpgsubl = gtk.Label("Subsampling:")
+        jpgsubl = gtk.Label(_("Subsampling:"))
         jpgsubls = gtk.ListStore(gobject.TYPE_STRING)
-        jpgsubos = [ "1x1,1x1,1x1 (best quality)", "2x1,1x1,1x1 (4:2:2)", "1x2,1x1,1x1", "2x2,1x1,1x1 (smallest file)" ]
+        jpgsubos = [ _("1x1,1x1,1x1 (best quality)"), _("2x1,1x1,1x1 (4:2:2)"), _("1x2,1x1,1x1"), _("2x2,1x1,1x1 (smallest file)") ]
         for jpgsubo in jpgsubos:
             jpgsubls.append([jpgsubo])
         jpgsubc = gtk.CellRendererText()
@@ -706,9 +706,9 @@ class ExportWin(gtk.Window):
         self.jpgsub.pack_start(jpgsubc, True)
         self.jpgsub.add_attribute(jpgsubc, 'text', 0)
         self.jpgsub.set_active(3)
-        jpgdctl = gtk.Label("DCT Method:")
+        jpgdctl = gtk.Label(_("DCT Method:"))
         jpgdctls = gtk.ListStore(gobject.TYPE_STRING)
-        jpgdctos = [ "Float Integer", "Integer", "Floating-Point" ]
+        jpgdctos = [ _("Float Integer"), _("Integer"), _("Floating-Point") ]
         for jpgdcto in jpgdctos:
             jpgdctls.append([jpgdcto])
         jpgdctc = gtk.CellRendererText()
@@ -716,7 +716,7 @@ class ExportWin(gtk.Window):
         self.jpgdct.pack_start(jpgdctc, True)
         self.jpgdct.add_attribute(jpgdctc, 'text', 0)
         self.jpgdct.set_active(1)
-        jpgcommentl = gtk.Label("Comment:")
+        jpgcommentl = gtk.Label(_("Comment:"))
         self.jpgcomment = gtk.Entry(256)
         jpgt.attach(jpgqualityl, 0,1,0,1)
         jpgt.attach(self.jpgquality, 1,2,0,1)
@@ -745,20 +745,20 @@ class ExportWin(gtk.Window):
     def psd(self):
         # PSD save options GUI.
         psdt = gtk.Table(2,2)
-        self.psdflatten = gtk.CheckButton("Flatten")
+        self.psdflatten = gtk.CheckButton(_("Flatten"))
         self.psdflatten.set_active(True)
         psdframe = gtk.Frame()
         psdframe.set_shadow_type(gtk.SHADOW_NONE)
-        psdframel = gtk.Label("<b>Compression</b>")
+        psdframel = gtk.Label(_("<b>Compression</b>"))
         psdframel.set_use_markup(True)
         psdframe.set_label_widget(psdframel)
         psdvbox = gtk.VBox(False, 5)
         psdframe.add(psdvbox)
-        self.psdnone = gtk.RadioButton(None, "None")
+        self.psdnone = gtk.RadioButton(None, _("None"))
         psdvbox.pack_start(self.psdnone)
-        self.psdlzw = gtk.RadioButton(self.psdnone, "LZW")
+        self.psdlzw = gtk.RadioButton(self.psdnone, _("LZW"))
         psdvbox.pack_start(self.psdlzw)
-        self.psdpackbits = gtk.RadioButton(self.psdnone, "Pack Bits")
+        self.psdpackbits = gtk.RadioButton(self.psdnone, _("Pack Bits"))
         psdvbox.pack_start(self.psdpackbits)
         psdt.attach(self.psdflatten, 0,2,0,1)
         psdt.attach(psdframe, 0,2,1,2)
@@ -767,16 +767,16 @@ class ExportWin(gtk.Window):
     def png(self):
         # PNG save options GUI.
         pngt = gtk.Table(8,2)
-        self.pnginterlacing = gtk.CheckButton("Interlacing (Adam7)")
-        self.pngbgcolor = gtk.CheckButton("Save background color")
-        self.pnggamma = gtk.CheckButton("Save gamma")
-        self.pnglayeroffset = gtk.CheckButton("Save layer offset")
-        self.pngresolution = gtk.CheckButton("Save resolution")
+        self.pnginterlacing = gtk.CheckButton(_("Interlacing (Adam7)"))
+        self.pngbgcolor = gtk.CheckButton(_("Save background color"))
+        self.pnggamma = gtk.CheckButton(_("Save gamma"))
+        self.pnglayeroffset = gtk.CheckButton(_("Save layer offset"))
+        self.pngresolution = gtk.CheckButton(_("Save resolution"))
         self.pngresolution.set_active(True)
-        self.pngcreationtime = gtk.CheckButton("Save creation time")
+        self.pngcreationtime = gtk.CheckButton(_("Save creation time"))
         self.pngcreationtime.set_active(True)
-        self.pngcoloroftransp = gtk.CheckButton("Save color values from transparent pixels")
-        pngcompressl = gtk.Label("Compression level:")
+        self.pngcoloroftransp = gtk.CheckButton(_("Save color values from transparent pixels"))
+        pngcompressl = gtk.Label(_("Compression level:"))
         pngcompressa = gtk.Adjustment(9, 0, 9, 1)
         self.pngcompress = gtk.HScale(pngcompressa)
         self.pngcompress.set_digits(0)
@@ -797,23 +797,23 @@ class ExportWin(gtk.Window):
         # Save color
         tifframe = gtk.Frame()
         tifframe.set_shadow_type(gtk.SHADOW_NONE)
-        tifframel = gtk.Label("<b>Compression</b>")
+        tifframel = gtk.Label(_("<b>Compression</b>"))
         tifframel.set_use_markup(True)
         tifframe.set_label_widget(tifframel)
         tifvbox = gtk.VBox(False, 5)
         tifframe.add(tifvbox)
-        self.tifnone = gtk.RadioButton(None, "None")
+        self.tifnone = gtk.RadioButton(None, _("None"))
         tifvbox.pack_start(self.tifnone)
-        self.tiflzw = gtk.RadioButton(self.tifnone, "LZW")
+        self.tiflzw = gtk.RadioButton(self.tifnone, _("LZW"))
         tifvbox.pack_start(self.tiflzw)
-        self.tifpackbits = gtk.RadioButton(self.tifnone, "Pack Bits")
+        self.tifpackbits = gtk.RadioButton(self.tifnone, _("Pack Bits"))
         tifvbox.pack_start(self.tifpackbits)
-        self.tifdeflate = gtk.RadioButton(self.tifnone, "Deflate")
+        self.tifdeflate = gtk.RadioButton(self.tifnone, _("Deflate"))
         tifvbox.pack_start(self.tifdeflate)
-        self.tifjpeg = gtk.RadioButton(self.tifnone, "JPEG")
+        self.tifjpeg = gtk.RadioButton(self.tifnone, _("JPEG"))
         tifvbox.pack_start(self.tifjpeg)
         self.tifnone.set_active(True)
-        self.tifcoloroftransp = gtk.CheckButton("Save color values from transparent pixels")
+        self.tifcoloroftransp = gtk.CheckButton(_("Save color values from transparent pixels"))
         tift.attach(tifframe, 0,2,0,1)
         tift.attach(self.tifcoloroftransp, 0,2,1,2)
         return tift
@@ -826,7 +826,7 @@ class ExportWin(gtk.Window):
         self.progress.set_text("")
         outfolder = os.path.join(self.destb.get_filename(), self.main.book.bookname)
         if os.path.isdir(outfolder):
-            overwrite = gtk.MessageDialog(self.main, 0, gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, '"%s" exists, do you want to overwrite it?' % (outfolder))
+            overwrite = gtk.MessageDialog(self.main, 0, gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, _('"%s" exists, do you want to overwrite it?') % (outfolder))
             response = overwrite.run()
             if response == gtk.RESPONSE_YES:
                 overwrite.hide()
@@ -906,9 +906,9 @@ class Book():
                 self.load_book(os.path.join(fullpath, name+".book"), self.main)
                 return True
             else:
-                show_error_msg("Name was left empty")
+                show_error_msg(_("Name was left empty"))
         else:
-            show_error_msg("Destination does not exist.")
+            show_error_msg(_("Destination does not exist."))
 
     def load_book(self, bookfile, mainwin):
         # Loads a selected book.
@@ -927,7 +927,7 @@ class Book():
             progress = 0.0
             for p in metadata['pages']:
                 mainwin.progress.show()
-                mainwin.progress.set_text("Loading %s" % (p))
+                mainwin.progress.set_text(_("Loading %s") % (p))
                 while gtk.events_pending():
                     gtk.main_iteration()
                 # Create a page object, and add to a list.
@@ -986,7 +986,7 @@ class Book():
                 self.pagestore.insert(dest, ( p, thumb.thumbpix, thumb.path, thumb.mtime))
                 return True
             else:
-                show_error_msg("Page names must be unique")
+                show_error_msg(_("Page names must be unique"))
         except Exception, err:
             show_error_msg(err)
 
@@ -1006,7 +1006,7 @@ class Book():
                 thumb = Thumb(os.path.join(self.pagepath, p))
                 self.pagestore.insert(dest, (name, thumb.thumbpix, thumb.path, thumb.mtime))
             else:
-                show_error_msg("Page name is not unique.")
+                show_error_msg(_("Page name is not unique."))
 
 
     def open_page(self, iconview, number):
@@ -1033,7 +1033,7 @@ class Book():
                 self.pagestore.insert(dest, ( p, thumb.thumbpix, thumb.path, thumb.mtime))
                 return True
             else:
-                show_error_msg("Page names must be unique")
+                show_error_msg(_("Page names must be unique"))
         except Exception, err:
             show_error_msg(err)
 
@@ -1053,13 +1053,13 @@ class Book():
                 except Exception, err:
                     show_error_msg(err)
             else:
-                show_error_msg("Page names must be unique")
+                show_error_msg(_("Page names must be unique"))
             
     def delete_page(self):
         # Delete the selected page.
         try:
             p = self.pagestore[self.selected][0]
-            shutil.move(os.path.join(self.pagepath, p), os.path.join(self.trashpath,strftime("%Y%m%d_%H%M%S_")+p))
+            shutil.move(os.path.join(self.pagepath, p), os.path.join(self.trashpath,strftime(_("%Y%m%d_%H%M%S_"))+p))
             piter = self.pagestore.get_iter_from_string(str(self.selected))
             self.pagestore.remove(piter)
             return True
@@ -1087,7 +1087,7 @@ class Book():
         elif formati == 5: # TIFF
             return "tif"
         else:
-            show_error_msg("Format index out of range")
+            show_error_msg(_("Format index out of range"))
 
 
     def export_book(self, expwin):
@@ -1114,7 +1114,7 @@ class Book():
             if i >= expwin.rangefrom.get_value() and i <= expwin.rangeto.get_value():
                 # Figure out the page name.
                 original = os.path.join(self.pagepath, p[0])
-                expwin.progress.set_text("Exporting %s" % (p[0]))
+                expwin.progress.set_text(_("Exporting %s") % (p[0]))
                 while gtk.events_pending():
                     gtk.main_iteration()
                 pagenr = str(i).zfill(padding)
@@ -1270,7 +1270,7 @@ class Main(gtk.Window):
     # Builds a GTK windows for managing the pages of a book.
     def __init__ (self):
         window = super(Main, self).__init__()
-        self.set_title("GIMP Book")
+        self.set_title(_("GIMP Book"))
         self.set_default_size(570, 400)
         self.set_position(gtk.WIN_POS_CENTER)
         self.loaded = False  # If there is a book loaded in the interface.
@@ -1282,22 +1282,22 @@ class Main(gtk.Window):
 
         # File menu
         filemenu = gtk.Menu()
-        i_file = gtk.MenuItem("File")
+        i_file = gtk.MenuItem(_("File"))
         i_file.set_submenu(filemenu)
         
         agr = gtk.AccelGroup()
         self.add_accel_group(agr)
 
         file_new = gtk.ImageMenuItem(gtk.STOCK_NEW, agr)
-        file_new.set_label("New Book...")
-        key, mod = gtk.accelerator_parse("<Control>N")
+        file_new.set_label(_("New Book..."))
+        key, mod = gtk.accelerator_parse(_("<Control>N"))
         file_new.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
         file_new.connect("activate", self.new_book)
         filemenu.append(file_new)
 
         file_open = gtk.ImageMenuItem(gtk.STOCK_OPEN, agr)
-        file_open.set_label("Open Book...")
-        key, mod = gtk.accelerator_parse("<Control>O")
+        file_open.set_label(_("Open Book..."))
+        key, mod = gtk.accelerator_parse(_("<Control>O"))
         file_open.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
         file_open.connect("activate", self.open_book)
         filemenu.append(file_open)
@@ -1306,8 +1306,8 @@ class Main(gtk.Window):
         filemenu.append(sep1)
 
         self.file_export = gtk.ImageMenuItem(gtk.STOCK_OPEN, agr)
-        self.file_export.set_label("Export Book...")
-        key, mod = gtk.accelerator_parse("<Control>E")
+        self.file_export.set_label(_("Export Book..."))
+        key, mod = gtk.accelerator_parse(_("<Control>E"))
         self.file_export.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
         self.file_export.connect("activate", self.export_win)
         self.file_export.set_sensitive(False)
@@ -1317,19 +1317,19 @@ class Main(gtk.Window):
         filemenu.append(sep2)
 
         file_close = gtk.ImageMenuItem(gtk.STOCK_CLOSE, agr)
-        file_close.set_label("Close Book...")
-        key, mod = gtk.accelerator_parse("<Control>W")
+        file_close.set_label(_("Close Book..."))
+        key, mod = gtk.accelerator_parse(_("<Control>W"))
         file_close.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
         file_close.connect("activate", gtk.main_quit)
         filemenu.append(file_close)
 
         # View Menu
         self.viewmenu = gtk.Menu()
-        i_view = gtk.MenuItem("View")
+        i_view = gtk.MenuItem(_("View"))
         i_view.set_submenu(self.viewmenu)
 
         toolbar = gtk.CheckMenuItem()
-        toolbar.set_label("Show Toolbar")
+        toolbar.set_label(_("Show Toolbar"))
         toolbar.set_active(True)
         toolbar.connect("activate", self.toggle_toolbar)
         self.viewmenu.append(toolbar)
@@ -1338,7 +1338,7 @@ class Main(gtk.Window):
         self.viewmenu.append(viewsep)
 
         self.storyboardm = gtk.CheckMenuItem()
-        self.storyboardm.set_label("Storyboard Mode")
+        self.storyboardm.set_label(_("Storyboard Mode"))
         self.storyboardm.set_active(False)
         self.storyboardm.set_sensitive(False)
         self.storyboardm.connect("activate", self.toggle_storyboard_mode)
@@ -1352,12 +1352,12 @@ class Main(gtk.Window):
 
         # Pages Menu
         self.pagemenu = gtk.Menu()
-        i_page = gtk.MenuItem("Pages")
+        i_page = gtk.MenuItem(_("Pages"))
         i_page.set_submenu(self.pagemenu)
 
         self.openpage = gtk.MenuItem()
         self.openpage.set_sensitive(False)
-        self.openpage.set_label("Open")
+        self.openpage.set_label(_("Open"))
         key, mod = gtk.accelerator_parse("Return")
         self.openpage.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
         self.openpage.connect("activate", self.open_page)
@@ -1366,8 +1366,8 @@ class Main(gtk.Window):
 
         self.addpage = gtk.MenuItem()
         self.addpage.set_sensitive(False)
-        self.addpage.set_label("Add")
-        key, mod = gtk.accelerator_parse("<Control>A")
+        self.addpage.set_label(_("Add"))
+        key, mod = gtk.accelerator_parse(_("<Control>A"))
         self.addpage.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
         self.addpage.connect("activate", self.ask_add_page)
         self.pagemenu.append(self.addpage)
@@ -1375,8 +1375,8 @@ class Main(gtk.Window):
 
         self.duplipage = gtk.MenuItem()
         self.duplipage.set_sensitive(False)
-        self.duplipage.set_label("Duplicate")
-        key, mod = gtk.accelerator_parse("<Control>D")
+        self.duplipage.set_label(_("Duplicate"))
+        key, mod = gtk.accelerator_parse(_("<Control>D"))
         self.duplipage.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
         self.duplipage.connect("activate", self.ask_dupli_page)
         self.pagemenu.append(self.duplipage)
@@ -1384,8 +1384,8 @@ class Main(gtk.Window):
 
         self.renamepage = gtk.MenuItem()
         self.renamepage.set_sensitive(False)
-        self.renamepage.set_label("Rename")
-        key, mod = gtk.accelerator_parse("<Control>R")
+        self.renamepage.set_label(_("Rename"))
+        key, mod = gtk.accelerator_parse(_("<Control>R"))
         self.renamepage.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
         self.renamepage.connect("activate", self.ask_rename_page)
         self.pagemenu.append(self.renamepage)
@@ -1393,7 +1393,7 @@ class Main(gtk.Window):
 
         self.deletepage = gtk.MenuItem()
         self.deletepage.set_sensitive(False)
-        self.deletepage.set_label("Delete")
+        self.deletepage.set_label(_("Delete"))
         key, mod = gtk.accelerator_parse("Delete")
         self.deletepage.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
         self.deletepage.connect("activate", self.ask_delete_page)
@@ -1405,8 +1405,8 @@ class Main(gtk.Window):
 
         self.importpage = gtk.MenuItem()
         self.importpage.set_sensitive(False)
-        self.importpage.set_label("Import Page(s)")
-        key, mod = gtk.accelerator_parse("<Control>I")
+        self.importpage.set_label(_("Import Page(s)"))
+        key, mod = gtk.accelerator_parse(_("<Control>I"))
         self.importpage.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
         self.importpage.connect("activate", self.ask_import_page)
         self.pagemenu.append(self.importpage)
@@ -1414,11 +1414,11 @@ class Main(gtk.Window):
 
         # Help Menu
         self.helpmenu = gtk.Menu()
-        i_help = gtk.MenuItem("Help")
+        i_help = gtk.MenuItem(_("Help"))
         i_help.set_submenu(self.helpmenu)
         
         onlinehelp = gtk.MenuItem()
-        self.urlbutton = gtk.LinkButton(website, "Online Help")
+        self.urlbutton = gtk.LinkButton(website, _("Online Help"))
         onlinehelp.add(self.urlbutton)
         onlinehelp.connect("activate", self.online_help)
         self.helpmenu.append(onlinehelp)
@@ -1427,7 +1427,7 @@ class Main(gtk.Window):
         self.helpmenu.append(helpsep)
 
         about = gtk.MenuItem()
-        about.set_label("About Gimp Book")
+        about.set_label(_("About Gimp Book"))
         about.connect("activate", self.about)
         self.helpmenu.append(about)
 
@@ -1443,23 +1443,23 @@ class Main(gtk.Window):
         self.add_page = gtk.ToolButton(gtk.STOCK_NEW)
         self.add_page.connect("clicked", self.ask_add_page)
         self.add_page.set_sensitive(False)
-        self.add_page.set_tooltip_text("Add a new page.")
+        self.add_page.set_tooltip_text(_("Add a new page."))
         self.dupli_page = gtk.ToolButton(gtk.STOCK_COPY)
         self.dupli_page.connect("clicked", self.ask_dupli_page)
         self.dupli_page.set_sensitive(False)
-        self.dupli_page.set_tooltip_text("Duplicate the selected page.")
+        self.dupli_page.set_tooltip_text(_("Duplicate the selected page."))
         self.ren_page = gtk.ToolButton(gtk.STOCK_EDIT)
         self.ren_page.connect("clicked", self.ask_rename_page)
         self.ren_page.set_sensitive(False)
-        self.ren_page.set_tooltip_text("Rename the selected page.")
+        self.ren_page.set_tooltip_text(_("Rename the selected page."))
         self.del_page = gtk.ToolButton(gtk.STOCK_DELETE)
         self.del_page.connect("clicked", self.ask_delete_page)
         self.del_page.set_sensitive(False)
-        self.del_page.set_tooltip_text("Delete the selected page.")
+        self.del_page.set_tooltip_text(_("Delete the selected page."))
         sep = gtk.SeparatorToolItem()
         self.storyboard = gtk.ToolButton(gtk.STOCK_ABOUT)
         self.storyboard.set_sensitive(False)
-        self.storyboard.set_tooltip_text("Toggle storyboard view mode.")
+        self.storyboard.set_tooltip_text(_("Toggle storyboard view mode."))
         self.storyboard.connect("clicked", self.toggle_storyboard_mode)
         self.toolbar.insert(self.add_page, 0)
         self.toolbar.insert(self.dupli_page, 1)
@@ -1505,7 +1505,7 @@ class Main(gtk.Window):
         about.set_license(license)
         about.set_copyright(copyright)
         about.set_website(website)
-        about.set_website_label("Visit Gimp Book at the Gimp Registry")
+        about.set_website_label(_("Visit Gimp Book at the Gimp Registry"))
         response = about.run()
         if response == gtk.RESPONSE_CANCEL:
             about.destroy()
@@ -1548,10 +1548,10 @@ class Main(gtk.Window):
 
     def open_book(self, widget):
         # Interface for opening an existing book.
-        o = gtk.FileChooserDialog("Open Book", self, gtk.FILE_CHOOSER_ACTION_OPEN, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        o = gtk.FileChooserDialog(_("Open Book"), self, gtk.FILE_CHOOSER_ACTION_OPEN, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         o.set_default_response(gtk.RESPONSE_OK)
         f = gtk.FileFilter()
-        f.set_name("GIMP Book")
+        f.set_name(_("GIMP Book"))
         f.add_pattern("*.book")
         o.add_filter(f)
         response = o.run()
@@ -1584,7 +1584,7 @@ class Main(gtk.Window):
 
     def update_title(self):
         # Update the title bar.
-        self.set_title("GIMP Book - %s (page %s of %s)" % (self.book.bookname, self.book.selected, len(self.book.pagestore)-1))
+        self.set_title(_("GIMP Book - %s (page %s of %s)") % (self.book.bookname, self.book.selected, len(self.book.pagestore)-1))
 
     def button_press(self, widget, event, menu):
         # Capture buttons presses on thumbs.
@@ -1614,7 +1614,7 @@ class Main(gtk.Window):
         if self.book.selected < 1:
             dest = len(self.book.pagestore)
         if self.loaded:
-            response, text = self.name_dialog("Add a Page", "Enter Page Name: ")
+            response, text = self.name_dialog(_("Add a Page"), _("Enter Page Name: "))
             if response == gtk.RESPONSE_ACCEPT:
                 if self.valid_name(text):
                     text = self.valid_name(text)
@@ -1622,12 +1622,12 @@ class Main(gtk.Window):
                     self.del_page.set_sensitive(True)
                     self.update_title()
         else:
-            show_error_msg("You need to create or load a book, before adding pages to it.")
+            show_error_msg(_("You need to create or load a book, before adding pages to it."))
 
     def open_page(self, widget):
         # Open page from right click menu.
         if self.book.selected < 0:
-            show_error_msg("No page selected to open.")
+            show_error_msg(_("No page selected to open."))
             return False
         self.book.open_page(self.thumbs, [self.book.selected])
 
@@ -1638,11 +1638,11 @@ class Main(gtk.Window):
             dest = len(self.book.pagestore)
         if self.loaded:
             # Interface for opening an existing book.
-            i = gtk.FileChooserDialog("Import Page", self, gtk.FILE_CHOOSER_ACTION_OPEN, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+            i = gtk.FileChooserDialog(_("Import Page"), self, gtk.FILE_CHOOSER_ACTION_OPEN, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
             i.set_default_response(gtk.RESPONSE_OK)
             i.set_select_multiple(True)
             f = gtk.FileFilter()
-            f.set_name("All Images")
+            f.set_name(_("All Images"))
             f.add_pattern("*.jpg")
             f.add_pattern("*.jpe")
             f.add_pattern("*.jpeg")
@@ -1672,10 +1672,10 @@ class Main(gtk.Window):
         # Duplicate the selected page.
         dest = self.book.selected
         if self.book.selected < 0:
-            show_error_msg("No page selected to duplicate.")
+            show_error_msg(_("No page selected to duplicate."))
             return False
         if self.loaded:
-            response, text = self.name_dialog("Duplicate Page", "Enter Name of Duplicate: ")
+            response, text = self.name_dialog(_("Duplicate Page"), _("Enter Name of Duplicate: "))
             if response == gtk.RESPONSE_ACCEPT:
                 if self.valid_name(text):
                     text = self.valid_name(text)
@@ -1683,15 +1683,15 @@ class Main(gtk.Window):
                     self.del_page.set_sensitive(True)
                     self.update_title()
         else:
-            show_error_msg("You need to create or load a book, before adding pages to it.")
+            show_error_msg(_("You need to create or load a book, before adding pages to it."))
 
     def ask_rename_page(self, widget):
         # Rename the selected page.
         if self.book.selected < 0:
-            show_error_msg("No page selected to rename.")
+            show_error_msg(_("No page selected to rename."))
             return False
         if self.book.selected > -1:
-            response, text = self.name_dialog("Rename Page", "Ente Page Name: ")
+            response, text = self.name_dialog(_("Rename Page"), _("Ente Page Name: "))
             if response == gtk.RESPONSE_ACCEPT:
                 if self.valid_name(text):
                     text = self.valid_name(text)
@@ -1700,9 +1700,9 @@ class Main(gtk.Window):
     def ask_delete_page(self, widget):
         # Delete the selected page.
         if self.book.selected < 0:
-            show_error_msg("No page selected to delete.")
+            show_error_msg(_("No page selected to delete."))
             return False
-        areyousure = gtk.MessageDialog(self, 0, gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, 'Delete page "%s"?' % (self.book.pagestore[self.book.selected][0]))
+        areyousure = gtk.MessageDialog(self, 0, gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, _('Delete page "%s"?') % (self.book.pagestore[self.book.selected][0]))
         response = areyousure.run()
         if response == gtk.RESPONSE_YES:
             self.book.delete_page()
@@ -1739,7 +1739,7 @@ class Main(gtk.Window):
     def valid_name(self, name):
         # Replaces illegal characters with _. Removes - and . from filename, and limits length to 255 characters, including extension.
         if len(name) < 1:
-            show_error_msg("No page name entered.")
+            show_error_msg(_("No page name entered."))
             return False
         loop = True
         while loop:
@@ -1752,11 +1752,11 @@ class Main(gtk.Window):
             name = name.replace(c, "_")
         if len(name) > 251:
             name = name[:250]
-            show_error_msg("Warning! Page name truncated to 255 characters.")
+            show_error_msg(_("Warning! Page name truncated to 255 characters."))
             return False
         if os.path.exists(os.path.join(self.book.pagepath, ("%s.xcf" % (name)))):
             # TODO! Support case insensitive names on Windows.
-            show_error_msg("A page called '%s.xcf' exists. Page names must be unique." % (name))
+            show_error_msg(_("A page called '%s.xcf' exists. Page names must be unique.") % (name))
             return False
         return name
 
@@ -1809,11 +1809,11 @@ def show_error_msg( msg ):
 # This is the plugin registration function
 register(
     "python_fu_book",    
-    "Tool for managing multiple pages of a comic book, childrens book, sketch book or similar.",
+    _("Tool for managing multiple pages of a comic book, childrens book, sketch book or similar."),
     "GNU GPL v3 or later.",
     "Ragnar Brynjúlfsson",
     "Ragnar Brynjúlfsson",
-    "January 2012",
+    _("January 2012"),
     "<Toolbox>/Windows/Book...",
     "",
     [
