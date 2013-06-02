@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gimp_book\n"
 "Report-Msgid-Bugs-To: bug@ragnarb.com\n"
-"POT-Creation-Date: 2013-06-02 15:17+0200\n"
+"POT-Creation-Date: 2013-06-02 19:13+0200\n"
 "PO-Revision-Date: 2013-06-02 17:13+0100\n"
 "Last-Translator: Patrick Depoix <patrick.depoix@gmail.com>\n"
 "Language-Team: French\n"
@@ -49,18 +49,15 @@ msgstr ""
 msgid "<b>Page</b>"
 msgstr ""
 
-#: ../book.py:198
-#: ../book.py:461
+#: ../book.py:198 ../book.py:461
 msgid "Width:"
 msgstr "Largeur:"
 
-#: ../book.py:201
-#: ../book.py:210
+#: ../book.py:201 ../book.py:210
 msgid "pixels"
 msgstr ""
 
-#: ../book.py:207
-#: ../book.py:467
+#: ../book.py:207 ../book.py:467
 msgid "Height:"
 msgstr "Hauteur:"
 
@@ -88,8 +85,7 @@ msgstr ""
 msgid "Background color"
 msgstr ""
 
-#: ../book.py:234
-#: ../book.py:420
+#: ../book.py:234 ../book.py:420
 msgid "White"
 msgstr "Blanc"
 
@@ -98,8 +94,7 @@ msgid "Transparency"
 msgstr ""
 
 #. Cancel
-#: ../book.py:249
-#: ../book.py:545
+#: ../book.py:249 ../book.py:545
 msgid "Cancel"
 msgstr "Annuler"
 
@@ -108,8 +103,7 @@ msgstr "Annuler"
 msgid "Ok"
 msgstr ""
 
-#: ../book.py:282
-#: ../book.py:1316
+#: ../book.py:282 ../book.py:1316
 msgid "Export Book..."
 msgstr "Exporter le livre..."
 
@@ -257,10 +251,7 @@ msgstr ""
 msgid "Interpolation:"
 msgstr ""
 
-#: ../book.py:488
-#: ../book.py:657
-#: ../book.py:759
-#: ../book.py:807
+#: ../book.py:488 ../book.py:657 ../book.py:759 ../book.py:807
 msgid "None"
 msgstr "Aucun"
 
@@ -340,8 +331,7 @@ msgstr "Positionnee"
 msgid "Interlace"
 msgstr "Entrelace"
 
-#: ../book.py:676
-#: ../book.py:750
+#: ../book.py:676 ../book.py:750
 msgid "Flatten"
 msgstr "Applatir"
 
@@ -409,18 +399,15 @@ msgstr "Point flottant"
 msgid "Comment:"
 msgstr "Commentaire:"
 
-#: ../book.py:754
-#: ../book.py:802
+#: ../book.py:754 ../book.py:802
 msgid "<b>Compression</b>"
 msgstr ""
 
-#: ../book.py:761
-#: ../book.py:809
+#: ../book.py:761 ../book.py:809
 msgid "LZW"
 msgstr ""
 
-#: ../book.py:763
-#: ../book.py:811
+#: ../book.py:763 ../book.py:811
 msgid "Pack Bits"
 msgstr ""
 
@@ -448,8 +435,7 @@ msgstr "Enregistrer resolution"
 msgid "Save creation time"
 msgstr "Enregistrer date de création"
 
-#: ../book.py:780
-#: ../book.py:818
+#: ../book.py:780 ../book.py:818
 msgid "Save color values from transparent pixels"
 msgstr "Enregistrer les valeurs de couleur des pixels transparents"
 
@@ -485,9 +471,7 @@ msgstr "La destination n'existe pas."
 msgid "Loading %s"
 msgstr "%s en charge"
 
-#: ../book.py:993
-#: ../book.py:1040
-#: ../book.py:1060
+#: ../book.py:993 ../book.py:1040 ../book.py:1060
 msgid "Page names must be unique"
 msgstr "Les noms de page doivent être unique"
 
@@ -505,8 +489,7 @@ msgstr "index de format hors de liste"
 msgid "Exporting %s"
 msgstr "%s en export"
 
-#: ../book.py:1278
-#: ../book.py:1561
+#: ../book.py:1278 ../book.py:1578
 msgid "GIMP Book"
 msgstr "Livre GIMP"
 
@@ -565,170 +548,180 @@ msgid "Open"
 msgstr "Ouvrir"
 
 #: ../book.py:1376
-msgid "Add"
-msgstr "Ajouter"
+#, fuzzy
+msgid "Import"
+msgstr "Importer une Page"
 
 #: ../book.py:1377
-msgid "<Control>A"
-msgstr ""
-
-#: ../book.py:1385
-msgid "Duplicate"
-msgstr "Dupliquer"
-
-#: ../book.py:1386
-msgid "<Control>D"
-msgstr ""
-
-#: ../book.py:1394
-msgid "Rename"
-msgstr "Renommer"
-
-#: ../book.py:1395
-msgid "<Control>R"
-msgstr ""
-
-#: ../book.py:1403
-msgid "Delete"
-msgstr "Détruire"
-
-#: ../book.py:1415
-msgid "Import Page(s)"
-msgstr "Importer Page(s)"
-
-#: ../book.py:1416
 msgid "<Control>I"
 msgstr ""
 
-#: ../book.py:1424
+#: ../book.py:1385
+msgid "Add"
+msgstr "Ajouter"
+
+#: ../book.py:1386
+msgid "<Control>A"
+msgstr ""
+
+#: ../book.py:1394
+msgid "Duplicate"
+msgstr "Dupliquer"
+
+#: ../book.py:1395
+msgid "<Control>D"
+msgstr ""
+
+#: ../book.py:1403
+msgid "Rename"
+msgstr "Renommer"
+
+#: ../book.py:1404
+msgid "<Control>R"
+msgstr ""
+
+#: ../book.py:1412
+msgid "Delete"
+msgstr "Détruire"
+
+#: ../book.py:1421
 msgid "Help"
 msgstr "Aide"
 
-#: ../book.py:1428
+#: ../book.py:1425
 msgid "Online Help"
 msgstr "Aide online"
 
-#: ../book.py:1437
+#: ../book.py:1434
 msgid "About Gimp Book"
 msgstr "A propos de Livre Gimp"
 
-#: ../book.py:1453
+#: ../book.py:1455
+#, fuzzy
+msgid "Import page(s)"
+msgstr "Importer Page(s)"
+
+#: ../book.py:1463
 msgid "Add a new page."
 msgstr "Ajouter une nouvelle page."
 
-#: ../book.py:1457
+#: ../book.py:1471
 msgid "Duplicate the selected page."
 msgstr "Dupliquer la page selectionnee."
 
-#: ../book.py:1461
+#: ../book.py:1479
 msgid "Rename the selected page."
 msgstr "Renommer la page selectionnee."
 
-#: ../book.py:1465
+#: ../book.py:1487
 msgid "Delete the selected page."
 msgstr "Detruire la page selectionnee."
 
-#: ../book.py:1469
-msgid "Toggle storyboard view mode."
-msgstr "Alterner le mode storyboard."
-
-#: ../book.py:1515
+#: ../book.py:1532
 msgid "Visit Gimp Book at the Gimp Registry"
 msgstr "Visiter le Livre Gimp sur le Gimp Registry"
 
 #. Interface for opening an existing book.
-#: ../book.py:1558
+#: ../book.py:1575
 msgid "Open Book"
 msgstr "Ouvrir le livre"
 
 #. Update the title bar.
 #. TRANSLATORS: The %s(book_title)s, %s(selected_page)s and %(page_count)s need to be left in.
 #. You can put them in a different order if needed.
-#: ../book.py:1597
+#: ../book.py:1614
 #, python-format
 msgid "GIMP Book - %(book_title)s (page %(selected_page)s of %(page_count)s)"
-msgstr "Livre GIMP -  %(book_title)s (page %(selected_page)s pages sur %(page_count)s)"
+msgstr ""
+"Livre GIMP -  %(book_title)s (page %(selected_page)s pages sur "
+"%(page_count)s)"
 
-#: ../book.py:1627
+#: ../book.py:1644
 msgid "Add a Page"
 msgstr "Ajouter une Page"
 
-#: ../book.py:1627
+#: ../book.py:1644
 msgid "Enter Page Name: "
 msgstr "Entrer le nom de la page: "
 
-#: ../book.py:1635
-#: ../book.py:1696
+#: ../book.py:1652 ../book.py:1713
 msgid "You need to create or load a book, before adding pages to it."
-msgstr "Vous avez besoin de creer ou charger un livre, avant d'ajouter des pages."
+msgstr ""
+"Vous avez besoin de creer ou charger un livre, avant d'ajouter des pages."
 
-#: ../book.py:1640
+#: ../book.py:1657
 msgid "No page selected to open."
 msgstr "Aucune page sélectionnée à ouvrir."
 
 #. Interface for opening an existing book.
-#: ../book.py:1651
-msgid "Import Page"
-msgstr "Importer une Page"
+#: ../book.py:1668
+msgid "Import Page(s)"
+msgstr "Importer Page(s)"
 
-#: ../book.py:1655
+#: ../book.py:1672
 msgid "All Images"
 msgstr "Ts les Images"
 
-#: ../book.py:1685
+#: ../book.py:1702
 msgid "No page selected to duplicate."
 msgstr "Aucune page sélectionnée à dupliquer."
 
-#: ../book.py:1688
+#: ../book.py:1705
 msgid "Duplicate Page"
 msgstr "Dupliquer une Page"
 
-#: ../book.py:1688
+#: ../book.py:1705
 msgid "Enter Name of Duplicate: "
 msgstr "Entrer le nom a dupliquer: "
 
-#: ../book.py:1701
+#: ../book.py:1718
 msgid "No page selected to rename."
 msgstr "Aucune page sélectionnée à renommer."
 
-#: ../book.py:1704
+#: ../book.py:1721
 msgid "Rename Page"
 msgstr "Renommer une page"
 
-#: ../book.py:1704
+#: ../book.py:1721
 msgid "Ente Page Name: "
 msgstr "Entrer le nom de la page: "
 
-#: ../book.py:1713
+#: ../book.py:1730
 msgid "No page selected to delete."
 msgstr "Aucune page sélectionnée à détruire."
 
 #. TRANSLATORS: %s is the name of the page to be deleted
-#: ../book.py:1716
+#: ../book.py:1733
 #, python-format
 msgid "Delete page \"%s\"?"
 msgstr "Détruire la page \"%s\"?"
 
-#: ../book.py:1753
+#: ../book.py:1770
 msgid "No page name entered."
 msgstr "Aucun nom de page entrée."
 
-#: ../book.py:1766
+#: ../book.py:1783
 msgid "Warning! Page name truncated to 255 characters."
 msgstr "Attention! Le nom de page est coupé à 255 caracteres."
 
 #. TODO! Support case insensitive names on Windows.
 #. TRANSLATORS: %s is the name of an existnig conflictnig page.
-#: ../book.py:1772
+#: ../book.py:1789
 #, python-format
 msgid "A page called '%s.xcf' exists. Page names must be unique."
 msgstr "Une page nommée '%s.xcf' existe. Les noms de page doivent être unique."
 
-#: ../book.py:1825
-msgid "Tool for managing multiple pages of a comic book, childrens book, sketch book or similar."
-msgstr "Outil pour manager de nombreuses pages de BD, livre pour enfant, croquis ou similaire."
+#: ../book.py:1840
+msgid ""
+"Tool for managing multiple pages of a comic book, childrens book, sketch "
+"book or similar."
+msgstr ""
+"Outil pour manager de nombreuses pages de BD, livre pour enfant, croquis ou "
+"similaire."
 
-#: ../book.py:1829
+#: ../book.py:1844
 msgid "January 2012"
 msgstr ""
 
+#~ msgid "Toggle storyboard view mode."
+#~ msgstr "Alterner le mode storyboard."
