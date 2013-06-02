@@ -2,6 +2,10 @@
 | CHANGELOG |
 +-----------+
 
+# GIMP Book 2013.6 rev 63
+- Added support for gettext translation.
+- Added French translation by Patrick Depoix
+
 # GIMP Book 2012.8 rev 50
 - Added About dialog.
 - Added Help menu with link to online help.

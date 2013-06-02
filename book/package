@@ -2,7 +2,7 @@
 #
 # Simple script to package GIMP Book for publishing.
 
-files="book.py docs license.txt"
+files="book.py docs license.txt locale"
 echo "Preparing the followign files and folders for publishing:"
 echo $files
 
@@ -10,18 +10,26 @@ version=`date +%Y.%-m`
 revision=`svn info http://svn.ragtag.net/gimp | grep Revision | cut -d\  -f 2`
 v="$version rev $revision"
 
-mv book.py book.py.bak
-mv docs/index.html index.html
-cat book.py.bak | sed "s/current_version/$v/" > book.py
-cat index.html | sed "s/current_version/$v/" > docs/index.html
+sed -i "s/current_version/$v/g" book.py
+sed -i "s/current_version/$v/g" docs/index.html
 
 
 if [ ! -d publish ]
 then
     mkdir publish
 fi
+# Make all languages
+cd locale
+for f in `ls -1 *.po`
+do
+    translation_language=`echo $f | cut -d . -f 1`
+    echo "Compiling translation for $translation_language"
+    mkdir -p $translation_language/LC_MESSAGES
+    msgfmt $translation_language.po --output-file $translation_language/LC_MESSAGES/book.mo
+done
+cd ..
 zip -r "publish/Gimp Book - $v.zip" $files -x *.svn*
-mv book.py.bak book.py
-mv index.html docs/index.html
+sed -i "s/$v/current_version/g" book.py
+sed -i "s/$v/current_version/g" docs/index.html
 
 echo "New version saved to publish/Gimp Book - $v.zip"
