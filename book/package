@@ -2,7 +2,7 @@
 #
 # Simple script to package GIMP Book for publishing.
 
-files="book.py docs license.txt locale"
+files="book.py docs license.txt locale icons"
 echo "Preparing the followign files and folders for publishing:"
 echo $files
 
