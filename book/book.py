@@ -654,7 +654,7 @@ class ExportWin(gtk.Window):
         self.gifcolors = gtk.SpinButton(gifcolorsa)
         gifdithl = gtk.Label(_("Color Dithering:"))
         gifdithls = gtk.ListStore(gobject.TYPE_STRING)
-        for g in [ _("None"), _("Floyd-Steinberg (normal)"), _("Flogy-Steinberg (reduced color bleeding)"), _("Positioned") ]:
+        for g in [ _("None"), _("Floyd-Steinberg (normal)"), _("Floyd-Steinberg (reduced color bleeding)"), _("Positioned") ]:
             gifdithls.append([g])
         gifdithc = gtk.CellRendererText()
         self.gifdith = gtk.ComboBox(gifdithls)
