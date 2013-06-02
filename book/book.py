@@ -58,8 +58,34 @@ from gimpfu import *
 from gimpenums import *
 from time import strftime
 
-import i18n
-_ = i18n.language.ugettext #use ugettext instead of getttext to avoid unicode errors
+# Translation implementation
+import locale
+import gettext
+import gimp
+ 
+APP_NAME = "book"
+APP_DIR = gimp.directory # ~/.gimp-2.x
+LOCALE_DIR = os.path.join(APP_DIR, 'plug-ins', 'locale') # location of .mo files (e.g. ~/gimp-2.x/plug-ins/locale/fr/LC_MESSAGES/fr.mo)
+
+# Get the default language. On Windows you need to set the LANG variable.
+DEFAULT_LANGUAGES = os.environ.get('LANG', '').split(':')
+DEFAULT_LANGUAGES += ['en_US']
+lc, encoding = locale.getdefaultlocale()
+if lc:
+    languages = [lc]
+languages += DEFAULT_LANGUAGES
+mo_location = LOCALE_DIR
+ 
+# Initialize gettext
+gettext.install(True, localedir=LOCALE_DIR, unicode=1)
+gettext.find(APP_NAME, mo_location)
+gettext.textdomain (APP_NAME)
+gettext.bind_textdomain_codeset(APP_NAME, "UTF-8")
+language = gettext.translation(APP_NAME, mo_location, languages=languages, fallback=True)
+
+# Define '_' function, so that strings will be with their correct translation.
+_ = language.ugettext #use ugettext instead of getttext to avoid unicode errors
+
 
 class Thumb():
     # Managing thumbnails, and creating new ones when needed.
@@ -1805,7 +1831,6 @@ main()
 #  MEDIUM
 # - Left to right or right to left reading option when exporting.
 # - Add Percent based margins.
-# - Make all text translateable.
 #  LOW
 # - Size the widgets that look waaay too big for their own good.
 # - New Book Window more like export with tables...maybe.
