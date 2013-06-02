@@ -94,6 +94,8 @@ class Thumb():
         if not self.find_thumb():
             self.build_thumb()
             if not self.find_thumb():
+                # TRANSLATROS: %s is the name of the page Gimp Book failed to find a thumb for
+                # All instances of %s in this document need to be left in, but can be moved around in the sentence as needed.
                 show_error_msg(_('Failed to find or build thumb for %s.') % self.imagepath)
 
     def build_thumb(self):
@@ -826,6 +828,7 @@ class ExportWin(gtk.Window):
         self.progress.set_text("")
         outfolder = os.path.join(self.destb.get_filename(), self.main.book.bookname)
         if os.path.isdir(outfolder):
+            # TRANSLATORS: %s is a previously exported book
             overwrite = gtk.MessageDialog(self.main, 0, gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, _('"%s" exists, do you want to overwrite it?') % (outfolder))
             response = overwrite.run()
             if response == gtk.RESPONSE_YES:
@@ -927,6 +930,7 @@ class Book():
             progress = 0.0
             for p in metadata['pages']:
                 mainwin.progress.show()
+                # TRANSLATORS: %s is the name of a page being loaded
                 mainwin.progress.set_text(_("Loading %s") % (p))
                 while gtk.events_pending():
                     gtk.main_iteration()
@@ -1059,7 +1063,7 @@ class Book():
         # Delete the selected page.
         try:
             p = self.pagestore[self.selected][0]
-            shutil.move(os.path.join(self.pagepath, p), os.path.join(self.trashpath,strftime(_("%Y%m%d_%H%M%S_"))+p))
+            shutil.move(os.path.join(self.pagepath, p), os.path.join(self.trashpath,strftime("%Y%m%d_%H%M%S_")+p))
             piter = self.pagestore.get_iter_from_string(str(self.selected))
             self.pagestore.remove(piter)
             return True
@@ -1114,6 +1118,7 @@ class Book():
             if i >= expwin.rangefrom.get_value() and i <= expwin.rangeto.get_value():
                 # Figure out the page name.
                 original = os.path.join(self.pagepath, p[0])
+                # TRANSLATORS: %s is the name of the page being exported
                 expwin.progress.set_text(_("Exporting %s") % (p[0]))
                 while gtk.events_pending():
                     gtk.main_iteration()
@@ -1290,6 +1295,8 @@ class Main(gtk.Window):
 
         file_new = gtk.ImageMenuItem(gtk.STOCK_NEW, agr)
         file_new.set_label(_("New Book..."))
+        # TRANSLATORS: Do NOT translate <Control>. You can change N, if you want to use a different keyboard shortcut.
+        # Same goes for all <Control> entires in this document.
         key, mod = gtk.accelerator_parse(_("<Control>N"))
         file_new.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
         file_new.connect("activate", self.new_book)
@@ -1584,7 +1591,10 @@ class Main(gtk.Window):
 
     def update_title(self):
         # Update the title bar.
-        self.set_title(_("GIMP Book - %s (page %s of %s)") % (self.book.bookname, self.book.selected, len(self.book.pagestore)-1))
+
+        # TRANSLATORS: The %s(book_title)s, %s(selected_page)s and %(page_count)s need to be left in.
+        # You can put them in a different order if needed.
+        self.set_title(_("GIMP Book - %(book_title)s (page %(selected_page)s of %(page_count)s)") % { 'book_title': self.book.bookname, 'selected_page': self.book.selected, 'page_count': len(self.book.pagestore)-1 })
 
     def button_press(self, widget, event, menu):
         # Capture buttons presses on thumbs.
@@ -1702,6 +1712,7 @@ class Main(gtk.Window):
         if self.book.selected < 0:
             show_error_msg(_("No page selected to delete."))
             return False
+        # TRANSLATORS: %s is the name of the page to be deleted
         areyousure = gtk.MessageDialog(self, 0, gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, _('Delete page "%s"?') % (self.book.pagestore[self.book.selected][0]))
         response = areyousure.run()
         if response == gtk.RESPONSE_YES:
@@ -1756,6 +1767,8 @@ class Main(gtk.Window):
             return False
         if os.path.exists(os.path.join(self.book.pagepath, ("%s.xcf" % (name)))):
             # TODO! Support case insensitive names on Windows.
+            
+            # TRANSLATORS: %s is the name of an existnig conflictnig page.
             show_error_msg(_("A page called '%s.xcf' exists. Page names must be unique.") % (name))
             return False
         return name
