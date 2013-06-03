@@ -111,10 +111,19 @@ class Thumb():
         if os.name == 'nt':
             # TODO! Get Windows to support utf-8 file paths.
             self.imagepath = self.imagepath.encode('utf-8')
+            show_error_msg(self.imagepath)
             winimagepath = repr(self.imagepath).replace('\\\\', '/')[1:-1]
+            show_error_msg('BEFORE')
+            show_error_msg(winimagepath)
+            winimagepath = winimagepath[0:2] + urllib.quote(winimagepath[2:])
             file_hash = hashlib.md5('file:///'+str(winimagepath)).hexdigest()
+            show_error_msg("IMAGEPATH and HASH")
+            show_error_msg(winimagepath)
+            show_error_msg('file:///'+str(winimagepath))
+            show_error_msg(file_hash)
         thumbpath = os.path.join(os.path.expanduser('~'), '.thumbnails')
         thumb = os.path.join(thumbpath, 'large', file_hash + '.png')
+        show_error_msg(thumb)
         if not os.path.exists(os.path.join(thumbpath, 'large')):
             os.makedirs(os.path.join(thumbpath, 'large'))
         if not os.path.exists(os.path.join(thumbpath, 'normal')):
@@ -1447,7 +1456,7 @@ class Main(gtk.Window):
         self.toolbar.set_style(gtk.TOOLBAR_ICONS)
 
         self.imp_icon = gtk.Image()
-        self.imp_icon.set_from_file(os.path.join(self.icondir, 'import.svg'))
+        self.imp_icon.set_from_file(os.path.join(self.icondir, 'import.png'))
         self.imp_icon.show()
         self.imp_page = gtk.ToolButton(self.imp_icon)
         self.imp_page.connect("clicked", self.ask_import_page)
@@ -1455,7 +1464,7 @@ class Main(gtk.Window):
         self.imp_page.set_tooltip_text(_("Import page(s)"))
 
         self.add_icon = gtk.Image()
-        self.add_icon.set_from_file(os.path.join(self.icondir, 'add.svg'))
+        self.add_icon.set_from_file(os.path.join(self.icondir, 'add.png'))
         self.add_icon.show()
         self.add_page = gtk.ToolButton(self.add_icon)
         self.add_page.connect("clicked", self.ask_add_page)
@@ -1463,7 +1472,7 @@ class Main(gtk.Window):
         self.add_page.set_tooltip_text(_("Add a new page."))
 
         self.dupli_icon = gtk.Image()
-        self.dupli_icon.set_from_file(os.path.join(self.icondir, 'duplicate.svg'))
+        self.dupli_icon.set_from_file(os.path.join(self.icondir, 'duplicate.png'))
         self.dupli_icon.show()
         self.dupli_page = gtk.ToolButton(self.dupli_icon)
         self.dupli_page.connect("clicked", self.ask_dupli_page)
@@ -1471,7 +1480,7 @@ class Main(gtk.Window):
         self.dupli_page.set_tooltip_text(_("Duplicate the selected page."))
 
         self.ren_icon = gtk.Image()
-        self.ren_icon.set_from_file(os.path.join(self.icondir, 'rename.svg'))
+        self.ren_icon.set_from_file(os.path.join(self.icondir, 'rename.png'))
         self.ren_icon.show()
         self.ren_page = gtk.ToolButton(self.ren_icon)
         self.ren_page.connect("clicked", self.ask_rename_page)
@@ -1479,7 +1488,7 @@ class Main(gtk.Window):
         self.ren_page.set_tooltip_text(_("Rename the selected page."))
 
         self.del_icon = gtk.Image()
-        self.del_icon.set_from_file(os.path.join(self.icondir, 'delete.svg'))
+        self.del_icon.set_from_file(os.path.join(self.icondir, 'delete.png'))
         self.del_icon.show()
         self.del_page = gtk.ToolButton(self.del_icon)
         self.del_page.connect("clicked", self.ask_delete_page)
