@@ -2,9 +2,11 @@
 | CHANGELOG |
 +-----------+
 
-# GIMP Book 2013.6 rev 63
+# GIMP Book 2013.6 rev 73
 - Added support for gettext translation.
 - Added French translation by Patrick Depoix
+- Paths with spaces now work correctly on Windows.
+- Updated toolbar icons to use images, and removed storyboard mode from toolbar.
 
 # GIMP Book 2012.8 rev 50
 - Added About dialog.

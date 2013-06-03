@@ -36,7 +36,14 @@
     <p>Creating a comic book is a lot of work, work you don't want to loose, so make sure you backup all your files regularly!<p>
       
       <h2>Installation</h2>
-    <p>Unzip the .zip file, and copy the book.py file into ~/gimp-2.6/plug-ins/. The next time you start the GIMP, you should find it under the Windows menu. GIMP Book is written for Gimp 2.6 and Python 2.6. If you're using Python 2.5, you need to install the json module manually.</p>
+    <p>Unzip the .zip file, and copy the content into ~/gimp-2.6/plug-ins/. The next time you start the GIMP, you should find it under the Windows menu. GIMP Book is written for Gimp 2.8 (but should work in 2.6) and Python 2.7. If you're using Python 2.5, you need to install the json module manually.</p>
+
+    <h2>Known Bugs &amp; Limitations</h2>
+    <ul>
+	<li>utf-8 names (i.e. Chinese, Japanese etc) for pages and books do not work properly on Windows.</li>                          
+	<li>Gimp Book has NOT been tested on OSX.</li>                                                                                           
+	<li>Import does not yet support any options on importing files such as pdf or svg (resolution, page etc.).</li> 
+    </ul>
     
     <h2>Creating a Book</h2>
     <p>Start by opening the GIMP, and the GIMP Book interface from the Windows>Book... menu. You'll be presented with an empty Book window, in which you can choose File>New Book (Ctrl-N).</p>
@@ -46,21 +53,21 @@
     <h3>The Template</h3>
     <p>When you create a book, you'll see a Template.xcf thumbnail show up in your Book window. This is used as a template for all new pages that you add. You can double click it to open it in the GIMP, and make any adjustments to it you like. It's a good idea to spend some time adjusting the resolution, adding print markings, default layers and any other things you may need for the pages of your book. You can adjust the template at any time later, but changes to it, won't affect existing pages.</p>
     
-    <p>The template is always shown as the first page of the book. It is numbered as page zero, when exporting, and is not exported by default.</p>
+    <p>The template is always shown as the first page of the book. It is numbered as page zero when exporting, and is not exported by default.</p>
     
     <h3>Thumbnail Size</h3>
     <p>The thumbnails used in GIMP Book, are standard GTK thumbnails. This means that their size is controlled by the GIMP itself. To get bigger thumbnails, got the the Edit>Preferences menu in the GIMP, under Environment, and change Size of thumbnails to "Large (256x256)". This won't affect existing thumbnails until the next time the file is saved, or you delete the thumbnail cache.</p>
     
     <h2>Saving Your Book</h2>
-    <p>There is no need to save your book. When you add pages, move them around, or delete them, GIMP Book saves those changes instantly. The only thing you need to save, is the actual GIMP xcf files, when you work on them.</p>
+    <p>There is no need to save your book. When you add pages, move them around, or delete them, GIMP Book saves those changes instantly. The only thing you need to save, is the actual GIMP .xcf files, when you work on them.</p>
     
     <h2>Opening an Existing Book</h2>
-    <p>To open a book simply choose File>Open Book... from the Book window, and use the standard open dialog to locate your *.book file. The book will open in the Book window, and you can start working with it. If thumbnails have not been generated for your book (which for instance happens if you move it to a different folder, loading will take a short while as new thumbnails are generated.</p>
+    <p>To open a book simply choose File>Open Book... from the Book window, and use the standard open dialog to locate your *.book file. The book will open in the Book window, and you can start working on it. If thumbnails have not been generated for your book (which for instance happens if you move it to a different folder, loading will take a short while as new thumbnails are generated.</p>
     
     <p>To open a page, simply double click it, and it will load in the GIMP.</p>
     
     <h2>Managing Pages</h2>
-    <p>To manage your pages you use the options in the Pages menu, as well as double clicking or dragging the thumbnails of the pages themselves. Alternately you can use the right click menu, the icons in the toolbar or keyboard shortcuts.</p>
+    <p>To manage your pages you use the options in the Pages menu, and by dragging the thumbnails of the pages themselves. Alternately you can use the right click menu, the icons in the toolbar or keyboard shortcuts.</p>
 
     <h3>Opening a page</h3>
     <p>The easiest way to do this is simply to double click the page you want to open, and it will load up in the GIMP. You can also hit the return key with a page selected or choose Pages>Open to open it. Once you're done working on it, simply save and close it.</p>
@@ -75,7 +82,7 @@
     <p>Select the page you want to rename, and choose Pages>Rename (Ctrl+R). Enter a new name, and you're done. Make sure you don't have the page open in GIMP before renaming it.</p>
     
     <h3>Deleting a Page</h3>
-    <p>To delete a page, simply select the page, and hit the delete button. You'll be asked to confirm that you really want to delete the page. Make sure you don't have the page open in GIMP, before deleting it.</p>
+    <p>To delete a page, simply select the page, and hit the Delete button. You'll be asked to confirm that you really want to delete the page. Make sure you don't have the page open in GIMP, before deleting it.</p>
     
     <p>When you delete a page in GIMP Book, it is not deleted permanently, but moved to your_book/trash/date_pagename.xcf, in case you want to get something from it later. You can freely delete the content of your_book/trash, if you want to free up disk space.</p>
 
@@ -90,7 +97,7 @@
     <p>To reorder the pages, simply drag them around to where you want them.</p>
     
     <h3>Storyboard Mode</h3>
-    <p>Storyboard mode toggles the page view between two column book view, and a flowing storyboard view that fills the width of the Book window. To toggle between the two modes, use the View>Storyboard Mode menu or the star in the toolbar.</p>
+    <p>Storyboard mode toggles the page view between two column book view, and a flowing storyboard view that fills the width of the Book window. To toggle between the two modes, use the View>Storyboard Mode menu.</p>
     
     <h2>Exporting Your Book</h2>
     <p>Once you're finished with your book, you can export it to several different formats. To do this simply choose File>Export Book... from the menu in the Book window.</p>
@@ -122,6 +129,10 @@
     
     <p>When you've chosen all your export options, hit the Export Pages button, and GIMP Book will start processing your pages. This can take a short while, as each page needs to be loaded, possibly modified, and then saved out again.</p>
     
+    <h2>Gimp Book in Your Language</h2>
+    <p>Gimp Book is now available in Frecnh thanks to Patrick Depoix. On Linux, if your operating system is set to French (i.e. the LANG variable is defined as fr_FR), it will automatically show up in French. Windows unfortunately doesn't set the LANG variable, but if you set it system wide, it should work there too.</p>
+    <p>If you would like to help out with translations, check out the ReadMe in the locale folder. I appreciate the help.</p>
+
     <h2>Behind the Scenes</h2>
     <p>If you just want to use GIMP Book, you can stop reading here. If, on the other hand, you want to know a little bit more about what it does, keep reading.</p>
     
