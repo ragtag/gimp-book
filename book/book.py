@@ -111,19 +111,11 @@ class Thumb():
         if os.name == 'nt':
             # TODO! Get Windows to support utf-8 file paths.
             self.imagepath = self.imagepath.encode('utf-8')
-            show_error_msg(self.imagepath)
             winimagepath = repr(self.imagepath).replace('\\\\', '/')[1:-1]
-            show_error_msg('BEFORE')
-            show_error_msg(winimagepath)
             winimagepath = winimagepath[0:2] + urllib.quote(winimagepath[2:])
             file_hash = hashlib.md5('file:///'+str(winimagepath)).hexdigest()
-            show_error_msg("IMAGEPATH and HASH")
-            show_error_msg(winimagepath)
-            show_error_msg('file:///'+str(winimagepath))
-            show_error_msg(file_hash)
         thumbpath = os.path.join(os.path.expanduser('~'), '.thumbnails')
         thumb = os.path.join(thumbpath, 'large', file_hash + '.png')
-        show_error_msg(thumb)
         if not os.path.exists(os.path.join(thumbpath, 'large')):
             os.makedirs(os.path.join(thumbpath, 'large'))
         if not os.path.exists(os.path.join(thumbpath, 'normal')):
