@@ -14,11 +14,11 @@
 # VERSION
 version = "current_version"
 # AUTHOR 
-author = [ 'Ragnar Brynjúlfsson' ]
+author = [ 'Ragnar Brynjúlfsson <me@ragnarb.com>', ' ', 'Translators:', ' French - Patrick Depoix' ]
 # COPYRIGHT
 copyright = "Copyright 2011-2012 © Ragnar Brynjúlfsson"
 # WEBSITE
-website = "http://registry.gimp.org/node/25975"
+website = "http://ragnarb.com/toolbox/gimp-book/"
 plugin = "Gimp Book"
 # LICENSE
 license = """
@@ -43,6 +43,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>."""
 # - utf-8 names (i.e. Chinese, Japanese etc) for pages not working properly on Windows.
 # - NOT tested on OSX.
 # - Import does not yet support any options on importing files such as pdf or svg (resolution, page etc.).
+
+# If you find additional bugs, please send me a mail at bug@ragnarb.com
 
 
 import os
@@ -1530,7 +1532,7 @@ class Main(gtk.Window):
         about.set_license(license)
         about.set_copyright(copyright)
         about.set_website(website)
-        about.set_website_label(_("Visit Gimp Book at the Gimp Registry"))
+        about.set_website_label(_("Visit Gimp Book at ragnarb.com"))
         response = about.run()
         if response == gtk.RESPONSE_CANCEL:
             about.destroy()

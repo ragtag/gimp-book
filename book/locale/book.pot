@@ -1,7 +1,7 @@
 # GIMP Book.
 # Copyright (C) 2013 Ragnar Brynjúlfsson
 # This file is distirbuted under the GNU General Public License version 3, or later.
-# Ragnar Brynjúlfsson <bug@ragnarb.com>, 2013.
+# Ragnar Brynjúlfsson <me@ragnarb.com>, 2013.
 #
 #, fuzzy
 msgid ""
@@ -616,7 +616,7 @@ msgid "Delete the selected page."
 msgstr ""
 
 #: ../book.py:1532
-msgid "Visit Gimp Book at the Gimp Registry"
+msgid "Visit Gimp Book at ragnarb.com"
 msgstr ""
 
 #. Interface for opening an existing book.
