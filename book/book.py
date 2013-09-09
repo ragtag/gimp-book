@@ -43,6 +43,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>."""
 # - utf-8 names (i.e. Chinese, Japanese etc) for pages not working properly on Windows.
 # - NOT tested on OSX.
 # - Import does not yet support any options on importing files such as pdf or svg (resolution, page etc.).
+# - Import does now work with grayscale images.
 
 # If you find additional bugs, please send me a mail at bug@ragnarb.com
 
