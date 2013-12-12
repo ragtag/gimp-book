@@ -16,7 +16,7 @@ version = "current_version"
 # AUTHOR 
 author = [ 'Ragnar Brynjúlfsson <me@ragnarb.com>', ' ', 'Translators:', ' French - Patrick Depoix' ]
 # COPYRIGHT
-copyright = "Copyright 2011-2012 © Ragnar Brynjúlfsson"
+copyright = "Copyright 2011-2013 © Ragnar Brynjúlfsson"
 # WEBSITE
 website = "http://ragnarb.com/toolbox/gimp-book/"
 plugin = "Gimp Book"
@@ -79,6 +79,7 @@ if lc:
 languages += DEFAULT_LANGUAGES
 mo_location = LOCALE_DIR
  
+
 # Initialize gettext
 gettext.install(True, localedir=LOCALE_DIR, unicode=1)
 gettext.find(APP_NAME, mo_location)
@@ -103,7 +104,7 @@ class Thumb():
 
     def build_thumb(self):
         # Build or rebuild a thumb for the image.
-        img = pdb.gimp_xcf_load(0, self.imagepath, self.imagepath)
+        img = pdb.gimp_file_load(self.imagepath, self.imagepath)
         pdb.gimp_file_save_thumbnail(img, self.imagepath)
         pdb.gimp_image_delete(img)
         
@@ -112,7 +113,7 @@ class Thumb():
         imagepathuri = urllib.quote(self.imagepath.encode("utf-8"))
         file_hash = hashlib.md5('file://'+imagepathuri).hexdigest()
         if os.name == 'nt':
-            # TODO! Get Windows to support utf-8 file paths.
+            # Todo! Get Windows to support utf-8 file paths.
             self.imagepath = self.imagepath.encode('utf-8')
             winimagepath = repr(self.imagepath).replace('\\\\', '/')[1:-1]
             winimagepath = winimagepath[0:2] + urllib.quote(winimagepath[2:])
@@ -1001,6 +1002,7 @@ class Book():
     def import_page(self, plist, dest):
         # Import a page from an external source.
         # TODO! Add support for format specific import settings, such as svg and pdf resolution.
+        plist.sort(reverse=True)
         for p in plist:
             name,ext = os.path.splitext(os.path.basename(p))
             name = name+'.xcf'
@@ -1375,15 +1377,6 @@ class Main(gtk.Window):
         self.pagemenu.append(self.openpage)
         self.openpage.show()
 
-        self.importpage = gtk.MenuItem()
-        self.importpage.set_sensitive(False)
-        self.importpage.set_label(_("Import"))
-        key, mod = gtk.accelerator_parse(_("<Control>I"))
-        self.importpage.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
-        self.importpage.connect("activate", self.ask_import_page)
-        self.pagemenu.append(self.importpage)
-        self.importpage.show()
-
         self.addpage = gtk.MenuItem()
         self.addpage.set_sensitive(False)
         self.addpage.set_label(_("Add"))
@@ -1392,6 +1385,15 @@ class Main(gtk.Window):
         self.addpage.connect("activate", self.ask_add_page)
         self.pagemenu.append(self.addpage)
         self.addpage.show()
+
+        self.importpage = gtk.MenuItem()
+        self.importpage.set_sensitive(False)
+        self.importpage.set_label(_("Import"))
+        key, mod = gtk.accelerator_parse(_("<Control>I"))
+        self.importpage.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
+        self.importpage.connect("activate", self.ask_import_page)
+        self.pagemenu.append(self.importpage)
+        self.importpage.show()
 
         self.duplipage = gtk.MenuItem()
         self.duplipage.set_sensitive(False)
@@ -1450,14 +1452,6 @@ class Main(gtk.Window):
         self.toolbar = gtk.Toolbar()
         self.toolbar.set_style(gtk.TOOLBAR_ICONS)
 
-        self.imp_icon = gtk.Image()
-        self.imp_icon.set_from_file(os.path.join(self.icondir, 'import.png'))
-        self.imp_icon.show()
-        self.imp_page = gtk.ToolButton(self.imp_icon)
-        self.imp_page.connect("clicked", self.ask_import_page)
-        self.imp_page.set_sensitive(False)
-        self.imp_page.set_tooltip_text(_("Import page(s)"))
-
         self.add_icon = gtk.Image()
         self.add_icon.set_from_file(os.path.join(self.icondir, 'add.png'))
         self.add_icon.show()
@@ -1465,6 +1459,14 @@ class Main(gtk.Window):
         self.add_page.connect("clicked", self.ask_add_page)
         self.add_page.set_sensitive(False)
         self.add_page.set_tooltip_text(_("Add a new page."))
+
+        self.imp_icon = gtk.Image()
+        self.imp_icon.set_from_file(os.path.join(self.icondir, 'import.png'))
+        self.imp_icon.show()
+        self.imp_page = gtk.ToolButton(self.imp_icon)
+        self.imp_page.connect("clicked", self.ask_import_page)
+        self.imp_page.set_sensitive(False)
+        self.imp_page.set_tooltip_text(_("Import page(s)"))
 
         self.dupli_icon = gtk.Image()
         self.dupli_icon.set_from_file(os.path.join(self.icondir, 'duplicate.png'))
@@ -1490,8 +1492,8 @@ class Main(gtk.Window):
         self.del_page.set_sensitive(False)
         self.del_page.set_tooltip_text(_("Delete the selected page."))
 
-        self.toolbar.insert(self.imp_page, 0)
-        self.toolbar.insert(self.add_page, 1)
+        self.toolbar.insert(self.add_page, 0)
+        self.toolbar.insert(self.imp_page, 1)
         self.toolbar.insert(self.dupli_page, 2)
         self.toolbar.insert(self.ren_page, 3)
         self.toolbar.insert(self.del_page, 4)
