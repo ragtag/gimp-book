@@ -143,6 +143,11 @@ class Thumb():
             else:
                 return False
 
+class NTFileChooserButton(gtk.Button):
+    # Hack for Windows to get a working FileChooserButton in Gimp 2.8.6+
+    def get_filename(self):
+        return self.get_label()
+
 class NewBookWin(gtk.Window):
     # Interface for creating new books.
     def __init__(self, main):
@@ -177,13 +182,18 @@ class NewBookWin(gtk.Window):
         namebox.pack_start(namelabel)
         namebox.pack_start(self.nameentry)
         # Destination dialog
-        destdialog = gtk.FileChooserDialog(_("Create a New Book"), self.main, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
-        destdialog.set_default_response(gtk.RESPONSE_OK)
+        self.destdialog = gtk.FileChooserDialog(_("Create a New Book"), self.main, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        self.destdialog.set_default_response(gtk.RESPONSE_OK)
         # Destination
         destbox = gtk.HBox(False, 2)
         bookbox.pack_start(destbox)
         destlabel = gtk.Label(_("Destination:"))
-        self.destbutton = gtk.FileChooserButton(destdialog)
+        if os.name == 'nt':
+            home = os.path.expanduser("~")
+            self.destbutton = NTFileChooserButton(home)
+            self.destbutton.connect("clicked", self.ntdestdialog)
+        else:
+            self.destbutton = gtk.FileChooserButton(self.destdialog)
         destbox.pack_start(destlabel)
         destbox.pack_start(self.destbutton)
         
@@ -260,6 +270,13 @@ class NewBookWin(gtk.Window):
         buttonbox.pack_start(okbutton)
 
         self.show_all()
+
+    def ntdestdialog(self, input):
+        # FileChooserButton bugs out on Windows after Gimp 2.8.4, so this is an alternative solution.
+        response = self.destdialog.run()
+        if response == gtk.RESPONSE_OK:
+            self.destbutton.set_label(self.destdialog.get_filename())
+        self.destdialog.hide()
 
     def cancel(self, widget):
         # Cancel book creation and close the window.
