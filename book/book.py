@@ -16,7 +16,7 @@ version = "current_version"
 # AUTHOR 
 author = [ 'Ragnar Brynjúlfsson <me@ragnarb.com>', ' ', 'Translators:', ' French - Patrick Depoix' ]
 # COPYRIGHT
-copyright = "Copyright 2011-2013 © Ragnar Brynjúlfsson"
+copyright = "Copyright 2011-2014 © Ragnar Brynjúlfsson"
 # WEBSITE
 website = "http://ragnarb.com/toolbox/gimp-book/"
 plugin = "Gimp Book"
@@ -24,7 +24,7 @@ plugin = "Gimp Book"
 license = """
 GIMP Book
 A plug-in for managing multiple pages in GIMP.
-Copyright 2011-2012 Ragnar Brynjúlfsson
+Copyright 2011-2014 Ragnar Brynjúlfsson
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>."""
 # - utf-8 names (i.e. Chinese, Japanese etc) for pages not working properly on Windows.
 # - NOT tested on OSX.
 # - Import does not yet support any options on importing files such as pdf or svg (resolution, page etc.).
-# - Import does now work with grayscale images.
+# - Thumbnails of imported pages, don't update until you restart Gimp Book, or rename the page.
 
 # If you find additional bugs, please send me a mail at bug@ragnarb.com
 
@@ -546,7 +546,7 @@ class ExportWin(gtk.Window):
         formatt = gtk.Table(2,2)
         formatl = gtk.Label(_("File Format:"))
         formatls = gtk.ListStore(gobject.TYPE_STRING)
-        formatoptions = [  _("GIF image (*.gif)"), _("GIMP XCF image (*.xcf)"), _("JPEG image (*.jpg)"), _("Photoshop image (*.psd)"), _("PNG image (*.png)"), _("TIFF image (*.tif)") ]
+        formatoptions = [  _("GIF image (*.gif)"), _("GIMP XCF image (*.xcf)"), _("JPEG image (*.jpg)"), _("OpenRaster (*.ora)"), _("Photoshop image (*.psd)"), _("PNG image (*.png)"), _("TIFF image (*.tif)") ]
         for formatoption in formatoptions:
             formatls.append([formatoption])
         self.formatm = gtk.ComboBox(formatls)
@@ -559,6 +559,7 @@ class ExportWin(gtk.Window):
         self.gift = self.gif()
         self.xcft = self.xcf()
         self.jpgt = self.jpg()
+        self.orat = self.ora()
         self.psdt = self.psd()
         self.pngt = self.png()
         self.tift = self.tif()
@@ -568,6 +569,7 @@ class ExportWin(gtk.Window):
         formatt.attach(self.gift, 0,2,1,2)
         formatt.attach(self.xcft, 0,2,1,2)
         formatt.attach(self.jpgt, 0,2,1,2)
+        formatt.attach(self.orat, 0,2,1,2)
         formatt.attach(self.psdt, 0,2,1,2)
         formatt.attach(self.pngt, 0,2,1,2)
         formatt.attach(self.tift, 0,2,1,2)
@@ -669,6 +671,7 @@ class ExportWin(gtk.Window):
         self.gift.hide()
         self.xcft.hide()
         self.jpgt.hide()
+        self.orat.hide()
         self.psdt.hide()
         self.pngt.hide()
         self.tift.hide()
@@ -678,6 +681,8 @@ class ExportWin(gtk.Window):
             self.xcft.show()
         elif ext == "jpg":
             self.jpgt.show()
+        elif ext == "ora":
+            self.orat.show()
         elif ext == "psd":
             self.psdt.show()
         elif ext == "png":
@@ -714,7 +719,7 @@ class ExportWin(gtk.Window):
         # XCF save options GUI.
         xcft = gtk.Table(1,2)
         self.xcfflatten = gtk.CheckButton(_("Flatten"))
-        self.xcfflatten.set_active(True)
+        self.xcfflatten.set_active(False)
         xcft.attach(self.xcfflatten, 0,2,0,1)
         return xcft
 
@@ -784,11 +789,19 @@ class ExportWin(gtk.Window):
         else:
             self.jpgfreq.set_sensitive(False)
 
+    def ora(self):
+        # ORA save options GUI.
+        orat = gtk.Table(1,2)
+        self.oraflatten = gtk.CheckButton(_("Flatten"))
+        self.oraflatten.set_active(False)
+        orat.attach(self.oraflatten, 0,2,0,1)
+        return orat
+
     def psd(self):
         # PSD save options GUI.
         psdt = gtk.Table(2,2)
         self.psdflatten = gtk.CheckButton(_("Flatten"))
-        self.psdflatten.set_active(True)
+        self.psdflatten.set_active(False)
         psdframe = gtk.Frame()
         psdframe.set_shadow_type(gtk.SHADOW_NONE)
         psdframel = gtk.Label(_("<b>Compression</b>"))
@@ -1125,11 +1138,13 @@ class Book():
             return "xcf"
         elif formati == 2: # JPEG
             return "jpg"
-        elif formati == 3: # PSD
+        elif formati == 3: # ORA
+            return "ora"
+        elif formati == 4: # PSD
             return "psd"
-        elif formati == 4: # PNG
+        elif formati == 5: # PNG
             return "png"
-        elif formati == 5: # TIFF
+        elif formati == 6: # TIFF
             return "tif"
         else:
             show_error_msg(_("Format index out of range"))
@@ -1193,6 +1208,8 @@ class Book():
                         pdb.gimp_layer_set_visible(img.layers[i], False)
                 # Process image.
                 if ext == "xcf" and not expwin.xcfflatten.get_active():
+                    pass
+                if ext == "ora" and not expwin.oraflatten.get_active():
                     pass
                 elif ext == "psd" and not expwin.psdflatten.get_active():
                     pass
@@ -1267,6 +1284,8 @@ class Book():
                                        0,
                                        restartfreq,
                                        expwin.jpgdct.get_active())
+                elif ext == "ora":
+                    pdb.file_openraster_save(img, drw, fullname, name)
                 elif ext == "psd":
                     compress = 0
                     if expwin.psdlzw.get_active():
@@ -1711,20 +1730,21 @@ class Main(gtk.Window):
             i.set_select_multiple(True)
             f = gtk.FileFilter()
             f.set_name(_("All Images"))
-            f.add_pattern("*.jpg")
+            f.add_pattern("*.bmp")
+            f.add_pattern("*.gif")
             f.add_pattern("*.jpe")
             f.add_pattern("*.jpeg")
-            f.add_pattern("*.xcf")
+            f.add_pattern("*.jpg")
+            f.add_pattern("*.ora")
+            f.add_pattern("*.pdf")
+            f.add_pattern("*.png")
             f.add_pattern("*.psd")
             f.add_pattern("*.psp")
+            f.add_pattern("*.svg")
+            f.add_pattern("*.tga")
             f.add_pattern("*.tif")
             f.add_pattern("*.tiff")
-            f.add_pattern("*.png")
-            f.add_pattern("*.gif")
-            f.add_pattern("*.bmp")
-            f.add_pattern("*.svg")
-            f.add_pattern("*.pdf")
-            f.add_pattern("*.tga")
+            f.add_pattern("*.xcf")
             i.add_filter(f)
             response = i.run()
             # filename = o.get_fielname()
@@ -1882,7 +1902,7 @@ register(
     "GNU GPL v3 or later.",
     "Ragnar Brynjúlfsson",
     "Ragnar Brynjúlfsson",
-    _("January 2012"),
+    _("January 2014"),
     "<Toolbox>/Windows/Book...",
     "",
     [
@@ -1900,6 +1920,7 @@ main()
 #  MEDIUM
 # - Left to right or right to left reading option when exporting.
 # - Add Percent based margins.
+# - Consider doing larger thumbnails, and storing them in the book itself.
 #  LOW
 # - Size the widgets that look waaay too big for their own good.
 # - New Book Window more like export with tables...maybe.

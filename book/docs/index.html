@@ -36,19 +36,19 @@
     <p>Creating a comic book is a lot of work, work you don't want to loose, so make sure you backup all your files regularly!<p>
       
       <h2>Installation</h2>
-    <p>Unzip the .zip file, and copy the content into ~/gimp-2.6/plug-ins/. The next time you start the GIMP, you should find it under the Windows menu. GIMP Book is written for Gimp 2.8 (but should work in 2.6) and Python 2.7. If you're using Python 2.5, you need to install the json module manually.</p>
+    <p>Unzip the .zip file, and copy the content into ~/gimp-2.8/plug-ins/. The next time you start the GIMP, you should find it under the Windows menu. GIMP Book is written for Gimp 2.8 (but should work in 2.6) and Python 2.7. If you're using Python 2.5, you need to install the json module manually.</p>
 
     <h2>Known Bugs &amp; Limitations</h2>
     <ul>
 	<li>utf-8 names (i.e. Chinese, Japanese etc) for pages and books do not work properly on Windows.</li>                          
-	<li>Gimp Book has NOT been tested on OSX.</li>                                                                                           
+	<li>Gimp Book has NOT been tested on OSX, but should work.</li>                                                                                           
 	<li>Import does not yet support any options on importing files such as pdf or svg (resolution, page etc.).</li> 
     </ul>
     
     <h2>Creating a Book</h2>
     <p>Start by opening the GIMP, and the GIMP Book interface from the Windows>Book... menu. You'll be presented with an empty Book window, in which you can choose File>New Book (Ctrl-N).</p>
     
-    <p>In the Create a New Book dialog, enter a name for your book, size and destination. GIMP Book will create a folder at that destination, with the name of your book, a a couple of subfolders for and a *.book file.</p>
+    <p>In the Create a New Book dialog, enter a name for your book, size and destination. GIMP Book will create a folder at that destination, with the name of your book, a a couple of subfolders and a *.book file.</p>
     
     <h3>The Template</h3>
     <p>When you create a book, you'll see a Template.xcf thumbnail show up in your Book window. This is used as a template for all new pages that you add. You can double click it to open it in the GIMP, and make any adjustments to it you like. It's a good idea to spend some time adjusting the resolution, adding print markings, default layers and any other things you may need for the pages of your book. You can adjust the template at any time later, but changes to it, won't affect existing pages.</p>
@@ -56,15 +56,13 @@
     <p>The template is always shown as the first page of the book. It is numbered as page zero when exporting, and is not exported by default.</p>
     
     <h3>Thumbnail Size</h3>
-    <p>The thumbnails used in GIMP Book, are standard GTK thumbnails. This means that their size is controlled by the GIMP itself. To get bigger thumbnails, got the the Edit>Preferences menu in the GIMP, under Environment, and change Size of thumbnails to "Large (256x256)". This won't affect existing thumbnails until the next time the file is saved, or you delete the thumbnail cache.</p>
+    <p>The thumbnails used in GIMP Book, are standard GTK thumbnails. This means that their size is controlled by the GIMP itself. To get bigger thumbnails, go to the the Edit>Preferences menu in the GIMP, under Environment, and change Size of thumbnails to "Large (256x256)". This won't affect existing thumbnails until the next time the file is saved, or you delete the thumbnail cache.</p>
     
     <h2>Saving Your Book</h2>
-    <p>There is no need to save your book. When you add pages, move them around, or delete them, GIMP Book saves those changes instantly. The only thing you need to save, is the actual GIMP .xcf files, when you work on them.</p>
+    <p>There is no need to save your book. When you add pages, move them around, or delete them, GIMP Book saves those changes instantly. The only thing you need to save, is the individual GIMP .xcf files or pages, when you work on them in Gimp.</p>
     
     <h2>Opening an Existing Book</h2>
-    <p>To open a book simply choose File>Open Book... from the Book window, and use the standard open dialog to locate your *.book file. The book will open in the Book window, and you can start working on it. If thumbnails have not been generated for your book (which for instance happens if you move it to a different folder, loading will take a short while as new thumbnails are generated.</p>
-    
-    <p>To open a page, simply double click it, and it will load in the GIMP.</p>
+    <p>To open a book simply choose File>Open Book... from the Book window, and use the standard open dialog to locate your *.book file. The book will open in the Book window, and you can start working on it. If thumbnails have not been generated for your book (which happens if you move it to a different folder, loading will take a short while as new thumbnails are generated.</p>
     
     <h2>Managing Pages</h2>
     <p>To manage your pages you use the options in the Pages menu, and by dragging the thumbnails of the pages themselves. Alternately you can use the right click menu, the icons in the toolbar or keyboard shortcuts.</p>
@@ -125,16 +123,16 @@
     <p>The image size tab is basically the same as the standard GIMP one. You can choose width or height, as pixels or percentiles, and choose the interpolation method to use. GIMP Book uses the template for you book, to decide the aspect ratio, when choosing scale values.</p>
     
     <h3>File Format Tab</h3>
-    <p>You can choose to export your book as a sequence of gif, xcf, jpg, psd, png or tiff files. The save options for the different file formats are basically the same as in GIMP. For xcf and psd, you can choose not to flatten the image, keeping layer data intact to work on the files further.</p>
+    <p>You can choose to export your book as a sequence of gif, xcf, jpg, ora, psd, png or tiff files. The save options for the different file formats are basically the same as in GIMP. For xcf, ora and psd, you can choose not to flatten the image, keeping layer data intact to work on the files further in other programs such as MyPaint or Krita (both of which support OpenRastar .ora).</p>
     
     <p>When you've chosen all your export options, hit the Export Pages button, and GIMP Book will start processing your pages. This can take a short while, as each page needs to be loaded, possibly modified, and then saved out again.</p>
     
     <h2>Gimp Book in Your Language</h2>
-    <p>Gimp Book is now available in Frecnh thanks to Patrick Depoix. On Linux, if your operating system is set to French (i.e. the LANG variable is defined as fr_FR), it will automatically show up in French. Windows unfortunately doesn't set the LANG variable, but if you set it system wide, it should work there too.</p>
+    <p>Gimp Book is now available in French thanks to Patrick Depoix. On Linux, if your operating system is set to French (i.e. the LANG variable is defined as fr_FR), it will automatically show up in French. Windows unfortunately doesn't set the LANG variable, but if you set it system wide, it should work there too.</p>
     <p>If you would like to help out with translations, check out the ReadMe in the locale folder. I appreciate the help.</p>
 
     <h2>Behind the Scenes</h2>
-    <p>If you just want to use GIMP Book, you can stop reading here. If, on the other hand, you want to know a little bit more about what it does, keep reading.</p>
+    <p>If you just want to use GIMP Book, you can stop reading here. If, on the other hand, you want to know a little bit more about what it does behind the scenes, then keep reading.</p>
     
     <h3>The File Format</h3>
     <p>GIMP Book stores the pages of your book in a simple file structure that looks like this.</p>

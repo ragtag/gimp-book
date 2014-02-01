@@ -2,6 +2,10 @@
 | CHANGELOG |
 +-----------+
 
+# GIMP Book 2013.1 rev 79
+- Fixed bug on Windows that would crash Gimp Book when browsing for folders in New Book and Export Book.
+- Added support for importing and exporting OpenRastar .ora files.
+
 # GIMP Book 2013.6 rev 73
 - Added support for gettext translation.
 - Added French translation by Patrick Depoix
