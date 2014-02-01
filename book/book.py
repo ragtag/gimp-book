@@ -146,7 +146,11 @@ class Thumb():
 class NTFileChooserButton(gtk.Button):
     # Hack for Windows to get a working FileChooserButton in Gimp 2.8.6+
     def get_filename(self):
-        return self.get_label()
+        return self.filename
+
+    def set_filename(self, filename):
+        self.filename = filename
+        self.set_label(filename[:24] + (filename[24:] and '...'))
 
 class NewBookWin(gtk.Window):
     # Interface for creating new books.
@@ -191,6 +195,7 @@ class NewBookWin(gtk.Window):
         if os.name == 'nt':
             home = os.path.expanduser("~")
             self.destbutton = NTFileChooserButton(home)
+            self.destbutton.set_filename(home)
             self.destbutton.connect("clicked", self.ntdestdialog)
         else:
             self.destbutton = gtk.FileChooserButton(self.destdialog)
@@ -275,7 +280,7 @@ class NewBookWin(gtk.Window):
         # FileChooserButton bugs out on Windows after Gimp 2.8.4, so this is an alternative solution.
         response = self.destdialog.run()
         if response == gtk.RESPONSE_OK:
-            self.destbutton.set_label(self.destdialog.get_filename())
+            self.destbutton.set_filename(self.destdialog.get_filename())
         self.destdialog.hide()
 
     def cancel(self, widget):
@@ -331,9 +336,15 @@ class ExportWin(gtk.Window):
         # Destination table
         destt = gtk.Table(4, 5, False)
         destl = gtk.Label(_("Destination Folder:"))
-        destd = gtk.FileChooserDialog(_("Export to"), self.main, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
-        destd.set_default_response(gtk.RESPONSE_OK)
-        self.destb = gtk.FileChooserButton(destd)
+        self.destdialog = gtk.FileChooserDialog(_("Export to"), self.main, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        self.destdialog.set_default_response(gtk.RESPONSE_OK)
+        if os.name == 'nt':
+            home = os.path.expanduser("~")
+            self.destbutton = NTFileChooserButton(home)
+            self.destbutton.set_filename(home)
+            self.destbutton.connect("clicked", self.ntdestdialog)
+        else:
+            self.destbutton = gtk.FileChooserButton(self.destdialog)
 
         namel = gtk.Label(_("Name Pages Using:"))
         namels = gtk.ListStore(gobject.TYPE_STRING)
@@ -391,7 +402,7 @@ class ExportWin(gtk.Window):
 
         # Attach stuff to the table
         destt.attach(destl, 0,2,0,1)
-        destt.attach(self.destb, 2,4,0,1)
+        destt.attach(self.destbutton, 2,4,0,1)
         destt.attach(namel, 0,2,1,2)
         destt.attach(self.namem, 2,4,1,2)
         destt.attach(entl, 0,2,2,3)
@@ -579,6 +590,13 @@ class ExportWin(gtk.Window):
         self.show_all()
         self.progress.hide()
         self.format_changed(2)
+
+    def ntdestdialog(self, input):
+        # FileChooserButton bugs out on Windows after Gimp 2.8.4, so this is an alternative solution.
+        response = self.destdialog.run()
+        if response == gtk.RESPONSE_OK:
+            self.destbutton.set_filename(self.destdialog.get_filename())
+        self.destdialog.hide()
 
     def name_option_changed(self, namem):
         # Enable entry field if name option is set to custom.
@@ -848,7 +866,7 @@ class ExportWin(gtk.Window):
         self.doneb.set_sensitive(False)
         self.progress.set_fraction(0)
         self.progress.set_text("")
-        outfolder = os.path.join(self.destb.get_filename(), self.main.book.bookname)
+        outfolder = os.path.join(self.destbutton.get_filename(), self.main.book.bookname)
         if os.path.isdir(outfolder):
             # TRANSLATORS: %s is a previously exported book
             overwrite = gtk.MessageDialog(self.main, 0, gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, _('"%s" exists, do you want to overwrite it?') % (outfolder))
@@ -1119,7 +1137,7 @@ class Book():
 
     def export_book(self, expwin):
         # Export the entire book.
-        outfolder = os.path.join(expwin.destb.get_filename(), self.bookname)
+        outfolder = os.path.join(expwin.destbutton.get_filename(), self.bookname)
         namei = expwin.namem.get_active() # Index of type of name to use, book, page, number or custom.
         if not os.path.isdir(outfolder):
             os.makedirs(outfolder)
