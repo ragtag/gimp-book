@@ -2,7 +2,7 @@
 | CHANGELOG |
 +-----------+
 
-# GIMP Book 2013.2 rev 80
+# GIMP Book 2014.2 rev 82
 - Fixed bug on Windows that would crash Gimp Book when browsing for folders in New Book and Export Book.
 - Added support for importing and exporting OpenRastar .ora files.
 
