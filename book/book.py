@@ -1917,10 +1917,11 @@ main()
 
 # FUTURE FEATURES & FIXES
 #  HIGH
+# - Add PPI when creating new books for print, and option to set size in units (in, cm etc.).
+# - Make larger thumbnails, and store them in the book itself.
 #  MEDIUM
 # - Left to right or right to left reading option when exporting.
 # - Add Percent based margins.
-# - Consider doing larger thumbnails, and storing them in the book itself.
 #  LOW
 # - Size the widgets that look waaay too big for their own good.
 # - New Book Window more like export with tables...maybe.
