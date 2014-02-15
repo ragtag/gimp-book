@@ -1,4 +1,4 @@
-#!/usr/bin/env pythonp
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # GIMP Book
@@ -1938,7 +1938,7 @@ register(
     "GNU GPL v3 or later.",
     "Ragnar Brynjúlfsson",
     "Ragnar Brynjúlfsson",
-    _("February 2014"),
+    _("January 2014"),
     "<Toolbox>/Windows/Book...",
     "",
     [
