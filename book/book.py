@@ -1245,7 +1245,7 @@ class Book():
                 # Process image.
                 if ext == "xcf" and not expwin.xcfflatten.get_active():
                     pass
-                if ext == "ora" and not expwin.oraflatten.get_active():
+                elif ext == "ora" and not expwin.oraflatten.get_active():
                     pass
                 elif ext == "psd" and not expwin.psdflatten.get_active():
                     pass
