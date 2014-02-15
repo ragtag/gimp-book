@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env pythonp
 # -*- coding: utf-8 -*-
 #
 # GIMP Book
@@ -162,7 +162,9 @@ class NewBookWin(gtk.Window):
         self.set_transient_for(main)
         self.set_title(_("Create a New Book..."))
         self.set_size_request(400, 400)
+        self.set_resizable(False)
         self.set_position(gtk.WIN_POS_CENTER)
+        self.set_border_width(10)
 
         # Box for divding the window in three parts, name, page and buttons.
         cont = gtk.VBox(False, 4)
@@ -174,17 +176,21 @@ class NewBookWin(gtk.Window):
         bookframelabel = gtk.Label(_("<b>Book</b>"))
         bookframelabel.set_use_markup(True)
         bookframe.set_label_widget(bookframelabel)
-        cont.add(bookframe)
+        #cont.add(bookframe)
         # Split the book frame in 4.
         bookbox = gtk.VBox(False, 2)
-        bookframe.add(bookbox)
+        #bookbox.set_border_width(10)
+        cont.add(bookbox)
         # Name entry field
         namebox = gtk.HBox(False, 2)
         bookbox.pack_start(namebox)
         namelabel = gtk.Label(_("Name:"))
+        namelabel.set_size_request(80, 28)
+        namelabel.set_alignment(0.0, 0.5)
         self.nameentry = gtk.Entry()
-        namebox.pack_start(namelabel)
-        namebox.pack_start(self.nameentry)
+        self.nameentry.set_size_request(286, 28)
+        namebox.pack_start(namelabel, expand=False, fill=False, padding=4)
+        namebox.pack_start(self.nameentry, expand=False, fill=False, padding=4)
         # Destination dialog
         self.destdialog = gtk.FileChooserDialog(_("Create a New Book"), self.main, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         self.destdialog.set_default_response(gtk.RESPONSE_OK)
@@ -192,6 +198,8 @@ class NewBookWin(gtk.Window):
         destbox = gtk.HBox(False, 2)
         bookbox.pack_start(destbox)
         destlabel = gtk.Label(_("Destination:"))
+        destlabel.set_size_request(80, 32)
+        destlabel.set_alignment(0.0, 0.5)
         if os.name == 'nt':
             home = os.path.expanduser("~")
             self.destbutton = NTFileChooserButton(home)
@@ -199,8 +207,9 @@ class NewBookWin(gtk.Window):
             self.destbutton.connect("clicked", self.ntdestdialog)
         else:
             self.destbutton = gtk.FileChooserButton(self.destdialog)
-        destbox.pack_start(destlabel)
-        destbox.pack_start(self.destbutton)
+        self.destbutton.set_size_request(286, 28)
+        destbox.pack_start(destlabel, expand=False, fill=False, padding=4)
+        destbox.pack_start(self.destbutton, expand=False, fill=False, padding=4)
         
         # Frame for the page size and color space.
         pageframe = gtk.Frame()
@@ -211,56 +220,81 @@ class NewBookWin(gtk.Window):
         cont.add(pageframe)
         # Split the frame in 6
         pagebox = gtk.VBox(False, 2)
+        pagebox.set_border_width(10)
         pageframe.add(pagebox)
         # Width and height fields.
         widthbox = gtk.HBox(False, 2)
         pagebox.pack_start(widthbox)
         widthlabel = gtk.Label(_("Width:"))
-        widthadjust = gtk.Adjustment(1024, 1, 262144, 1, 100)
+        widthlabel.set_size_request(80, 28)
+        widthlabel.set_alignment(0.0, 0.5)
+        widthadjust = gtk.Adjustment(2800, 1, 262144, 1, 100)
         self.widthentry = gtk.SpinButton(widthadjust)
+        self.widthentry.set_size_request(80, 28)
         widthpixels = gtk.Label(_("pixels"))
-        widthbox.pack_start(widthlabel)
-        widthbox.pack_start(self.widthentry)
-        widthbox.pack_start(widthpixels)
+        widthbox.pack_start(widthlabel, expand=False, fill=False, padding=2)
+        widthbox.pack_start(self.widthentry, expand=False, fill=False, padding=2)
+        widthbox.pack_start(widthpixels, expand=False, fill=False, padding=2)
         heightbox = gtk.HBox(False, 2)
         pagebox.pack_start(heightbox)
         heightlabel = gtk.Label(_("Height:"))
-        heightadjust = gtk.Adjustment(1024, 1, 262144, 1, 100)
+        heightlabel.set_size_request(80, 28)
+        heightlabel.set_alignment(0.0, 0.5)
+        heightadjust = gtk.Adjustment(4000, 1, 262144, 1, 100)
         self.heightentry = gtk.SpinButton(heightadjust)
+        self.heightentry.set_size_request(80, 28)
         heightpixels = gtk.Label(_("pixels"))
-        heightbox.pack_start(heightlabel)
-        heightbox.pack_start(self.heightentry)
-        heightbox.pack_start(heightpixels)
+        heightbox.pack_start(heightlabel, expand=False, fill=False, padding=2)
+        heightbox.pack_start(self.heightentry, expand=False, fill=False, padding=2)
+        heightbox.pack_start(heightpixels, expand=False, fill=False, padding=2)
+        ppibox = gtk.HBox(False, 2)
+        pagebox.pack_start(ppibox)
+        ppilabel = gtk.Label(_("Resolution:"))
+        ppilabel.set_size_request(80, 28)
+        ppilabel.set_alignment(0.0, 0.5)
+        ppiadjust = gtk.Adjustment(400, 1, 262144, 1, 100)
+        self.ppientry = gtk.SpinButton(ppiadjust)
+        self.ppientry.set_size_request(80, 28)
+        ppipixels = gtk.Label(_("pixels/in"))
+        ppibox.pack_start(ppilabel, expand=False, fill=False, padding=2)
+        ppibox.pack_start(self.ppientry, expand=False, fill=False, padding=2)
+        ppibox.pack_start(ppipixels, expand=False, fill=False, padding=2)
         # Color space:
         colorbox = gtk.HBox(False, 2)
         pagebox.pack_start(colorbox)
         colorlabel = gtk.Label(_("Color Space:"))
+        colorlabel.set_size_request(80, 28)
+        colorlabel.set_alignment(0.0, 0.5)
         colorlist = gtk.ListStore(gobject.TYPE_STRING)
         colors = [ _("RBG color"), _("Grayscale") ]
         for color in colors:
             colorlist.append([color])
         self.colormenu = gtk.ComboBox(colorlist)
+        self.colormenu.set_size_request(280, 28)
         colorcell = gtk.CellRendererText()
         self.colormenu.pack_start(colorcell, True)
         self.colormenu.add_attribute(colorcell, 'text', 0)
         self.colormenu.set_active(0)
-        colorbox.pack_start(colorlabel)
-        colorbox.pack_start(self.colormenu)
+        colorbox.pack_start(colorlabel, expand=False, fill=False, padding=2)
+        colorbox.pack_start(self.colormenu, expand=False, fill=False, padding=2)
         # Background fill.
         fillbox = gtk.HBox(False, 2)
         pagebox.pack_start(fillbox)
         filllabel = gtk.Label(_("Fill with:"))
+        filllabel.set_size_request(80, 28)
+        filllabel.set_alignment(0.0, 0.5)
         filllist = gtk.ListStore(gobject.TYPE_STRING)
         fills = [ _("Foreground color"), _("Background color"), _("White"), _("Transparency") ]
         for fill in fills:
             filllist.append([fill])
         self.fillmenu = gtk.ComboBox(filllist)
+        self.fillmenu.set_size_request(280, 28)
         fillcell = gtk.CellRendererText()
         self.fillmenu.pack_start(fillcell, True)
         self.fillmenu.add_attribute(fillcell, 'text', 0)
-        self.fillmenu.set_active(1)
-        fillbox.pack_start(filllabel)
-        fillbox.pack_start(self.fillmenu)
+        self.fillmenu.set_active(2)
+        fillbox.pack_start(filllabel, expand=False, fill=False, padding=2)
+        fillbox.pack_start(self.fillmenu, expand=False, fill=False, padding=2)
         
         # Buttons
         buttonbox = gtk.HBox(False, 2)
@@ -291,7 +325,7 @@ class NewBookWin(gtk.Window):
         # Creates a new book.
         self.main.close_book()
         self.book = Book(self.main)
-        self.book.make_book(self.destbutton.get_filename(), self.nameentry.get_text(), self.widthentry.get_value(), self.heightentry.get_value(), self.colormenu.get_active(), self.fillmenu.get_active())
+        self.book.make_book(self.destbutton.get_filename(), self.nameentry.get_text(), self.widthentry.get_value(), self.heightentry.get_value(), self.ppientry.get_value(), self.colormenu.get_active(),  self.fillmenu.get_active())
         self.main.add_book(self.book)
         self.destroy()
 
@@ -922,10 +956,11 @@ class Book():
         self.trashpath = "" # Path to trash folder.
         self.selected = 0  # Index of the currently selected page, -1 if none.
 
-    def make_book(self, dest, name, w, h, color, fill):
+    def make_book(self, dest, name, w, h, r, color, fill):
         # Build the files and folders needed for the book.
         width = int(w)
         height = int(h)
+        resolution = int(r)
         if os.path.isdir(dest):
             if name:
                 # Make folder dest/name
@@ -944,6 +979,7 @@ class Book():
                     os.makedirs(os.path.join(fullpath,"trash"))
                 # Make file dest/name/Template.xcf
                 img = pdb.gimp_image_new(width, height, color)
+                pdb.gimp_image_set_resolution(img, resolution, resolution)
                 if color == 0:
                     bglayer = gimp.Layer(img, "Background", width, height, RGBA_IMAGE, 100, NORMAL_MODE)
                 else:
@@ -1902,7 +1938,7 @@ register(
     "GNU GPL v3 or later.",
     "Ragnar Brynjúlfsson",
     "Ragnar Brynjúlfsson",
-    _("January 2014"),
+    _("February 2014"),
     "<Toolbox>/Windows/Book...",
     "",
     [
@@ -1917,7 +1953,6 @@ main()
 
 # FUTURE FEATURES & FIXES
 #  HIGH
-# - Add PPI when creating new books for print, and option to set size in units (in, cm etc.).
 # - Make larger thumbnails, and store them in the book itself.
 #  MEDIUM
 # - Left to right or right to left reading option when exporting.
