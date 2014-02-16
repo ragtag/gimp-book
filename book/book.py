@@ -2007,7 +2007,7 @@ register(
     "GNU GPL v3 or later.",
     "Ragnar Brynjúlfsson",
     "Ragnar Brynjúlfsson",
-    _("January 2014"),
+    _("February 2014"),
     "<Toolbox>/Windows/Book...",
     "",
     [
