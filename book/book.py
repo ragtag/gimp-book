@@ -149,7 +149,7 @@ class NewBookWin(gtk.Window):
         win = super(NewBookWin, self).__init__()
         self.set_transient_for(main)
         self.set_title(_("Create a New Book..."))
-        self.set_size_request(400, 400)
+        self.set_size_request(400, 500)
         self.set_resizable(False)
         self.set_position(gtk.WIN_POS_CENTER)
         self.set_border_width(10)
@@ -158,16 +158,8 @@ class NewBookWin(gtk.Window):
         cont = gtk.VBox(False, 4)
         self.add(cont)
 
-        # Frame for the book name and path.
-        bookframe = gtk.Frame()
-        bookframe.set_shadow_type(gtk.SHADOW_NONE)
-        bookframelabel = gtk.Label(_("<b>Book</b>"))
-        bookframelabel.set_use_markup(True)
-        bookframe.set_label_widget(bookframelabel)
-        #cont.add(bookframe)
         # Split the book frame in 4.
         bookbox = gtk.VBox(False, 2)
-        #bookbox.set_border_width(10)
         cont.add(bookbox)
         # Name entry field
         namebox = gtk.HBox(False, 2)
@@ -283,6 +275,67 @@ class NewBookWin(gtk.Window):
         self.fillmenu.set_active(2)
         fillbox.pack_start(filllabel, expand=False, fill=False, padding=2)
         fillbox.pack_start(self.fillmenu, expand=False, fill=False, padding=2)
+
+        # Frame for guides for margins and bleed
+        guideframe = gtk.Frame()
+        guideframe.set_shadow_type(gtk.SHADOW_NONE)
+        guideframelabel = gtk.Label(_("<b>Guides</b>"))
+        guideframelabel.set_use_markup(True)
+        guideframe.set_label_widget(guideframelabel)
+        cont.add(guideframe)
+        # Split the frame in 6
+        guidebox = gtk.VBox(False, 2)
+        guidebox.set_border_width(10)
+        guideframe.add(guidebox)
+        # Margin fields.
+        topbox = gtk.HBox(False, 2)
+        guidebox.pack_start(topbox)
+        toplabel = gtk.Label(_("Top Margins:"))
+        toplabel.set_size_request(120, 28)
+        toplabel.set_alignment(0.0, 0.5)
+        topadjust = gtk.Adjustment(0, 0, 262144, 1, 100)
+        self.topentry = gtk.SpinButton(topadjust)
+        self.topentry.set_size_request(80, 28)
+        toppixels = gtk.Label(_("pixels"))
+        topbox.pack_start(toplabel, expand=False, fill=False, padding=2)
+        topbox.pack_start(self.topentry, expand=False, fill=False, padding=2)
+        topbox.pack_start(toppixels, expand=False, fill=False, padding=2)
+        bottombox = gtk.HBox(False, 2)
+        guidebox.pack_start(bottombox)
+        bottomlabel = gtk.Label(_("Bottom Margins:"))
+        bottomlabel.set_size_request(120, 28)
+        bottomlabel.set_alignment(0.0, 0.5)
+        bottomadjust = gtk.Adjustment(0, 0, 262144, 1, 100)
+        self.bottomentry = gtk.SpinButton(bottomadjust)
+        self.bottomentry.set_size_request(80, 28)
+        bottompixels = gtk.Label(_("pixels"))
+        bottombox.pack_start(bottomlabel, expand=False, fill=False, padding=2)
+        bottombox.pack_start(self.bottomentry, expand=False, fill=False, padding=2)
+        bottombox.pack_start(bottompixels, expand=False, fill=False, padding=2)
+        sidesbox = gtk.HBox(False, 2)
+        guidebox.pack_start(sidesbox)
+        sideslabel = gtk.Label(_("Side Margins:"))
+        sideslabel.set_size_request(120, 28)
+        sideslabel.set_alignment(0.0, 0.5)
+        sidesadjust = gtk.Adjustment(0, 0, 262144, 1, 100)
+        self.sidesentry = gtk.SpinButton(sidesadjust)
+        self.sidesentry.set_size_request(80, 28)
+        sidespixels = gtk.Label(_("pixels"))
+        sidesbox.pack_start(sideslabel, expand=False, fill=False, padding=2)
+        sidesbox.pack_start(self.sidesentry, expand=False, fill=False, padding=2)
+        sidesbox.pack_start(sidespixels, expand=False, fill=False, padding=2)
+        bleedbox = gtk.HBox(False, 2)
+        guidebox.pack_start(bleedbox)
+        bleedlabel = gtk.Label(_("Bleed:"))
+        bleedlabel.set_size_request(120, 28)
+        bleedlabel.set_alignment(0.0, 0.5)
+        bleedadjust = gtk.Adjustment(0, 0, 262144, 1, 100)
+        self.bleedentry = gtk.SpinButton(bleedadjust)
+        self.bleedentry.set_size_request(80, 28)
+        bleedpixels = gtk.Label(_("pixels"))
+        bleedbox.pack_start(bleedlabel, expand=False, fill=False, padding=2)
+        bleedbox.pack_start(self.bleedentry, expand=False, fill=False, padding=2)
+        bleedbox.pack_start(bleedpixels, expand=False, fill=False, padding=2)
         
         # Buttons
         buttonbox = gtk.HBox(False, 2)
@@ -313,7 +366,7 @@ class NewBookWin(gtk.Window):
         # Creates a new book.
         self.main.close_book()
         self.book = Book(self.main)
-        self.book.make_book(self.destbutton.get_filename(), self.nameentry.get_text(), self.widthentry.get_value(), self.heightentry.get_value(), self.ppientry.get_value(), self.colormenu.get_active(),  self.fillmenu.get_active())
+        self.book.make_book(self.destbutton.get_filename(), self.nameentry.get_text(), self.widthentry.get_value(), self.heightentry.get_value(), self.ppientry.get_value(), self.colormenu.get_active(),  self.fillmenu.get_active(), self.topentry.get_value(), self.bottomentry.get_value(), self.sidesentry.get_value(), self.bleedentry.get_value())
         self.main.add_book(self.book)
         self.destroy()
 
@@ -944,9 +997,10 @@ class Book():
         self.trashpath = ""  # Path to trash folder.
         self.selected = 0    # Index of the currently selected page, -1 if none.
         self.thumbsize = 256 # Defautl thumbnail size.
+        self.thumbwidth = 256
         self.aspect = 1      # The aspect ratio of the page (a width 7 and height 10 page, is 0.7 aspect)
 
-    def make_book(self, dest, name, w, h, r, color, fill):
+    def make_book(self, dest, name, w, h, r, color, fill, top, bottom, sides, bleed):
         # Build the files and folders needed for the book.
         width = int(w)
         height = int(h)
@@ -985,7 +1039,21 @@ class Book():
                 elif fill == 3:
                     bglayer.fill(TRANSPARENT_FILL)
                 img.add_layer(bglayer, 0)
+                # Add guides
+                if top > 0 or bottom > 0 or sides > 0:
+                    pt = top
+                    pl = sides
+                    pr = width - sides
+                    pb = height - bottom
+                    self.add_guide(_("Margins"), img, pt, pl, pr, pb)
+                if bleed > 0:
+                    pt = bleed
+                    pl = bleed
+                    pr = width - bleed
+                    pb = height - bleed
+                    self.add_guide(_("Bleed"), img,  pt, pl, pr, pb)
                 pdb.gimp_xcf_save(0, img, None, os.path.join(fullpath, "pages", "Template.xcf") , "Template.xcf")
+
                 # Load the newly created book.
                 self.load_book(os.path.join(fullpath, name+".book"), self.main)
                 return True
@@ -993,6 +1061,20 @@ class Book():
                 show_error_msg(_("Name was left empty"))
         else:
             show_error_msg(_("Destination does not exist."))
+
+    def add_guide(self, name, img,  pt, pl, pr, pb):
+        bleedcoords = [
+            pl,pt,pl,pt,pl,pt,
+            pr,pt,pr,pt,pr,pt,
+            pr,pb,pr,pb,pr,pb,
+            pl,pb,pl,pb,pl,pb,
+            pl,pt,pl,pt,pl,pt ]
+        drw = pdb.gimp_image_get_active_layer(img)
+        bleedpath = pdb.gimp_vectors_new(img, name)
+        pdb.gimp_vectors_set_visible(bleedpath, True)
+        pdb.gimp_image_add_vectors(img, bleedpath, 0)
+        pdb.gimp_vectors_stroke_new_from_points(bleedpath, 0, 30, bleedcoords, True)
+
 
     def load_book(self, bookfile, mainwin):
         # Loads a selected book.
@@ -1031,6 +1113,8 @@ class Book():
                 thumb = Thumb(os.path.join(self.pagepath, p), self.thumbsize, self.main)
                 self.pagestore.append((p, thumb.thumbpix, thumb.path))
                 progress = progress + progressstep
+                if progress > 1.0:
+                    progress = 1.0
                 mainwin.progress.set_fraction(progress)
                 while gtk.events_pending():
                     gtk.main_iteration()
@@ -2027,10 +2111,6 @@ main()
 # - Update minor changes in French translation.
 #  LOW
 # - Support color coding pages, making it easy to divide up the story into chapters or mark pages.
-
-
-# TODO!
-# - Test changes on Windows.
 
 
 
