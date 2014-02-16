@@ -96,14 +96,15 @@ THUMBMAX=512
 
 class Thumb():
     # Managing thumbnails, and creating new ones when needed.
-    def __init__(self, imagepath, size):
+    def __init__(self, imagepath, size, main):
         self.imagepath = imagepath # bla/pages/one.xcf
         self.size = size
+        self.main = main
         imagename = os.path.split(imagepath)[1]
         self.thumbdir = os.path.join(os.path.split(os.path.split(imagepath)[0])[0], 'thumbs', str(size))
         self.path = os.path.join(self.thumbdir, imagename+'.png')
         self.get_thumb()
-        #        show_error_msg(_('Failed to find or build thumb for %s.') % self.imagepath)
+        # show_error_msg(_('Failed to find or build thumb for %s.') % self.imagepath)
 
     def get_thumb(self):
         # Fetch the thumb, if it exists.
@@ -113,10 +114,12 @@ class Thumb():
         else:
             self.build_thumb()
         self.thumbpix = gtk.gdk.pixbuf_new_from_file(self.path)
-        self.mtime = os.stat(self.path).st_mtime
 
     def build_thumb(self):
         # Build or rebuild a thumb for the image.
+        self.main.progress.show()
+        while gtk.events_pending():
+            gtk.main_iteration()
         if not os.path.exists(self.thumbdir):
             os.makedirs(self.thumbdir)
         img = pdb.gimp_file_load(self.imagepath, self.imagepath)
@@ -935,7 +938,7 @@ class Book():
     def __init__(self, main):
         # Defines basic variables to store.
         # pagestore columns = pagenmae, thumb Pixbuf, thumb path
-        self.pagestore = gtk.ListStore(str, gtk.gdk.Pixbuf, str, str)
+        self.pagestore = gtk.ListStore(str, gtk.gdk.Pixbuf, str)
         self.main = main     # Main windows.
         self.bookfile = ""   # The *.book for this book.
         self.bookname = ""   # The name of the book.
@@ -1016,8 +1019,8 @@ class Book():
                 while gtk.events_pending():
                     gtk.main_iteration()
                 # Create a page object, and add to a list.
-                thumb = Thumb(os.path.join(self.pagepath, p), self.thumbsize)
-                self.pagestore.append((p, thumb.thumbpix, thumb.path, thumb.mtime))
+                thumb = Thumb(os.path.join(self.pagepath, p), self.thumbsize, self.main)
+                self.pagestore.append((p, thumb.thumbpix, thumb.path))
                 progress = progress + progressstep
                 mainwin.progress.set_fraction(progress)
                 while gtk.events_pending():
@@ -1067,8 +1070,8 @@ class Book():
             if unique:
                 template = os.path.join(self.pagepath, self.pagestore[0][0])
                 shutil.copy(template, os.path.join(self.pagepath, p))
-                thumb = Thumb(os.path.join(self.pagepath, p), self.thumbsize)
-                self.pagestore.insert(dest, ( p, thumb.thumbpix, thumb.path, thumb.mtime))
+                thumb = Thumb(os.path.join(self.pagepath, p), self.thumbsize, self.main)
+                self.pagestore.insert(dest, ( p, thumb.thumbpix, thumb.path))
                 return True
             else:
                 show_error_msg(_("Page names must be unique"))
@@ -1089,8 +1092,8 @@ class Book():
             if unique:
                 img = pdb.gimp_file_load(p, p)
                 pdb.gimp_xcf_save(0, img, None, os.path.join(self.pagepath, name) , name)
-                thumb = Thumb(os.path.join(self.pagepath, p), self.thumbsize)
-                self.pagestore.insert(dest, (name, thumb.thumbpix, thumb.path, thumb.mtime))
+                thumb = Thumb(os.path.join(self.pagepath, p), self.thumbsize, self.main)
+                self.pagestore.insert(dest, (name, thumb.thumbpix, thumb.path))
             else:
                 show_error_msg(_("Page name is not unique."))
 
@@ -1115,8 +1118,8 @@ class Book():
                 template = os.path.join(self.pagepath, self.pagestore[0][0])
                 src = os.path.join(self.pagepath, self.pagestore[dest][0])
                 shutil.copy(src, os.path.join(self.pagepath, p))
-                thumb = Thumb(os.path.join(self.pagepath, p), self.thumbsize)
-                self.pagestore.insert(dest, ( p, thumb.thumbpix, thumb.path, thumb.mtime))
+                thumb = Thumb(os.path.join(self.pagepath, p), self.thumbsize, self.main)
+                self.pagestore.insert(dest, ( p, thumb.thumbpix, thumb.path))
                 return True
             else:
                 show_error_msg(_("Page names must be unique"))
@@ -1133,8 +1136,8 @@ class Book():
             if unique:
                 try:
                     shutil.move(os.path.join(self.pagepath, self.pagestore[self.selected][0]), os.path.join(self.pagepath, p))
-                    thumb = Thumb(os.path.join(self.pagepath,p), self.thumbsize)
-                    self.pagestore[self.selected] = ((p, thumb.thumbpix, thumb.path, thumb.mtime))
+                    thumb = Thumb(os.path.join(self.pagepath,p), self.thumbsize, self.main)
+                    self.pagestore[self.selected] = ((p, thumb.thumbpix, thumb.path))
                     return True
                 except Exception, err:
                     show_error_msg(err)
@@ -1359,15 +1362,14 @@ class Book():
         for i,p in enumerate(self.pagestore):
             if p[0]:
                 self.main.progress.set_text("Generating thumbnail for %s" % p[0])
-                thumb = Thumb(os.path.join(self.pagepath,p[0]), self.thumbsize)
+                thumb = Thumb(os.path.join(self.pagepath,p[0]), self.thumbsize, self.main)
                 self.thumbwidth = thumb.thumbpix.get_width()
-                self.pagestore[i] = ((p[0], thumb.thumbpix, thumb.path, thumb.mtime))
+                self.pagestore[i] = ((p[0], thumb.thumbpix, thumb.path))
             progress = float(i) / pagecount
             self.main.progress.set_fraction(progress)
-            while gtk.events_pending():
-                gtk.main_iteration()
-        self.main.progress.set_text("")
         self.main.progress.hide()
+        self.main.progress.set_text("")
+        self.main.progress.set_fraction(0.0)
 
 
 class Main(gtk.Window):
@@ -1721,7 +1723,7 @@ class Main(gtk.Window):
         self.book.update_thumbs()
         self.zoomoutm.set_sensitive(True)
         self.zoominm.set_sensitive(True)
-        self.thumbs.set_item_width(self.book.thumbwidth + 20)
+        self.thumbs.set_item_width(self.book.thumbwidth + 10)
         self.thumbs.select_path(0)
         self.update_title()
 
@@ -1944,7 +1946,7 @@ class Main(gtk.Window):
             self.zoominm.set_sensitive(False)
         self.book.update_thumbs()
         self.zoomoutm.set_sensitive(True)
-        self.thumbs.set_item_width(self.book.thumbwidth + 20)
+        self.thumbs.set_item_width(self.book.thumbwidth + 10)
     
     def zoomout(self, widget):
         # Display thumbnails smaller.
@@ -1954,7 +1956,7 @@ class Main(gtk.Window):
             self.zoomoutm.set_sensitive(False)
         self.book.update_thumbs()
         self.zoominm.set_sensitive(True)
-        self.thumbs.set_item_width(self.book.thumbwidth + 20)
+        self.thumbs.set_item_width(self.book.thumbwidth + 10)
 
     def close_book(self):
         if self.loaded:
@@ -1997,7 +1999,6 @@ main()
 
 # FUTURE FEATURES & FIXES
 #  HIGH
-# - Add progress bar on creating thumbs.
 # - Store additional data in book file, such as Storyboard mode status and zoom level.
 #  MEDIUM
 # - Left to right or right to left reading option when exporting.
