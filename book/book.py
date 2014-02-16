@@ -43,10 +43,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>."""
 # - utf-8 names (i.e. Chinese, Japanese etc) for pages not working properly on Windows.
 # - NOT tested on OSX.
 # - Import does not yet support any options on importing files such as pdf or svg (resolution, page etc.).
-# - Thumbnails of imported pages, don't update until you restart Gimp Book, or rename the page.
 
 # If you find additional bugs, please send me a mail at bug@ragnarb.com
-
 
 import os
 import hashlib
@@ -1464,18 +1462,18 @@ class Main(gtk.Window):
         self.storyboardm.connect("activate", self.toggle_storyboard_mode)
         self.viewmenu.append(self.storyboardm)
 
-        self.zoomoutm = gtk.MenuItem()
+        self.zoomoutm = gtk.ImageMenuItem(gtk.STOCK_ZOOM_OUT, agr)
         self.zoomoutm.set_label(_("Zoom Out"))
-        #key, mod = gtk.accelerator_parse(_("<Control>-"))
-        #self.zoomoutm.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
+        key, mod = gtk.accelerator_parse(_("<Control>minus"))
+        self.zoomoutm.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
         self.zoomoutm.set_sensitive(False)
         self.zoomoutm.connect("activate", self.zoomout)
         self.viewmenu.append(self.zoomoutm)
 
-        self.zoominm = gtk.MenuItem()
+        self.zoominm = gtk.ImageMenuItem(gtk.STOCK_ZOOM_IN, agr)
         self.zoominm.set_label(_("Zoom In"))
-        #key, mod = gtk.accelerator_parse(_("<Control>+"))
-        #self.zoominm.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
+        key, mod = gtk.accelerator_parse(_("<Control>plus"))
+        self.zoominm.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
         self.zoominm.set_sensitive(False)
         self.zoominm.connect("activate", self.zoomin)
         self.viewmenu.append(self.zoominm)
@@ -2026,8 +2024,13 @@ main()
 # - Adjust layout in export window.
 # - Left to right or right to left reading option when exporting.
 # - Add Percent based margins.
+# - Update minor changes in French translation.
 #  LOW
 # - Support color coding pages, making it easy to divide up the story into chapters or mark pages.
+
+
+# TODO!
+# - Test changes on Windows.
 
 
 
