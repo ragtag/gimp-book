@@ -91,57 +91,44 @@ language = gettext.translation(APP_NAME, mo_location, languages=languages, fallb
 _ = language.ugettext #use ugettext instead of getttext to avoid unicode errors
 
 
+THUMBMIN=128
+THUMBMAX=512
+
 class Thumb():
     # Managing thumbnails, and creating new ones when needed.
-    def __init__(self, imagepath):
-        self.imagepath = imagepath
-        if not self.find_thumb():
+    def __init__(self, imagepath, size):
+        self.imagepath = imagepath # bla/pages/one.xcf
+        self.size = size
+        imagename = os.path.split(imagepath)[1]
+        self.thumbdir = os.path.join(os.path.split(os.path.split(imagepath)[0])[0], 'thumbs', str(size))
+        self.path = os.path.join(self.thumbdir, imagename+'.png')
+        self.get_thumb()
+        #        show_error_msg(_('Failed to find or build thumb for %s.') % self.imagepath)
+
+    def get_thumb(self):
+        # Fetch the thumb, if it exists.
+        if os.path.exists(self.path):
+            if float(os.stat(self.path).st_mtime) < float(os.stat(self.imagepath).st_mtime):
+                self.build_thumb()
+        else:
             self.build_thumb()
-            if not self.find_thumb():
-                # TRANSLATROS: %s is the name of the page Gimp Book failed to find a thumb for
-                # All instances of %s in this document need to be left in, but can be moved around in the sentence as needed.
-                show_error_msg(_('Failed to find or build thumb for %s.') % self.imagepath)
+        self.thumbpix = gtk.gdk.pixbuf_new_from_file(self.path)
+        self.mtime = os.stat(self.path).st_mtime
 
     def build_thumb(self):
         # Build or rebuild a thumb for the image.
+        if not os.path.exists(self.thumbdir):
+            os.makedirs(self.thumbdir)
         img = pdb.gimp_file_load(self.imagepath, self.imagepath)
-        pdb.gimp_file_save_thumbnail(img, self.imagepath)
+        img.flatten()
+        width = int(self.size) if img.width > img.height else int(float(img.width) / img.height * self.size)
+        height = int(self.size) if img.height > img.width else int(float(img.height) / img.width * self.size)
+        pdb.gimp_image_scale_full(img, width, height, 2)
+        drw = pdb.gimp_image_get_active_layer(img)
+        thumbname = os.path.split(self.path)[1]
+        pdb.file_png_save(img, drw, self.path, thumbname, False, 9, False, False, False, True, True)
         pdb.gimp_image_delete(img)
-        
-    def find_thumb(self):
-        # Find the pages thumbnail.
-        imagepathuri = urllib.quote(self.imagepath.encode("utf-8"))
-        file_hash = hashlib.md5('file://'+imagepathuri).hexdigest()
-        if os.name == 'nt':
-            # Todo! Get Windows to support utf-8 file paths.
-            self.imagepath = self.imagepath.encode('utf-8')
-            winimagepath = repr(self.imagepath).replace('\\\\', '/')[1:-1]
-            winimagepath = winimagepath[0:2] + urllib.quote(winimagepath[2:])
-            file_hash = hashlib.md5('file:///'+str(winimagepath)).hexdigest()
-        thumbpath = os.path.join(os.path.expanduser('~'), '.thumbnails')
-        thumb = os.path.join(thumbpath, 'large', file_hash + '.png')
-        if not os.path.exists(os.path.join(thumbpath, 'large')):
-            os.makedirs(os.path.join(thumbpath, 'large'))
-        if not os.path.exists(os.path.join(thumbpath, 'normal')):
-            os.makedirs(os.path.join(thumbpath, 'normal'))
-        if os.path.exists(thumb):
-            if float(os.stat(thumb).st_mtime) < float(os.stat(self.imagepath).st_mtime):
-                return False
-            self.thumbpix = gtk.gdk.pixbuf_new_from_file(thumb)
-            self.path = thumb
-            self.mtime = os.stat(thumb).st_mtime
-            return True
-        else:
-            thumb = os.path.join(thumbpath, 'normal', file_hash + '.png')
-            if os.path.exists(thumb):
-                if float(os.stat(thumb).st_mtime) < float(os.stat(self.imagepath).st_mtime):
-                    return False
-                self.thumbpix = gtk.gdk.pixbuf_new_from_file(thumb)
-                self.path = thumb
-                self.mtime = os.stat(thumb).st_mtime
-                return True
-            else:
-                return False
+
 
 class NTFileChooserButton(gtk.Button):
     # Hack for Windows to get a working FileChooserButton in Gimp 2.8.6+
@@ -947,14 +934,16 @@ class Book():
     # Stores and manages the data for the book.
     def __init__(self, main):
         # Defines basic variables to store.
-        # pagestore columns = pagenmae, thumb Pixbuf, thumb path, thumb mtime
-        self.main = main
+        # pagestore columns = pagenmae, thumb Pixbuf, thumb path
         self.pagestore = gtk.ListStore(str, gtk.gdk.Pixbuf, str, str)
-        self.bookfile = ""  # The *.book for this book.
-        self.bookname = ""  # The name of the book.
-        self.pagepath = ""  # Path to the "pages" subfolder.
-        self.trashpath = "" # Path to trash folder.
-        self.selected = 0  # Index of the currently selected page, -1 if none.
+        self.main = main     # Main windows.
+        self.bookfile = ""   # The *.book for this book.
+        self.bookname = ""   # The name of the book.
+        self.pagepath = ""   # Path to the "pages" subfolder.
+        self.trashpath = ""  # Path to trash folder.
+        self.selected = 0    # Index of the currently selected page, -1 if none.
+        self.thumbsize = 256 # Defautl thumbnail size.
+        self.aspect = 1      # The aspect ratio of the page (a width 7 and height 10 page, is 0.7 aspect)
 
     def make_book(self, dest, name, w, h, r, color, fill):
         # Build the files and folders needed for the book.
@@ -977,6 +966,8 @@ class Book():
                     os.makedirs(os.path.join(fullpath,"pages"))
                 if not os.path.isdir(os.path.join(fullpath,"trash")):
                     os.makedirs(os.path.join(fullpath,"trash"))
+                if not os.path.isdir(os.path.join(fullpath,"thumbs")):
+                    os.makedirs(os.path.join(fullpath,"thumbs"))
                 # Make file dest/name/Template.xcf
                 img = pdb.gimp_image_new(width, height, color)
                 pdb.gimp_image_set_resolution(img, resolution, resolution)
@@ -1010,6 +1001,7 @@ class Book():
             bookpath = os.path.dirname(self.bookfile)
             self.pagepath = os.path.join(bookpath, "pages")
             self.trashpath = os.path.join(bookpath, "trash")
+            self.thumbsize = 256
             # Load the pages.
             f = open(self.bookfile, "r")
             metatext = f.read()
@@ -1024,7 +1016,7 @@ class Book():
                 while gtk.events_pending():
                     gtk.main_iteration()
                 # Create a page object, and add to a list.
-                thumb = Thumb(os.path.join(self.pagepath, p))
+                thumb = Thumb(os.path.join(self.pagepath, p), self.thumbsize)
                 self.pagestore.append((p, thumb.thumbpix, thumb.path, thumb.mtime))
                 progress = progress + progressstep
                 mainwin.progress.set_fraction(progress)
@@ -1075,7 +1067,7 @@ class Book():
             if unique:
                 template = os.path.join(self.pagepath, self.pagestore[0][0])
                 shutil.copy(template, os.path.join(self.pagepath, p))
-                thumb = Thumb(os.path.join(self.pagepath, p))
+                thumb = Thumb(os.path.join(self.pagepath, p), self.thumbsize)
                 self.pagestore.insert(dest, ( p, thumb.thumbpix, thumb.path, thumb.mtime))
                 return True
             else:
@@ -1097,7 +1089,7 @@ class Book():
             if unique:
                 img = pdb.gimp_file_load(p, p)
                 pdb.gimp_xcf_save(0, img, None, os.path.join(self.pagepath, name) , name)
-                thumb = Thumb(os.path.join(self.pagepath, p))
+                thumb = Thumb(os.path.join(self.pagepath, p), self.thumbsize)
                 self.pagestore.insert(dest, (name, thumb.thumbpix, thumb.path, thumb.mtime))
             else:
                 show_error_msg(_("Page name is not unique."))
@@ -1123,7 +1115,7 @@ class Book():
                 template = os.path.join(self.pagepath, self.pagestore[0][0])
                 src = os.path.join(self.pagepath, self.pagestore[dest][0])
                 shutil.copy(src, os.path.join(self.pagepath, p))
-                thumb = Thumb(os.path.join(self.pagepath, p))
+                thumb = Thumb(os.path.join(self.pagepath, p), self.thumbsize)
                 self.pagestore.insert(dest, ( p, thumb.thumbpix, thumb.path, thumb.mtime))
                 return True
             else:
@@ -1141,7 +1133,7 @@ class Book():
             if unique:
                 try:
                     shutil.move(os.path.join(self.pagepath, self.pagestore[self.selected][0]), os.path.join(self.pagepath, p))
-                    thumb = Thumb(os.path.join(self.pagepath,p))
+                    thumb = Thumb(os.path.join(self.pagepath,p), self.thumbsize)
                     self.pagestore[self.selected] = ((p, thumb.thumbpix, thumb.path, thumb.mtime))
                     return True
                 except Exception, err:
@@ -1360,11 +1352,22 @@ class Book():
 
     def update_thumbs(self):
         # Update all thumbnails that have changed.
+        progress = 0.0
+        self.main.progress.set_fraction(progress)
+        self.main.progress.set_text("")
+        pagecount = len(self.pagestore)
         for i,p in enumerate(self.pagestore):
             if p[0]:
-                if not str(os.stat(p[2]).st_mtime) == p[3]:
-                    thumb = Thumb(os.path.join(self.pagepath,p[0]))
-                    self.pagestore[i] = ((p[0], thumb.thumbpix, thumb.path, thumb.mtime))
+                self.main.progress.set_text("Generating thumbnail for %s" % p[0])
+                thumb = Thumb(os.path.join(self.pagepath,p[0]), self.thumbsize)
+                self.thumbwidth = thumb.thumbpix.get_width()
+                self.pagestore[i] = ((p[0], thumb.thumbpix, thumb.path, thumb.mtime))
+            progress = float(i) / pagecount
+            self.main.progress.set_fraction(progress)
+            while gtk.events_pending():
+                gtk.main_iteration()
+        self.main.progress.set_text("")
+        self.main.progress.hide()
 
 
 class Main(gtk.Window):
@@ -1446,6 +1449,22 @@ class Main(gtk.Window):
         self.storyboardm.set_sensitive(False)
         self.storyboardm.connect("activate", self.toggle_storyboard_mode)
         self.viewmenu.append(self.storyboardm)
+
+        self.zoomoutm = gtk.MenuItem()
+        self.zoomoutm.set_label(_("Zoom Out"))
+        #key, mod = gtk.accelerator_parse(_("<Control>-"))
+        #self.zoomoutm.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
+        self.zoomoutm.set_sensitive(False)
+        self.zoomoutm.connect("activate", self.zoomout)
+        self.viewmenu.append(self.zoomoutm)
+
+        self.zoominm = gtk.MenuItem()
+        self.zoominm.set_label(_("Zoom In"))
+        #key, mod = gtk.accelerator_parse(_("<Control>+"))
+        #self.zoominm.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
+        self.zoominm.set_sensitive(False)
+        self.zoominm.connect("activate", self.zoomin)
+        self.viewmenu.append(self.zoominm)
 
         #self.direction = gtk.CheckMenuItem()
         #self.direction.set_label("Read Left to Right")
@@ -1699,6 +1718,10 @@ class Main(gtk.Window):
         self.thumbs.connect("item-activated", self.book.open_page)
         self.thumbs.connect("button-press-event", self.button_press, self.pagemenu)
         self.thumbs.set_model(self.book.pagestore)
+        self.book.update_thumbs()
+        self.zoomoutm.set_sensitive(True)
+        self.zoominm.set_sensitive(True)
+        self.thumbs.set_item_width(self.book.thumbwidth + 20)
         self.thumbs.select_path(0)
         self.update_title()
 
@@ -1881,7 +1904,6 @@ class Main(gtk.Window):
             return False
         if os.path.exists(os.path.join(self.book.pagepath, ("%s.xcf" % (name)))):
             # TODO! Support case insensitive names on Windows.
-            
             # TRANSLATORS: %s is the name of an existnig conflictnig page.
             show_error_msg(_("A page called '%s.xcf' exists. Page names must be unique.") % (name))
             return False
@@ -1895,6 +1917,8 @@ class Main(gtk.Window):
         self.imp_page.set_sensitive(True)
         self.file_export.set_sensitive(True)
         self.storyboardm.set_sensitive(True)
+        self.zoomoutm.set_sensitive(True)
+        self.zoominm.set_sensitive(True)
         if len(self.book.pagestore) > 1:
             self.del_page.set_sensitive(True)
             self.deletepage.set_sensitive(True)
@@ -1911,6 +1935,26 @@ class Main(gtk.Window):
             self.thumbs.set_columns(0)
         else:
             self.thumbs.set_columns(2)
+            
+    def zoomin(self, widget):
+        # Display thumbnails larger.
+        if self.book.thumbsize < THUMBMAX:
+            self.book.thumbsize = int(self.book.thumbsize * 2)
+        if self.book.thumbsize >= THUMBMAX:
+            self.zoominm.set_sensitive(False)
+        self.book.update_thumbs()
+        self.zoomoutm.set_sensitive(True)
+        self.thumbs.set_item_width(self.book.thumbwidth + 20)
+    
+    def zoomout(self, widget):
+        # Display thumbnails smaller.
+        if self.book.thumbsize > THUMBMIN:
+            self.book.thumbsize = int(self.book.thumbsize / 2.0)
+        if self.book.thumbsize <= THUMBMIN:
+            self.zoomoutm.set_sensitive(False)
+        self.book.update_thumbs()
+        self.zoominm.set_sensitive(True)
+        self.thumbs.set_item_width(self.book.thumbwidth + 20)
 
     def close_book(self):
         if self.loaded:
@@ -1953,13 +1997,13 @@ main()
 
 # FUTURE FEATURES & FIXES
 #  HIGH
-# - Make larger thumbnails, and store them in the book itself.
+# - Add progress bar on creating thumbs.
+# - Store additional data in book file, such as Storyboard mode status and zoom level.
 #  MEDIUM
 # - Left to right or right to left reading option when exporting.
 # - Add Percent based margins.
 #  LOW
 # - Size the widgets that look waaay too big for their own good.
-# - New Book Window more like export with tables...maybe.
 # - Support color coding pages, making it easy to divide up the story into chapters or mark pages.
 
 
