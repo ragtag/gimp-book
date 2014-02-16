@@ -1010,6 +1010,17 @@ class Book():
             metatext = f.read()
             metadata = json.loads(metatext)
             f.close()
+            if 'storyboardmode' in metadata:
+                if metadata['storyboardmode']:
+                    self.main.storyboardm.set_active(1)
+                    self.main.storyboardmode = 1
+                    self.main.thumbs.set_columns(0)
+                else:
+                    self.main.storyboardm.set_active(0)
+                    self.main.storyboardmode = 1
+                    self.main.thumbs.set_columns(2)
+            if 'thumbsize' in metadata:
+                self.thumbsize = metadata['thumbsize']
             progressstep = float(1.0 / len(metadata['pages']))
             progress = 0.0
             for p in metadata['pages']:
@@ -1054,7 +1065,7 @@ class Book():
         for p in self.pagestore:
             if p[0]:
                 metadata.append(p[0])
-        savetofile = json.dumps({ 'pages': metadata }, indent=4)
+        savetofile = json.dumps({ 'storyboardmode': self.main.storyboardmode, 'thumbsize': self.thumbsize, 'pages': metadata }, indent=4)
         bookfile = open(self.bookfile, "w")
         bookfile.write(savetofile)
         bookfile.close()
@@ -1382,6 +1393,7 @@ class Main(gtk.Window):
         self.loaded = False  # If there is a book loaded in the interface.
         self.connect('notify::is-active', self.update_thumbs)
         self.set_icon_name('gimp')
+        self.storyboardmode = 0
 
         # Main menu
         mb = gtk.MenuBar()
@@ -1919,8 +1931,15 @@ class Main(gtk.Window):
         self.imp_page.set_sensitive(True)
         self.file_export.set_sensitive(True)
         self.storyboardm.set_sensitive(True)
-        self.zoomoutm.set_sensitive(True)
-        self.zoominm.set_sensitive(True)
+        if self.book.thumbsize >= THUMBMAX:
+            self.zoomoutm.set_sensitive(True)
+            self.zoominm.set_sensitive(False)
+        elif self.book.thumbsize <= THUMBMIN:
+            self.zoomoutm.set_sensitive(False)
+            self.zoominm.set_sensitive(True)
+        else:
+            self.zoomoutm.set_sensitive(True)
+            self.zoominm.set_sensitive(True)
         if len(self.book.pagestore) > 1:
             self.del_page.set_sensitive(True)
             self.deletepage.set_sensitive(True)
@@ -1935,8 +1954,10 @@ class Main(gtk.Window):
         # Have the pages flow, rather than be shown in two columns. Handy for storyboarding.
         if int(self.thumbs.get_columns()) == 2:
             self.thumbs.set_columns(0)
+            self.storyboardmode = 1
         else:
             self.thumbs.set_columns(2)
+            self.storyboardmode = 0
             
     def zoomin(self, widget):
         # Display thumbnails larger.
@@ -1947,6 +1968,7 @@ class Main(gtk.Window):
         self.book.update_thumbs()
         self.zoomoutm.set_sensitive(True)
         self.thumbs.set_item_width(self.book.thumbwidth + 10)
+        self.book.save()
     
     def zoomout(self, widget):
         # Display thumbnails smaller.
@@ -1957,6 +1979,7 @@ class Main(gtk.Window):
         self.book.update_thumbs()
         self.zoominm.set_sensitive(True)
         self.thumbs.set_item_width(self.book.thumbwidth + 10)
+        self.book.save()
 
     def close_book(self):
         if self.loaded:
@@ -1999,12 +2022,11 @@ main()
 
 # FUTURE FEATURES & FIXES
 #  HIGH
-# - Store additional data in book file, such as Storyboard mode status and zoom level.
 #  MEDIUM
+# - Adjust layout in export window.
 # - Left to right or right to left reading option when exporting.
 # - Add Percent based margins.
 #  LOW
-# - Size the widgets that look waaay too big for their own good.
 # - Support color coding pages, making it easy to divide up the story into chapters or mark pages.
 
 
