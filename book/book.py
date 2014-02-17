@@ -39,13 +39,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>."""
 
-# KNOWN BUGS & LIMITATIONS
-# - utf-8 names (i.e. Chinese, Japanese etc) for pages not working properly on Windows.
-# - NOT tested on OSX.
-# - Import does not yet support any options on importing files such as pdf or svg (resolution, page etc.).
-
-# If you find additional bugs, please send me a mail at bug@ragnarb.com
-
 import os
 import hashlib
 import json
@@ -2108,7 +2101,6 @@ main()
 # - Adjust layout in export window.
 # - Left to right or right to left reading option when exporting.
 # - Add Percent based margins.
-# - Update minor changes in French translation.
 #  LOW
 # - Support color coding pages, making it easy to divide up the story into chapters or mark pages.
 

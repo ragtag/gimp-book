@@ -1,6 +1,15 @@
 +-----------+
 | CHANGELOG |
 +-----------+
+# GIMP Book v1.0.0
+- Changed versioning to use the more standard, major.minor.patch.
+- Added zoom to the page preview, so you can display the pages at three different sizes.
+- Rewrote the thumbnail generation, and moved thumbs into the book folder.
+- Storyboard mode and zoom level are now saved with the book.
+- Fixed a bug where exporting non-flattend xcf files, would still flatten them.
+- Fixed the layout of the New Book window.
+- Added support for defining print resolution when creating new books.
+- Added option to create margin and bleed guides on book creation.
 
 # GIMP Book 2014.2 rev 82
 - Fixed bug on Windows that would crash Gimp Book when browsing for folders in New Book and Export Book.
