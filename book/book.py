@@ -82,8 +82,8 @@ language = gettext.translation(APP_NAME, mo_location, languages=languages, fallb
 _ = language.ugettext #use ugettext instead of getttext to avoid unicode errors
 
 
-THUMBMIN=128
-THUMBMAX=512
+THUMBMIN=64
+THUMBMAX=1024
 
 class Thumb():
     # Managing thumbnails, and creating new ones when needed.
@@ -99,11 +99,12 @@ class Thumb():
 
     def get_thumb(self):
         # Fetch the thumb, if it exists.
-        if os.path.exists(self.path):
+        if os.path.exists(self.path) and os.path.exists(self.imagepath):
             if float(os.stat(self.path).st_mtime) < float(os.stat(self.imagepath).st_mtime):
                 self.build_thumb()
         else:
-            self.build_thumb()
+            if os.path.exists(self.imagepath):
+                self.build_thumb()
         self.thumbpix = gtk.gdk.pixbuf_new_from_file(self.path)
 
     def build_thumb(self):
@@ -122,6 +123,7 @@ class Thumb():
         thumbname = os.path.split(self.path)[1]
         pdb.file_png_save(img, drw, self.path, thumbname, False, 9, False, False, False, True, True)
         pdb.gimp_image_delete(img)
+        self.main.progress.hide()
 
 
 class NTFileChooserButton(gtk.Button):
@@ -981,13 +983,14 @@ class Book():
     # Stores and manages the data for the book.
     def __init__(self, main):
         # Defines basic variables to store.
-        # pagestore columns = pagenmae, thumb Pixbuf, thumb path
+        # pagestore columns = pagename, thumb Pixbuf, thumb path
         self.pagestore = gtk.ListStore(str, gtk.gdk.Pixbuf, str)
         self.main = main     # Main windows.
         self.bookfile = ""   # The *.book for this book.
         self.bookname = ""   # The name of the book.
-        self.pagepath = ""   # Path to the "pages" subfolder.
+        self.pagepath = ""   # Path to the pages subfolder.
         self.trashpath = ""  # Path to trash folder.
+        self.thumbpath = ""  # Path to the thumbs folder.
         self.selected = 0    # Index of the currently selected page, -1 if none.
         self.thumbsize = 256 # Defautl thumbnail size.
         self.thumbwidth = 256
@@ -1077,6 +1080,7 @@ class Book():
             bookpath = os.path.dirname(self.bookfile)
             self.pagepath = os.path.join(bookpath, "pages")
             self.trashpath = os.path.join(bookpath, "trash")
+            self.thumbpath = os.path.join(bookpath, "thumbs")
             self.thumbsize = 256
             # Load the pages.
             f = open(self.bookfile, "r")
@@ -1221,9 +1225,11 @@ class Book():
                 unique = False
             if unique:
                 try:
+                    oldthumb = self.pagestore[self.selected][0]
                     shutil.move(os.path.join(self.pagepath, self.pagestore[self.selected][0]), os.path.join(self.pagepath, p))
                     thumb = Thumb(os.path.join(self.pagepath,p), self.thumbsize, self.main)
                     self.pagestore[self.selected] = ((p, thumb.thumbpix, thumb.path))
+                    self.delete_thumb(oldthumb)
                     return True
                 except Exception, err:
                     show_error_msg(err)
@@ -1237,9 +1243,17 @@ class Book():
             shutil.move(os.path.join(self.pagepath, p), os.path.join(self.trashpath,strftime("%Y%m%d_%H%M%S_")+p))
             piter = self.pagestore.get_iter_from_string(str(self.selected))
             self.pagestore.remove(piter)
+            self.delete_thumb(p)
             return True
         except Exception, err:
             show_error_msg(err)
+
+    def delete_thumb(self, pagename):
+        # Delete all sizes of a thumbnail by name
+        for i in [ 32, 64, 128, 256, 512, 1024 ]:
+            oldthumb = os.path.join(self.thumbpath, str(i), pagename+".png")
+            if os.path.isfile(oldthumb):
+                os.remove(oldthumb)
 
     def get_template_size(self):
         # Return the size of the template in pixels x,y
