@@ -6,9 +6,7 @@ files="book.py docs license.txt locale icons"
 echo "Preparing the followign files and folders for publishing:"
 echo $files
 
-version=`date +%Y.%-m` 
-revision=`svn info http://svn.ragtag.net/gimp | grep Revision | cut -d\  -f 2`
-v="$version rev $revision"
+v="1.0.0"
 
 sed -i "s/current_version/$v/g" book.py
 sed -i "s/current_version/$v/g" docs/index.html
@@ -28,7 +26,7 @@ do
     msgfmt $translation_language.po --output-file $translation_language/LC_MESSAGES/book.mo
 done
 cd ..
-zip -r "publish/Gimp Book - $v.zip" $files -x *.svn*
+zip -r "publish/gimp_book_$v.zip" $files -x *.svn*
 sed -i "s/$v/current_version/g" book.py
 sed -i "s/$v/current_version/g" docs/index.html
 
