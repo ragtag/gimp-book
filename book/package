@@ -30,4 +30,4 @@ zip -r "publish/gimp_book_$v.zip" $files -x *.svn*
 sed -i "s/$v/current_version/g" book.py
 sed -i "s/$v/current_version/g" docs/index.html
 
-echo "New version saved to publish/Gimp Book - $v.zip"
+echo "New version saved to publish/gimp_book_v$.zip"
