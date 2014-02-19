@@ -1,6 +1,9 @@
 +-----------+
 | CHANGELOG |
 +-----------+
+# GIMP Book v1.0.1
+- Margins width is now correct, when used with bleed.
+
 # GIMP Book v1.0.0
 - Changed versioning to use the more standard, major.minor.patch.
 - Added zoom to the page preview, so you can display the pages at different sizes.

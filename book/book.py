@@ -1047,10 +1047,10 @@ class Book():
                 img.add_layer(bglayer, 0)
                 # Add guides
                 if top > 0 or bottom > 0 or sides > 0:
-                    pt = top
-                    pl = sides
-                    pr = width - sides
-                    pb = height - bottom
+                    pt = top + bleed
+                    pl = sides + bleed
+                    pr = width - sides - bleed
+                    pb = height - bottom - bleed
                     self.add_guide(_("Margins"), img, pt, pl, pr, pb)
                 if bleed > 0:
                     pt = bleed
@@ -1069,17 +1069,17 @@ class Book():
             show_error_msg(_("Destination does not exist."))
 
     def add_guide(self, name, img,  pt, pl, pr, pb):
-        bleedcoords = [
+        coords = [
             pl,pt,pl,pt,pl,pt,
             pr,pt,pr,pt,pr,pt,
             pr,pb,pr,pb,pr,pb,
             pl,pb,pl,pb,pl,pb,
             pl,pt,pl,pt,pl,pt ]
         drw = pdb.gimp_image_get_active_layer(img)
-        bleedpath = pdb.gimp_vectors_new(img, name)
-        pdb.gimp_vectors_set_visible(bleedpath, True)
-        pdb.gimp_image_add_vectors(img, bleedpath, 0)
-        pdb.gimp_vectors_stroke_new_from_points(bleedpath, 0, 30, bleedcoords, True)
+        vector = pdb.gimp_vectors_new(img, name)
+        pdb.gimp_vectors_set_visible(vector, True)
+        pdb.gimp_image_add_vectors(img, vector, 0)
+        pdb.gimp_vectors_stroke_new_from_points(vector, 0, 30, coords, True)
 
 
     def load_book(self, bookfile, mainwin):

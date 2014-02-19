@@ -6,7 +6,7 @@ files="book.py docs license.txt locale icons"
 echo "Preparing the followign files and folders for publishing:"
 echo $files
 
-v="1.0.0"
+v="1.0.1"
 
 sed -i "s/current_version/$v/g" book.py
 sed -i "s/current_version/$v/g" docs/index.html
