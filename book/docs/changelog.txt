@@ -3,7 +3,7 @@
 +-----------+
 # GIMP Book v1.0.0
 - Changed versioning to use the more standard, major.minor.patch.
-- Added zoom to the page preview, so you can display the pages at three different sizes.
+- Added zoom to the page preview, so you can display the pages at different sizes.
 - Rewrote the thumbnail generation, and moved thumbs into the book folder.
 - Storyboard mode and zoom level are now saved with the book.
 - Fixed a bug where exporting non-flattend xcf files, would still flatten them.
