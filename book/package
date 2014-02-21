@@ -2,9 +2,15 @@
 #
 # Simple script to package GIMP Book for publishing.
 
+buildroot=/tmp/book
 files="book.py docs license.txt locale icons"
 echo "Preparing the followign files and folders for publishing:"
 echo $files
+rm -rf $buildroot
+mkdir -p $buildroot
+cp -R $files $buildroot/.
+here=$(pwd)
+cd $buildroot
 
 v="1.0.1"
 
@@ -27,7 +33,7 @@ do
 done
 cd ..
 zip -r "publish/gimp_book_$v.zip" $files -x *.svn*
-sed -i "s/$v/current_version/g" book.py
-sed -i "s/$v/current_version/g" docs/index.html
+cp publish/gimp_book_$v.zip $here/publish/.
+cd $here
 
 echo "New version saved to publish/gimp_book_v$.zip"
