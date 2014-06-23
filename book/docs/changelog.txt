@@ -1,6 +1,9 @@
 +-----------+
 | CHANGELOG |
 +-----------+
+# GIMP Book v1.0.2
+- Lowered the max thumbsize to 512, and raised the min to 128.
+
 # GIMP Book v1.0.1
 - Margins width is now correct, when used with bleed.
 
