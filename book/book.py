@@ -82,8 +82,8 @@ language = gettext.translation(APP_NAME, mo_location, languages=languages, fallb
 _ = language.ugettext #use ugettext instead of getttext to avoid unicode errors
 
 
-THUMBMIN=64
-THUMBMAX=1024
+THUMBMIN=128
+THUMBMAX=512
 
 class Thumb():
     # Managing thumbnails, and creating new ones when needed.
@@ -95,7 +95,6 @@ class Thumb():
         self.thumbdir = os.path.join(os.path.split(os.path.split(imagepath)[0])[0], 'thumbs', str(size))
         self.path = os.path.join(self.thumbdir, imagename+'.png')
         self.get_thumb()
-        # show_error_msg(_('Failed to find or build thumb for %s.') % self.imagepath)
 
     def get_thumb(self):
         # Fetch the thumb, if it exists.
