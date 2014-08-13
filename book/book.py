@@ -2120,6 +2120,9 @@ main()
 
 # FUTURE FEATURES & FIXES
 #  HIGH
+# - Start using github bug tracker and wiki for todos. :)
+# - Fix bug where python returns an empty locale, and everything breaks.
+# - Add .bmp support to work with Potrace
 #  MEDIUM
 # - Adjust layout in export window.
 # - Left to right or right to left reading option when exporting.
