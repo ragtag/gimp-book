@@ -1116,6 +1116,16 @@ class Book():
                     self.main.storyboardm.set_active(0)
                     self.main.storyboardmode = 1
                     self.main.thumbs.set_columns(2)
+            if 'readingdirection' in metadata:
+                if metadata['readingdirection']:
+                    self.main.readingdirectionm.set_active(1)
+                    self.main.thumbs.set_direction(gtk.TEXT_DIR_RTL)
+                    self.main.readingdirection = 1
+                else:
+                    self.main.readingdirectionm.set_active(0)
+                    self.main.thumbs.set_direction(gtk.TEXT_DIR_LTR)
+                    self.main.readingdirection = 0
+
             if 'thumbsize' in metadata:
                 self.thumbsize = metadata['thumbsize']
             progressstep = float(1.0 / len(metadata['pages']))
@@ -1164,7 +1174,7 @@ class Book():
         for p in self.pagestore:
             if p[0]:
                 metadata.append(p[0])
-        savetofile = json.dumps({ 'storyboardmode': self.main.storyboardmode, 'thumbsize': self.thumbsize, 'pages': metadata }, indent=4)
+        savetofile = json.dumps({ 'storyboardmode': self.main.storyboardmode, 'readingdirection': self.main.readingdirection, 'thumbsize': self.thumbsize, 'pages': metadata }, indent=4)
         bookfile = open(self.bookfile, "w")
         bookfile.write(savetofile)
         bookfile.close()
@@ -1370,7 +1380,6 @@ class Book():
                     img.flatten()
                 drw = pdb.gimp_image_get_active_layer(img)
                 # Add/Remove margins.
-                # TODO! Add support or percentile margins...maybe.
                 top = expwin.margtop.get_value()
                 bottom = expwin.margbot.get_value()
                 inner = expwin.marginner.get_value()
@@ -1507,6 +1516,7 @@ class Main(gtk.Window):
         self.connect('notify::is-active', self.update_thumbs)
         self.set_icon_name('gimp')
         self.storyboardmode = 0
+        self.readingdirection = 0 # LTR
 
         # Main menu
         mb = gtk.MenuBar()
@@ -1577,6 +1587,13 @@ class Main(gtk.Window):
         self.storyboardm.connect("activate", self.toggle_storyboard_mode)
         self.viewmenu.append(self.storyboardm)
 
+        self.readingdirectionm = gtk.CheckMenuItem()
+        self.readingdirectionm.set_label(_("Read from Right to Left"))
+        self.readingdirectionm.set_active(False)
+        self.readingdirectionm.set_sensitive(False)
+        self.readingdirectionm.connect("activate", self.toggle_reading_direction)
+        self.viewmenu.append(self.readingdirectionm)
+
         self.zoomoutm = gtk.ImageMenuItem(gtk.STOCK_ZOOM_OUT, agr)
         self.zoomoutm.set_label(_("Zoom Out"))
         key, mod = gtk.accelerator_parse(_("<Control>minus"))
@@ -1592,12 +1609,6 @@ class Main(gtk.Window):
         self.zoominm.set_sensitive(False)
         self.zoominm.connect("activate", self.zoomin)
         self.viewmenu.append(self.zoominm)
-
-        #self.direction = gtk.CheckMenuItem()
-        #self.direction.set_label("Read Left to Right")
-        #self.direction.set_active(True)
-        #self.direction.connect("activate", self.toggle_reading_direction)
-        #self.viewmenu.append(self.direction)
 
         # Pages Menu
         self.pagemenu = gtk.Menu()
@@ -1783,30 +1794,10 @@ class Main(gtk.Window):
         else:
             self.toolbar.hide()
 
-    def toggle_reading_direction(self, widget):
-        # TODO! In development, not fully working.
-        # Toggle reading direction between left-to-right and right-to-left.
-        pagecount = len(self.book.pagestore)
-        order = []
-        show_error_msg(pagecount)
-        for r in range(0, pagecount):
-            show_error_msg(r)
-            if r%2 == 0: # Even
-                if r == pagecount-1:
-                    order.append(r)
-                else:
-                    order.append(r+1)
-            else: # Odd
-                order.append(r-1)
-        show_error_msg(order)
-        self.book.pagestore.reorder(order)
-
     def update_thumbs(self, widget, arg):
         # Tell Book to update the thumbnails on window receiving focus.
         if self.is_active() and self.loaded:
             self.book.update_thumbs()
-            # TODO! Right-to-left order of icons. Not working.
-            #self.thumbs.scroll_to_path(':1', True, 0.0, 1.0)
 
     def new_book(self, widget):
         # Helper for opening up the New Book window.
@@ -2044,6 +2035,7 @@ class Main(gtk.Window):
         self.imp_page.set_sensitive(True)
         self.file_export.set_sensitive(True)
         self.storyboardm.set_sensitive(True)
+        self.readingdirectionm.set_sensitive(True)
         if self.book.thumbsize >= THUMBMAX:
             self.zoomoutm.set_sensitive(True)
             self.zoominm.set_sensitive(False)
@@ -2071,6 +2063,17 @@ class Main(gtk.Window):
         else:
             self.thumbs.set_columns(2)
             self.storyboardmode = 0
+        self.book.save()
+            
+    def toggle_reading_direction(self, widget):
+        # Toggle between left-to-righ and right-to-left reading direction.
+        if self.thumbs.get_direction() == gtk.TEXT_DIR_LTR:
+            self.thumbs.set_direction(gtk.TEXT_DIR_RTL)
+            self.readingdirection = 1
+        else:
+            self.thumbs.set_direction(gtk.TEXT_DIR_LTR)
+            self.readingdirection = 0
+        self.book.save()
             
     def zoomin(self, widget):
         # Display thumbnails larger.
@@ -2132,12 +2135,6 @@ register(
 
 main()
 
-
-# FUTURE FEATURES & FIXES
-#  HIGH
-#  MEDIUM
-# - Left to right or right to left reading option when exporting.
-#  LOW
 
 
 
