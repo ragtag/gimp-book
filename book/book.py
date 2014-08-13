@@ -64,7 +64,8 @@ LOCALE_DIR = os.path.join(APP_DIR, 'plug-ins', 'locale') # location of .mo files
 # Get the default language. On Windows you need to set the LANG variable.
 DEFAULT_LANGUAGES = os.environ.get('LANG', '').split(':')
 DEFAULT_LANGUAGES += ['en_US']
-lc, encoding = locale.getdefaultlocale()
+lc, encoding = locale.getdefaultlocale() or ['en_US', 'UTF-8']
+languages = ["en_US"] # Defaults to English, if $LANG env is not defined.
 if lc:
     languages = [lc]
 languages += DEFAULT_LANGUAGES
@@ -2134,15 +2135,9 @@ main()
 
 # FUTURE FEATURES & FIXES
 #  HIGH
-# - Start using github bug tracker and wiki for todos. :)
-# - Fix bug where python returns an empty locale, and everything breaks.
-# - Add .bmp support to work with Potrace
 #  MEDIUM
-# - Adjust layout in export window.
 # - Left to right or right to left reading option when exporting.
-# - Add Percent based margins.
 #  LOW
-# - Support color coding pages, making it easy to divide up the story into chapters or mark pages.
 
 
 
