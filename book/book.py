@@ -625,7 +625,7 @@ class ExportWin(gtk.Window):
         formatt = gtk.Table(2,2)
         formatl = gtk.Label(_("File Format:"))
         formatls = gtk.ListStore(gobject.TYPE_STRING)
-        formatoptions = [  _("GIF image (*.gif)"), _("GIMP XCF image (*.xcf)"), _("JPEG image (*.jpg)"), _("OpenRaster (*.ora)"), _("Photoshop image (*.psd)"), _("PNG image (*.png)"), _("TIFF image (*.tif)") ]
+        formatoptions = [  _("GIF image (*.gif)"), _("GIMP XCF image (*.xcf)"), _("JPEG image (*.jpg)"), _("OpenRaster (*.ora)"), _("Photoshop image (*.psd)"), _("PNG image (*.png)"), _("TIFF image (*.tif)"), _("Windows BMP Image (*.bmp)") ]
         for formatoption in formatoptions:
             formatls.append([formatoption])
         self.formatm = gtk.ComboBox(formatls)
@@ -642,6 +642,7 @@ class ExportWin(gtk.Window):
         self.psdt = self.psd()
         self.pngt = self.png()
         self.tift = self.tif()
+        self.bmpt = self.bmp()
 
         formatt.attach(formatl, 0,1,0,1)
         formatt.attach(self.formatm, 1,2,0,1)
@@ -652,6 +653,7 @@ class ExportWin(gtk.Window):
         formatt.attach(self.psdt, 0,2,1,2)
         formatt.attach(self.pngt, 0,2,1,2)
         formatt.attach(self.tift, 0,2,1,2)
+        formatt.attach(self.bmpt, 0,2,1,2)
         formatf.add(formatt)
 
         # Done buttons
@@ -754,6 +756,7 @@ class ExportWin(gtk.Window):
         self.psdt.hide()
         self.pngt.hide()
         self.tift.hide()
+        self.bmpt.hide()
         if ext == "gif":
             self.gift.show()
         elif ext == "xcf":
@@ -768,6 +771,8 @@ class ExportWin(gtk.Window):
             self.pngt.show()
         elif ext == "tif":
             self.tift.show()
+        elif ext == "bmp":
+            self.bmpt.show()
 
     def gif(self):
         # GIF save options GUI.
@@ -951,6 +956,11 @@ class ExportWin(gtk.Window):
         tift.attach(tifframe, 0,2,0,1)
         tift.attach(self.tifcoloroftransp, 0,2,1,2)
         return tift
+
+    def bmp(self):
+        # BMP save options GUI.
+        bmpt = gtk.Table(1,2)
+        return bmpt
         
     def export(self, button):
         # Pass self to Book, and tell it to export.
@@ -1286,6 +1296,8 @@ class Book():
             return "png"
         elif formati == 6: # TIFF
             return "tif"
+        elif formati == 7: # BMP
+            return "bmp"
         else:
             show_error_msg(_("Format index out of range"))
 
@@ -1455,6 +1467,8 @@ class Book():
                     elif expwin.tifjpeg.get_active():
                         compress = 4
                     pdb.file_tiff_save2(img, drw, fullname, name, compress, expwin.tifcoloroftransp.get_active())
+                elif ext == "bmp":
+                    pdb.file_bmp_save(img, drw, fullname, name)
                 pdb.gimp_image_delete(img)
                 progress = progress + progressstep
                 expwin.progress.set_fraction(progress)
