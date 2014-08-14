@@ -1,6 +1,12 @@
 +-----------+
 | CHANGELOG |
 +-----------+
+# GIMP Book v1.1.0
+- Added right to left reading support.
+- Added Windows BMP image export.
+- Fixed bug where GIMP Book would fail i locale was not set.
+- Moved the repository to GitHub.
+
 # GIMP Book v1.0.2
 - Lowered the max thumbsize to 512, and raised the min to 128.
 

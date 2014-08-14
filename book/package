@@ -12,7 +12,7 @@ cp -R $files $buildroot/.
 here=$(pwd)
 cd $buildroot
 
-v="1.0.2"
+v="1.1.0"
 
 sed -i "s/current_version/$v/g" book.py
 sed -i "s/current_version/$v/g" docs/index.html
@@ -36,4 +36,4 @@ zip -r "publish/gimp_book_$v.zip" $files -x *.svn*
 cp publish/gimp_book_$v.zip $here/publish/.
 cd $here
 
-echo "New version saved to publish/gimp_book_v$.zip"
+echo "New version saved to publish/gimp_book_$v.zip"
